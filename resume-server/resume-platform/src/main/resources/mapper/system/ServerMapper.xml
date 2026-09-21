@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.abc.resume.system.mapper.ServerMapper">
+
+    <resultMap type="com.abc.resume.system.domain.entity.Server" id="ServerResult">
+        <result property="serverId"    column="server_id"    />
+        <result property="name"    column="name"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="status"    column="status"    />
+        <result property="ver"    column="ver"    />
+        <result property="isDelete"    column="is_delete"    />
+    </resultMap>
+
+    <sql id="selectServerVo">
+        select server_id, name, create_time, update_time, status, ver, is_delete from server
+    </sql>
+
+    <insert id="insertServer">
+        insert into server (server_id, name, create_time, update_time, status, ver, is_delete)
+        values (#{serverId}, #{name}, #{createTime}, #{updateTime}, #{status}, #{ver}, #{isDelete})
+    </insert>
+
+    <update id="updateServer">
+        update server set name = #{name}, update_time = #{updateTime}, status = #{status}, ver = #{ver}, is_delete = #{isDelete}
+        where server_id = #{serverId}
+    </update>
+
+    <select id="selectServerByServerId" resultMap="ServerResult">
+        <include refid="selectServerVo" />
+        where server_id = #{serverId}
+    </select>
+
+    <select id="selectServerByName" resultMap="ServerResult">
+        <include refid="selectServerVo" />
+        where name = #{name}
+    </select>
+
+    <select id="selectServerList" resultMap="ServerResult">
+        <include refid="selectServerVo" />
+    </select>
+
+</mapper>

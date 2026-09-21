@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.abc.resume.system.mapper.UserMapper">
+
+    <resultMap type="com.abc.resume.system.domain.entity.User" id="UserResult">
+        <result property="uid"    column="uid"    />
+        <result property="username"    column="username"    />
+        <result property="password"    column="password"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="nickname"    column="nickname"    />
+        <result property="email"    column="email"    />
+        <result property="lastServerId"    column="last_server_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="status"    column="status"    />
+        <result property="ver"    column="ver"    />
+        <result property="isDelete"    column="is_delete"    />
+    </resultMap>
+
+    <sql id="selectUserVo">
+        select uid, username, password, avatar, nickname, email, last_server_id, create_time, update_time, status, ver, is_delete from user
+    </sql>
+
+    <insert id="insertUser">
+        insert into user (nickname, username, password, avatar, email, create_time, update_time, status, ver, is_delete)
+        values (#{nickname}, #{username}, #{password}, #{avatar}, #{email}, #{createTime}, #{updateTime}, #{status}, #{ver}, #{isDelete})
+    </insert>
+
+    <select id="selectUserByUsername" resultMap="UserResult">
+        <include refid="selectUserVo" />
+        where username = #{username}
+    </select>
+
+    <select id="selectUserByEmail" resultMap="UserResult">
+        <include refid="selectUserVo" />
+        where email = #{email}
+    </select>
+
+    <select id="selectUserLastServerIdByUid" resultType="java.lang.Long">
+        select last_server_id from user where uid = #{uid}
+    </select>
+
+    <select id="selectUserByUid" resultMap="UserResult">
+        <include refid="selectUserVo" />
+        where uid = #{uid}
+    </select>
+
+    <update id="updateUserLastServer">
+        update user set last_server_id = #{serverId} where uid = #{uid}
+    </update>
+
+</mapper>

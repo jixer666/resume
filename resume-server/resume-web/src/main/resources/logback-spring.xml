@@ -1,0 +1,89 @@
+<configuration>
+    <springProperty scope="context" name="logRoot" source="resume.log-path" defaultValue="./logs"/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{ip}] [%X{uri}] [%X{traceId}] [%X{uid}] [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <!-- 默认日志 -->
+    <appender name="DEFAULT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logRoot}/resume-default.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logRoot}/resume-default.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{ip}] [%X{uri}] [%X{traceId}] [%X{uid}] [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+    </appender>
+
+    <!-- 启动日志 -->
+    <appender name="STARTUP-APPENDER" class="ch.qos.logback.core.FileAppender">
+        <file>${logRoot}/startup.log</file>
+        <append>false</append>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{ip}] [%X{path}] [%X{traceId}] [%X{uid}] [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+    </appender>
+
+    <!-- 错误日志 -->
+    <appender name="COMMON-ERROR-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logRoot}/common-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logRoot}/common-error.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{ip}] [%X{uri}] [%X{traceId}] [%X{uid}] [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>
+    </appender>
+
+    <!-- 数据库操作日志 -->
+    <appender name="DAO-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logRoot}/resume-dao.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logRoot}/resume-dao.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{ip}] [%X{uri}] [%X{traceId}] [%X{uid}] [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </layout>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+    </appender>
+
+    <!-- 数据库操作日志 -->
+    <logger name="com.abc.resume.system.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="DAO-APPENDER"/>
+    </logger>
+
+    <!-- Spring 启动日志（错误同时进控制台和 common-error.log，避免启动失败时错误日志丢失） -->
+    <logger name="org.springframework" additivity="false" level="INFO">
+        <appender-ref ref="STARTUP-APPENDER"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="COMMON-ERROR-APPENDER"/>
+    </logger>
+    <logger name="STARTUP_LOGGER" additivity="false" level="INFO">
+        <appender-ref ref="STARTUP-APPENDER"/>
+    </logger>
+
+    <!-- 根日志 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEFAULT"/>
+        <appender-ref ref="COMMON-ERROR-APPENDER"/>
+    </root>
+</configuration>

@@ -1,0 +1,198 @@
+system:
+  name: Resume
+  whitelist:
+    - /system/user/login
+    - /system/user/register
+    - /system/email/send
+    - /system/logout
+    - /system/oss/download/**
+    - /system/white/routes
+    - /system/captcha
+    - /system/sendForgetPwdEmail
+    - /system/resetPwd
+    - /system/tenant/info
+    - /system/spm/track
+    - /system/publicKey
+    - /dms/index/book/button/**
+    - /dms/doc/info/**
+    - /dms/doc/info/s/**
+    - /dms/book/docTree/**
+
+server:
+  port: ${server.port}
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: resume
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  datasource:
+    url: jdbc:mysql://${resume.mysql.ip}:${resume.mysql.port}/${resume.mysql.db}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&allowMultiQueries=true
+    username: ${resume.mysql.username}
+    password: ${resume.mysql.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      maxWait: 600000
+      timeBetweenEvictionRunsMillis: 600000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      filter:
+        slf4j:
+          enabled: true
+        stat:
+          enabled: true
+          merge-sql: true
+          slow-sql-millis: 5000
+        wall:
+          enabled: true
+      stat-view-servlet:
+        enabled: true
+        login-username: admin
+        login-password: admin
+        reset-enable: false
+      web-stat-filter:
+        enabled: true
+  redis:
+    host: ${resume.redis.host}
+    port: ${resume.redis.port}
+    database: ${resume.redis.index}
+    timeout: 1800000
+#    password: ${resume.redis.password}
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  mail:
+    default-encoding: UTF-8
+    host: ${resume.mail.host}
+    port: ${resume.mail.port}
+    username: ${resume.mail.username}
+    password: ${resume.mail.password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: ${resume.mail.host}
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  rabbitmq:
+    host: ${resume.rabbitmq.host}
+    port: ${resume.rabbitmq.port}
+    username: ${resume.rabbitmq.username}
+    password: ${resume.rabbitmq.password}
+    listener:
+      simple:
+        concurrency: ${resume.rabbitmq.concurrency}
+        max-concurrency: ${resume.rabbitmq.maxConcurrency}
+        prefetch: ${resume.rabbitmq.prefetch}
+        acknowledge-mode: ${resume.rabbitmq.ackMode}
+        retry:
+          enabled: ${resume.rabbitmq.retry.enable}
+          initial-interval: ${resume.rabbitmq.retry.time}
+          multiplier: ${resume.rabbitmq.retry.multiplier}
+          max-attempts: ${resume.rabbitmq.retry.maxAttempts}
+          stateless: ${resume.rabbitmq.retry.stateless}
+
+mybatis:
+  mapperLocations: classpath*:mapper/*Mapper.xml,classpath*:mapper/**/*Mapper.xml
+  typeAliasesPackage: com.abc.resume.**.domain.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+wechat:
+  appid: wxed9954c01bb89b47
+  appSecret: a7482517235173ddb4083788de60b90e
+  redirectUri: http://localhost:8160/auth/wxLogin
+
+oss:
+  type: ${resume.oss.type}
+  minio:
+    endpoint: ${resume.oss.minio.endpoint}
+    bucketName: ${resume.oss.minio.bucketName}
+    accessKey: ${resume.oss.minio.accessKey}
+    secretKey: ${resume.oss.minio.secretKey}
+  aliyun:
+    end-point: ${resume.oss.aliyun.endpoint}
+    access-key-id: ${resume.oss.aliyun.accessKey}
+    access-key-secret: ${resume.oss.aliyun.secretKey}
+    bucket-name: ${resume.oss.aliyun.bucketName}
+  local:
+    path: ${resume.oss.local.path}
+
+url:
+  front: ${resume.url.front}
+  backend: ${resume.url.backend}
+
+token:
+  header: Authorization
+  secret: abcdefghijklmnopqrstuvwxyz
+  expireTime: 60
+  refreshTime: 10
+
+pandoc:
+  path: ${resume.pandoc.path}
+
+ai:
+  type: ${resume.ai.type}
+  rerank-type: ${resume.ai.rerank-type}
+  embedding-type: ${resume.ai.embedding-type}
+  deepseek:
+    api-key: ${resume.ai.deepseek.apiKey}
+    model: ${resume.ai.deepseek.model}
+    chat-url: ${resume.ai.deepseek.chatUrl}
+  ollama:
+    api-key: ${resume.ai.ollama.apiKey}
+    model: ${resume.ai.ollama.model}
+    chat-url: ${resume.ai.ollama.chatUrl}
+    embedding-model: ${resume.ai.ollama.embeddingModel}
+    embedding-url: ${resume.ai.ollama.embeddingUrl}
+  xunfei:
+    api-key: ${resume.ai.xunfei.apiKey}
+    model: ${resume.ai.xunfei.model}
+    chat-url: ${resume.ai.xunfei.chatUrl}
+  openrouter:
+    api-key: ${resume.ai.openrouter.apiKey}
+    model: ${resume.ai.openrouter.model}
+    rerank-url: ${resume.ai.openrouter.rerankUrl}
+    rerank-model: ${resume.ai.openrouter.rerankModel}
+    chat-url: ${resume.ai.openrouter.chatUrl}
+    embedding-model: ${resume.ai.openrouter.embeddingModel}
+    embedding-url: ${resume.ai.openrouter.embeddingUrl}
+  siliconflow:
+    embedding-model: ${resume.ai.siliconflow.embeddingModel}
+    embedding-url: ${resume.ai.siliconflow.embeddingUrl}
+    embedding-api-key: ${resume.ai.siliconflow.embeddingApiKey}
+
+milvus:
+  url: ${resume.milvus.url}
+  username: ${resume.milvus.username}
+  password: ${resume.milvus.password}
+
+crypto:
+  enabled: ${resume.crypto.enabled}
+
+# ===== 修炼引擎数值 =====
+cultivation:
+  max-settle-seconds: 28800        # 单次结算 Δt 上限：8 小时
+  max-clock-skew-millis: 300000    # 客户端时间偏差容忍 5 分钟，超限拒绝并告警
+  base-rate: 10.0                  # 1 境界基础速率（修为/秒）
+  rate-growth: 1.25                # 速率境界成长倍率
+  base-breakthrough-cost: 36000.0  # 突破 1→2 消耗（约 1 小时挂机量）
+  cost-growth: 3.0                 # 突破消耗成长倍率
+  max-realm: 100                   # 境界上限
+
