@@ -23,7 +23,7 @@ public class SecurityUtils {
     }
 
 
-    public static Long getUserId() {
+    public static String getUserId() {
         try {
             LoginUserDTO loginUser = getLoginUser();
             if (Objects.isNull(loginUser)) {

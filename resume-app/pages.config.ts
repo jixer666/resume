@@ -4,9 +4,9 @@ import { tabBar } from './src/tabbar/config'
 export default defineUniPages({
   globalStyle: {
     navigationStyle: 'default',
-    navigationBarTitleText: '简历盒子',
-    navigationBarBackgroundColor: '#2563eb',
-    navigationBarTextStyle: 'white',
+    navigationBarTitleText: 'unibest',
+    navigationBarBackgroundColor: '#f8f8f8',
+    navigationBarTextStyle: 'black',
     backgroundColor: '#FFFFFF',
   },
   easycom: {

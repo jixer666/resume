@@ -50,7 +50,7 @@ public class TokenServiceImpl implements TokenService {
         return createToken(tokenKey, loginUser.getUserId());
     }
 
-    private String createToken(String tokenKey, Long userId) {
+    private String createToken(String tokenKey, String userId) {
         Map<String, Object> tokenMap = new HashMap<>();
         tokenMap.put(CommonConstants.LOGIN_TOKEN_KEY, tokenKey);
         tokenMap.put(CommonConstants.JWT_USERID, userId);

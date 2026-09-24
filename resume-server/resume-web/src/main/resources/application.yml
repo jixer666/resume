@@ -186,13 +186,4 @@ milvus:
 crypto:
   enabled: ${resume.crypto.enabled}
 
-# ===== 修炼引擎数值 =====
-cultivation:
-  max-settle-seconds: 28800        # 单次结算 Δt 上限：8 小时
-  max-clock-skew-millis: 300000    # 客户端时间偏差容忍 5 分钟，超限拒绝并告警
-  base-rate: 10.0                  # 1 境界基础速率（修为/秒）
-  rate-growth: 1.25                # 速率境界成长倍率
-  base-breakthrough-cost: 36000.0  # 突破 1→2 消耗（约 1 小时挂机量）
-  cost-growth: 3.0                 # 突破消耗成长倍率
-  max-realm: 100                   # 境界上限
 

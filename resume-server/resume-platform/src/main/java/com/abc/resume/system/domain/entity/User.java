@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
 
-    private Long uid;
+    private String uid;
 
     private String nickname;
 
@@ -20,6 +20,8 @@ public class User extends BaseEntity {
 
     private String email;
 
-    private Long lastServerId;
+    private String openid;
+
+    private String ch;
 
 }

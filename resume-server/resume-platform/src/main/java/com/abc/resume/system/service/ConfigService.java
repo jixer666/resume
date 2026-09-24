@@ -1,7 +1,7 @@
 package com.abc.resume.system.service;
 
 import com.abc.resume.core.config.model.Config;
-import com.abc.resume.game.domain.context.ConfigQueryContext;
+import com.abc.resume.system.domain.context.ConfigQueryContext;
 
 import java.util.List;
 

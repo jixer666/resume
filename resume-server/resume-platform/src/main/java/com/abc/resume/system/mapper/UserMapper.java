@@ -12,9 +12,7 @@ public interface UserMapper {
 
     int insertUser(User user);
 
-    Long selectUserLastServerIdByUid(Long userId);
+    User selectUserByUid(String uid);
 
-    User selectUserByUid(Long uid);
-
-    int updateUserLastServer(@Param("uid") Long userId, @Param("serverId") Long serverId);
+    User getUserByOpenidAndCh(@Param("openid") String openid, @Param("ch") String ch);
 }

@@ -14,6 +14,8 @@ import java.util.Date;
 @Data
 public class BaseEntity implements Serializable {
 
+    private Long id;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
@@ -27,7 +29,7 @@ public class BaseEntity implements Serializable {
     private Integer status;
 
     // 未删除：创建时间，删除：主键ID
-    private Long isDelete;
+    private String isDelete;
 
     public void setCommonParams() {
         Date now = new Date();
@@ -35,7 +37,7 @@ public class BaseEntity implements Serializable {
         this.setUpdateTime(now);
         this.setStatus(StatusEnum.NORMAL.getStatus());
         this.setVer(CommonConstants.DEFAULT_VER);
-        this.setIsDelete(now.getTime());
+        this.setIsDelete(String.valueOf(now.getTime()));
     }
 
 }

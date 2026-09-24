@@ -11,6 +11,7 @@ import com.abc.resume.system.domain.entity.User;
 import com.abc.resume.system.service.EmailService;
 import com.abc.resume.system.service.UserService;
 import com.abc.resume.util.AssertUtils;
+import com.abc.resume.util.IdUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AuthStrategy(AuthTypeEnum.ACCOUNT)
-public class AccountAuthStrategy implements IAuthStrategy {
+public class AccountAuthStrategy extends BaseAuthStrategy implements IAuthStrategy {
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -61,17 +62,6 @@ public class AccountAuthStrategy implements IAuthStrategy {
 
     private void afterRegister(User user, RegisterDTO registerDTO) {
         emailService.invalidEmailCode(registerDTO.getEmailUuid());
-    }
-
-    private User buildUserByRegisterDTO(RegisterDTO registerDTO) {
-        User user = new User();
-        user.setUsername(registerDTO.getUsername());
-        user.setPassword(new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
-        user.setNickname(CommonConstants.DEFAULT_NICKNAME + RandomUtil.randomString(5));
-        user.setAvatar(CommonConstants.DEFAULT_AVATAR);
-        user.setEmail(registerDTO.getEmail());
-        user.setCommonParams();
-        return user;
     }
 
     public void preRegisterCheck(RegisterDTO registerDTO) {

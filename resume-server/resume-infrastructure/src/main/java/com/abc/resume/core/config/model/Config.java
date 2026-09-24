@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Config extends BaseEntity {
 
-    private Long configId;
-
     private String code;
 
     private String group;

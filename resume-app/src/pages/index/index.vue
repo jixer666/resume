@@ -1,6 +1,53 @@
-<script setup lang="ts">
-import { templates } from '@/utils/resume'
-function openTemplate(id: string) { uni.navigateTo({ url: `/pages/template-detail/template-detail?id=${id}` }) }
+<script lang="ts" setup>
+defineOptions({
+  name: 'Home',
+})
+definePage({
+  // 使用 type: "home" 属性设置首页，其他页面不需要设置，默认为page
+  type: 'home',
+  style: {
+    // 'custom' 表示开启自定义导航栏，默认 'default'
+    navigationStyle: 'custom',
+    navigationBarTitleText: '首页',
+  },
+})
+
+const description = ref(
+  'unibest 是一个集成了多种工具和技术的 uniapp 开发模板，由 uniapp + Vue3 + Ts + Vite5 + UnoCss + VSCode 构建，模板具有代码提示、自动格式化、统一配置、代码片段等功能，并内置了许多常用的基本组件和基本功能，让你编写 uniapp 拥有 best 体验。',
+)
+console.log('index/index 首页打印了')
+
+onLoad(() => {
+  console.log('测试 uni API 自动引入: onLoad')
+})
 </script>
-<template><view class="page"><view class="section-head"><text class="section-title">模板库</text><text class="count">{{ templates.length }} 个模板</text></view><view class="grid"><view v-for="item in templates" :key="item.id" class="template-card" @click="openTemplate(item.id)"><image :src="item.cover" mode="aspectFill" class="cover"/><view class="card-body"><text class="name">{{ item.name }}</text><text class="desc">{{ item.description }}</text><text class="use">查看详情 ›</text></view></view></view></view></template>
-<style scoped lang="scss">.page{min-height:100vh;background:#f5f8fd;padding-bottom:70px}.section-head{display:flex;align-items:center;justify-content:space-between;padding:22px 18px 14px}.section-title{font-size:20px;font-weight:700;color:#172b4d}.count{font-size:12px;color:#8290a5}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 14px}.template-card{overflow:hidden;background:#fff;border-radius:12px;box-shadow:0 4px 16px #234b8b12}.cover{width:100%;height:210px;display:block}.card-body{padding:12px}.name{display:block;font-size:15px;font-weight:700;color:#172b4d}.desc{display:block;height:34px;margin-top:7px;overflow:hidden;font-size:11px;line-height:17px;color:#8290a5}.use{display:block;margin-top:10px;font-size:12px;color:#2563eb}</style>
+
+<template>
+  <view class="bg-white px-4 pt-safe">
+    <view class="mt-10">
+      <image src="/static/logo.svg" alt="" class="mx-auto block h-28 w-28" />
+    </view>
+    <view class="mt-4 text-center text-4xl text-[#d14328]">
+      unibest
+    </view>
+    <view class="mb-8 mt-2 text-center text-2xl">
+      最好用的 uniapp 开发模板
+    </view>
+
+    <view class="m-auto mb-2 max-w-100 text-justify indent text-4">
+      {{ description }}
+    </view>
+    <view class="mt-4 text-center">
+      作者：
+      <text class="text-green-500">
+        菲鸽
+      </text>
+    </view>
+    <view class="mt-4 text-center">
+      官网地址：
+      <text class="text-green-500">
+        https://unibest.tech
+      </text>
+    </view>
+  </view>
+</template>

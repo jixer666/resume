@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum AuthTypeEnum {
 
     ACCOUNT(1, "账号认证"),
+    WX(2, "微信认证"),
 
     ;
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ExceptionEnum {
 
-    SUCCESS(0, "成功", "ok"),
+    SUCCESS(200, "成功", "成功"),
     SYSTEM_EXCEPTION(1000, "系统异常", "系统开小差了，请稍后再试"),
     PARAM_EXCEPTION(1001, "参数校验异常", "人气太火爆了，请稍后再试"),
     UNAUTHORIZED_EXCEPTION(1002, "身份未授权", "身份认证失败，请先登录哦！"),

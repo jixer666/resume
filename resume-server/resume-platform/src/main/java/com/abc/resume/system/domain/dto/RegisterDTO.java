@@ -50,4 +50,13 @@ public class RegisterDTO {
      */
     private String emailUuid;
 
+    /**
+     * openid
+     */
+    private String openid;
+
+    /**
+     * 渠道
+     */
+    private String ch;
 }

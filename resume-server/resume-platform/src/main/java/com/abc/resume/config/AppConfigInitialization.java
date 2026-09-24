@@ -4,7 +4,7 @@ import com.abc.resume.constants.CommonConstants;
 import com.abc.resume.core.async.AsyncManager;
 import com.abc.resume.core.config.AppConfigBootstrap;
 import com.abc.resume.core.config.model.Config;
-import com.abc.resume.game.domain.context.ConfigQueryContext;
+import com.abc.resume.system.domain.context.ConfigQueryContext;
 import com.abc.resume.system.service.ConfigService;
 import com.abc.resume.util.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;

@@ -21,7 +21,7 @@ public class LoginUserDTO implements UserDetails {
     /**
      * 用户ID
      */
-    private Long userId;
+    private String userId;
 
     /**
      * 用户唯一标识

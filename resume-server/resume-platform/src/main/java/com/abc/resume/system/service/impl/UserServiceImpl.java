@@ -7,6 +7,7 @@ import com.abc.resume.system.domain.dto.LoginDTO;
 import com.abc.resume.system.domain.dto.LoginUserDTO;
 import com.abc.resume.system.domain.dto.RegisterDTO;
 import com.abc.resume.system.domain.entity.User;
+import com.abc.resume.system.domain.enums.ChannelEnum;
 import com.abc.resume.system.domain.vo.*;
 import com.abc.resume.system.mapper.UserMapper;
 import com.abc.resume.system.service.TokenService;
@@ -37,9 +38,17 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public User getUserByUid(Long uid) {
+    public User getUserByUid(String uid) {
         AssertUtils.isNotEmpty(uid, ExceptionEnum.PARAM_EXCEPTION);
         return userMapper.selectUserByUid(uid);
+    }
+
+    @Override
+    public User getUserByOpenidAndCh(String openid, String ch) {
+        AssertUtils.isNotEmpty(openid, ExceptionEnum.PARAM_EXCEPTION);
+        AssertUtils.isNotEmpty(ch, ExceptionEnum.PARAM_EXCEPTION);
+        AssertUtils.isNotEmpty(ChannelEnum.chOf(ch), ExceptionEnum.PARAM_EXCEPTION.getCode(), "未知渠道来源");
+        return userMapper.getUserByOpenidAndCh(openid, ch);
     }
 
     @Override
@@ -79,19 +88,12 @@ public class UserServiceImpl extends BaseService implements UserService {
     }
 
     @Override
-    public UserInfoVO getUserInfo(Long userId) {
-        AssertUtils.isNotEmpty(userId, ExceptionEnum.PARAM_EXCEPTION);
+    public UserInfoVO getUserInfo(String uid) {
+        AssertUtils.isNotEmpty(uid, ExceptionEnum.PARAM_EXCEPTION);
         UserInfoVO userInfoVO = new UserInfoVO();
-        User user = getUserByUid(userId);
+        User user = getUserByUid(uid);
         userInfoVO.setUser(BeanUtils.copyProperties(user, UserVO.class));
         return userInfoVO;
     }
 
-    @Override
-    public void updateUserLastServer(Long userId, Long serverId) {
-        AssertUtils.isNotEmpty(userId, ExceptionEnum.PARAM_EXCEPTION);
-        AssertUtils.isNotEmpty(serverId, ExceptionEnum.PARAM_EXCEPTION);
-        int row = userMapper.updateUserLastServer(userId, serverId);
-        AssertUtils.isTrue(row > 0, ExceptionEnum.BIZ_EXCEPTION);
-    }
 }

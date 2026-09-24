@@ -1,13 +1,13 @@
 {
-  "name": "resume",
+  "name": "resume-app",
   "type": "module",
   "version": "1.0.0",
   "unibest": {
     "platforms": [
       "h5",
       "mp-weixin",
-      "mp-toutiao",
-      "mp-alipay"
+      "mp-alipay",
+      "mp-toutiao"
     ],
     "uiLibrary": "none",
     "loginStrategy": false,
@@ -16,7 +16,7 @@
     "cliVersion": "4.0.16",
     "unibestVersion": "4.4.1",
     "unibestUpdateTime": "2026-05-22",
-    "createdAt": "2026-09-19 15:40:40"
+    "createdAt": "2026-09-24 00:22:20"
   },
   "packageManager": "pnpm@10.10.0",
   "description": "unibest - 最好的 uniapp 开发模板",
