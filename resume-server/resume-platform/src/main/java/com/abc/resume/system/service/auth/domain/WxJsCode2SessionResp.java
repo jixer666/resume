@@ -2,10 +2,10 @@ package com.abc.resume.system.service.auth.domain;
 
 import lombok.Data;
 
+import java.util.Objects;
+
 @Data
 public class WxJsCode2SessionResp {
-
-    private static final String successCode = "0";
 
     private String session_key;
 
@@ -18,6 +18,6 @@ public class WxJsCode2SessionResp {
     private String errmsg;
 
     public boolean isSuccess() {
-        return successCode.equals(errocode);
+        return Objects.isNull(errocode);
     }
 }

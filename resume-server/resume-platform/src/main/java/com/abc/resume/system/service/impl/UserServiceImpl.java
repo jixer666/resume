@@ -17,6 +17,7 @@ import com.abc.resume.system.service.auth.IAuthStrategy;
 import com.abc.resume.util.AssertUtils;
 import com.abc.resume.util.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,6 +31,10 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Autowired
     private TokenService tokenService;
+
+    /** token有效期（分钟），与服务端缓存保持一致 */
+    @Value("${token.expireTime}")
+    private Integer tokenExpireTime;
 
     @Override
     public User getUserByUsername(String username) {
@@ -71,7 +76,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         IAuthStrategy authStrategy = getAuthStrategyByAuthType(loginDTO.getAuthType());
         LoginUserDTO loginUserDTO = authStrategy.authenticate(loginDTO);
         String token = tokenService.createToken(loginUserDTO);
-        return new LoginVO(token);
+        return new LoginVO(token, tokenExpireTime * 60);
     }
 
     private IAuthStrategy getAuthStrategyByAuthType(Integer authType) {

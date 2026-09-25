@@ -11,4 +11,7 @@ public class LoginVO {
 
     private String token;
 
+    /** token有效期（秒） */
+    private Integer expiresIn;
+
 }

@@ -1,0 +1,120 @@
+/*
+  简历编辑页子表单（basic / form / experience / text）的共用样式。
+  在各页面的 `<style scoped>` 里用 `@import` 引入，规则会带上该页面的作用域，互不污染。
+
+  两条约束：
+  1. 只用 class 选择器 —— 微信小程序的 wxss 不支持标签选择器（能力所限，`ul/li/p` 之类会静默失效）；
+  2. 单位统一用 px，与物料皮肤、A4 画布同一坐标系（见任务文档 §2.3）。
+*/
+
+.page {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 18px 16px 100px;
+  background-color: #f4f4f4;
+}
+
+.card {
+  padding: 18px 16px;
+  border-radius: 12px;
+  background-color: #fff;
+}
+
+.label {
+  display: block;
+  margin: 2px 0 8px;
+  color: #344054;
+  font-size: 13px;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  margin-bottom: 15px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #172b4d;
+  font-size: 14px;
+}
+
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  height: 88px;
+  margin-bottom: 15px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #172b4d;
+  font-size: 14px;
+}
+
+.picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 44px;
+  margin-bottom: 15px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  color: #172b4d;
+  font-size: 14px;
+}
+
+.placeholder {
+  color: #94a3b8;
+}
+
+.picker-arrow {
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid #f1f5f9;
+  background-color: #fff;
+}
+
+.btn {
+  flex: 1;
+  height: 44px;
+  margin: 0;
+  border: none;
+  border-radius: 22px;
+  font-size: 15px;
+  line-height: 44px;
+
+  &::after {
+    border: none;
+  }
+}
+
+.btn--ghost {
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  color: #64748b;
+}
+
+.btn--primary {
+  margin-left: 12px;
+  background-color: var(--wot-color-theme, #0957de);
+  color: #fff;
+}
+
+.btn--press {
+  opacity: 0.86;
+}

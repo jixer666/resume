@@ -1,0 +1,155 @@
+/*
+  简历编辑相关底部弹层（编辑页的简历设置 / 名称编辑 / 模块管理，以及模块设置与全局样式面板）的共用样式。
+  在各文件的 `<style scoped>` 里用 `@import` 引入，规则会带上该文件的作用域，互不污染。
+
+  两条约束（同 editor-form.scss）：
+  1. 只用 class 选择器 —— 微信小程序的 wxss 不支持标签选择器；
+  2. 单位统一用 px，与物料皮肤、A4 画布同一坐标系（见任务文档 §2.3）。
+
+  注意：`.sheet` 用到的 `sheet-up` 关键帧不能写在这里（scoped 块里的 @keyframes 会被编译改写、
+  引用却不会同步改名），由各文件在独立的非 scoped `<style>` 块里各自声明。
+*/
+
+.mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  background-color: rgb(15 23 42 / 45%);
+}
+
+.sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  padding: 20px 16px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  border-radius: 20px 20px 0 0;
+  background-color: #fff;
+  animation: sheet-up 0.24s ease-out;
+}
+
+.sheet--tall {
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+}
+
+.sheet-title {
+  display: block;
+  color: #172b4d;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sheet-sub {
+  display: block;
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.sheet-item {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 15px 14px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+}
+
+.sheet-item--press {
+  background-color: #eef4ff;
+}
+
+.sheet-item--danger .sheet-text {
+  color: #ef4444;
+}
+
+.sheet-text {
+  margin-left: 10px;
+  color: #172b4d;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sheet-cancel {
+  height: 46px;
+  margin-top: 14px;
+  border-radius: 23px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 46px;
+  text-align: center;
+}
+
+.sheet-cancel--press {
+  background-color: #e2e8f0;
+}
+
+.sheet-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 46px;
+  margin-top: 14px;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #f8fafc;
+  color: #172b4d;
+  font-size: 15px;
+}
+
+.sheet-placeholder {
+  color: #94a3b8;
+}
+
+.sheet-actions {
+  display: flex;
+  margin-top: 16px;
+}
+
+.sheet-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 23px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 46px;
+  text-align: center;
+}
+
+.sheet-btn--ghost {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.sheet-btn--primary {
+  margin-left: 12px;
+  background-color: var(--wot-color-theme, #0957de);
+  color: #fff;
+}
+
+.sheet-btn--press {
+  opacity: 0.86;
+}
+
+.sheet-scroll {
+  max-height: 52vh;
+  margin-top: 6px;
+}
+
+.sheet-scroll--tall {
+  max-height: 64vh;
+}
+
+.sheet-label {
+  display: block;
+  margin-top: 16px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}

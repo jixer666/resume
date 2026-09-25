@@ -115,8 +115,8 @@ mybatis:
     map-underscore-to-camel-case: true
 
 wechat:
-  appid: wxed9954c01bb89b47
-  appSecret: a7482517235173ddb4083788de60b90e
+  appid: wx51fb265a187a9e34
+  appSecret: cfffefe792373955e126c939f4f59d07
   redirectUri: http://localhost:8160/auth/wxLogin
 
 oss:

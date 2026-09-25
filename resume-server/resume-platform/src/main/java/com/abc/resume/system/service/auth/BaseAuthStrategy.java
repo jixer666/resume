@@ -15,13 +15,14 @@ public class BaseAuthStrategy {
     public User buildUserByRegisterDTO(RegisterDTO registerDTO) {
         User user = new User();
         user.setUid(IdUtils.getIdStr());
-        user.setUsername(registerDTO.getUsername());
-        user.setPassword(StringUtils.isEmpty(registerDTO.getCh()) ? StringUtils.EMPTY : new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
+        user.setUsername(StringUtils.isEmpty(registerDTO.getUsername()) ? StringUtils.EMPTY : registerDTO.getUsername());
+        user.setPassword(StringUtils.isEmpty(registerDTO.getPassword()) ? StringUtils.EMPTY : new BCryptPasswordEncoder().encode(registerDTO.getPassword()));
         ChannelEnum channelEnum = ChannelEnum.chOf(registerDTO.getCh());
         user.setNickname(Objects.isNull(channelEnum) ? CommonConstants.DEFAULT_NICKNAME : channelEnum.getDesc() + CommonConstants.DEFAULT_NICKNAME);
         user.setAvatar(CommonConstants.DEFAULT_AVATAR);
         user.setOpenid(registerDTO.getOpenid());
         user.setCh(registerDTO.getCh());
+        user.setEmail(StringUtils.isEmpty(registerDTO.getEmail()) ? StringUtils.EMPTY : registerDTO.getEmail());
         user.setCommonParams();
         return user;
     }

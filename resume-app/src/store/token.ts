@@ -163,7 +163,7 @@ export const useTokenStore = defineStore(
       catch (error) {
         console.error('微信登录失败:', error)
         uni.showToast({
-          title: '微信登录失败，请重试',
+          title: error.message,
           icon: 'error',
         })
         throw error

@@ -26,7 +26,8 @@ export type IAuthLoginRes = ISingleTokenRes | IDoubleTokenRes
 export type UserRole = string
 
 export interface IUserInfoRes {
-  userId: number
+  /** 数字用于 demo 数据，字符串用于后端 BASE62 主键 uid */
+  userId: number | string
   username: string
   nickname: string
   avatar?: string

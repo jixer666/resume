@@ -26,8 +26,8 @@
     </sql>
 
     <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
-        insert into user (uid, nickname, username, password, avatar, email, create_time, update_time, status, ver, is_delete)
-        values (#{uid}, #{nickname}, #{username}, #{password}, #{avatar}, #{email}, #{createTime}, #{updateTime}, #{status}, #{ver}, #{isDelete})
+        insert into user (uid, nickname, username, password, avatar, email, openid, ch, create_time, update_time, status, ver, is_delete)
+        values (#{uid}, #{nickname}, #{username}, #{password}, #{avatar}, #{email}, #{openid}, #{ch}, #{createTime}, #{updateTime}, #{status}, #{ver}, #{isDelete})
     </insert>
 
     <select id="selectUserByUsername" resultMap="UserResult">

@@ -9,6 +9,8 @@ export default uniHelper({
     '**/uni_modules/',
     // 忽略原生插件目录
     '**/nativeplugins/',
+    // 忽略 AI Skill 自带的示例代码（第三方 vendored 内容，不参与本项目质量门禁）
+    '**/.agents/',
     'dist',
     // unplugin-auto-import 生成的类型文件，每次提交都改变，所以加入这里吧，与 .gitignore 配合使用
     'auto-import.d.ts',
@@ -19,6 +21,8 @@ export default uniHelper({
     'src/manifest.json',
     // 忽略自动生成文件
     'src/service/**',
+    // 物料派发组件由 scripts/gen-material-renderer.js 生成，勿手改
+    'src/components/ResumeRender/generated/**',
   ],
   // https://eslint-config.antfu.me/rules
   rules: {

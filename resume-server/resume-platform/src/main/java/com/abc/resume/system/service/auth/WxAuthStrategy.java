@@ -53,7 +53,6 @@ public class WxAuthStrategy extends BaseAuthStrategy implements IAuthStrategy {
         RegisterDTO registerDTO = new RegisterDTO();
         registerDTO.setCh(ChannelEnum.WX.getCh());
         registerDTO.setOpenid(wxJsCode2SessionResp.getOpenid());
-        registerDTO.setUsername(wxJsCode2SessionResp.getOpenid());
         return registerDTO;
     }
 
