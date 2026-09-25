@@ -5,25 +5,28 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 简历
+ * 用户简历
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Resume extends BaseEntity {
+public class UserResume extends BaseEntity {
 
-    /** 归属用户uid */
-    private String userId;
+    /** 用户ID */
+    private Long uid;
 
     /** 简历名称 */
     private String title;
 
-    /** 整份简历JSON */
-    private String resumeJson;
-
-    /** 布局标识 */
+    /** 布局 */
     private String layout;
 
-    /** 缩略图地址 */
+    /** 简历JSON */
+    private String resumeJson;
+
+    /** 缩略图地址，未生成时为空串 */
     private String thumbnail;
+
+    /** 模板编码 */
+    private String templateCode;
 
 }

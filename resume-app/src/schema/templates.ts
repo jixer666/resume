@@ -27,17 +27,25 @@ export interface IResumeTemplate {
   variants?: Partial<Record<string, string>>
   /** 双列布局下模块的左右栏归属，未列出的模块通栏 */
   columns?: { left?: string[], right?: string[] }
+  /**
+   * 初始不渲染的模块。
+   *
+   * 模块清单与渲染顺序是全工程统一的，模板只负责把它们关掉：图片版式里没有简历标题栏
+   * （姓名已经进了顶部名片带），标题栏留着会和名片带打架，所以由模板声明隐藏。
+   * 隐藏只是把 `show` 置 false，用户在编辑页仍可自行打开。
+   */
+  hidden?: string[]
 }
 
 export const TEMPLATES: IResumeTemplate[] = [
   {
     id: 'classic',
     name: '经典商务',
-    desc: '深蓝主色配加粗小标题，投递绝大多数岗位都不会出错',
+    desc: '顶部通栏名片带配主题色章节条，投递绝大多数岗位都不会出错',
     layout: 'classical',
     style: {
       themeColor: '#0b63ce',
-      firstTitleFontSize: '20px',
+      firstTitleFontSize: '18px',
       secondTitleFontSize: '14px',
       textFontSize: '14px',
       secondTitleColor: '#23304a',
@@ -45,55 +53,104 @@ export const TEMPLATES: IResumeTemplate[] = [
       secondTitleWeight: 600,
       textFontWeight: 400,
       modelMarginTop: '0px',
-      modelMarginBottom: '40px',
+      modelMarginBottom: '32px',
+      // 各皮肤自带的上下内边距在 30~40px 不等，叠加 32px 的模块间距会把版式撑散；
+      // 收成 0 后间距只由 modelMarginBottom 决定，章节节奏才和设计稿一致
+      pTop: '0px',
+      pBottom: '0px',
+      // 刻意不写 pLeftRight：名片带要通栏（皮肤自带 0px），正文各模块靠自带 30px 留白
     },
+    // 换成 _9 家族：整行浅主题色底纹条 + 左侧主题色竖条，对应设计稿里的章节标题
+    variants: {
+      BASE_INFO: 'BASE_INFO_10',
+      JOB_INTENTION: 'JOB_INTENTION_9',
+      EDU_BACKGROUND: 'EDU_BACKGROUND_10',
+      SKILL_SPECIALTIES: 'SKILL_SPECIALTIES_13',
+      CAMPUS_EXPERIENCE: 'CAMPUS_EXPERIENCE_9',
+      INTERNSHIP_EXPERIENCE: 'INTERNSHIP_EXPERIENCE_9',
+      WORK_EXPERIENCE: 'WORK_EXPERIENCE_9',
+      PROJECT_EXPERIENCE: 'PROJECT_EXPERIENCE_9',
+      AWARDS: 'AWARDS_9',
+      HOBBIES: 'HOBBIES_9',
+      SELF_EVALUATION: 'SELF_EVALUATION_9',
+      WORKS_DISPLAY: 'WORKS_DISPLAY_9',
+    },
+    // 设计稿没有简历标题栏，姓名已经在名片带里，标题栏留着会叠在名片带上方
+    hidden: ['RESUME_TITLE'],
   },
   {
     id: 'sidebar',
     name: '侧栏简历',
-    desc: '顶部通栏放标题与基本信息，左侧色块承载技能与特长，右侧留给经历正文',
+    desc: '亮蓝侧栏压白字，右侧橙棕章节线贯穿全宽，经历正文独占四分之三版面',
     layout: 'leftRight',
+    /**
+     * 双色方案：themeColor 只驱动右栏章节标题与下划线，栏底色另有 leftThemeColor。
+     *
+     * 这两个字段都不在 GLOBAL_STYLE_MAP 里，只被 ResumeRender 直接消费，所以蓝色栏底
+     * 不会被扇出到模块的 style 上，橙棕标题也不会污染左栏底色。
+     */
     style: {
-      themeColor: '#0b63ce',
-      leftWidth: '38%',
-      rightWidth: '62%',
-      leftThemeColor: '#eef4ff',
+      themeColor: '#c37530',
+      leftWidth: '25%',
+      rightWidth: '75%',
+      leftThemeColor: '#4184ff',
       rightThemeColor: '#ffffff',
+      firstTitleFontSize: '16px',
+      secondTitleFontSize: '14px',
+      textFontSize: '14px',
       secondTitleColor: '#23304a',
+      textFontColor: '#4a4a4a',
+      secondTitleWeight: 600,
       textFontWeight: 400,
-      // 双列后每栏只剩 300~490px，沿用物料自带的 40px 左右内边距会把正文挤窄，收到 20px
-      pLeftRight: '20px',
-      modelMarginBottom: '32px',
-      // 刻意不写 textFontColor：它会无条件盖到每个模块的 textColor 上，而 RESUME_TITLE
-      // 的标题栏是「主题色底 + 白字」，被灰字盖住后基本看不见（对比度 1.05）。
-    },
-    // 左栏底色偏浅，左栏三件套统一换成「斜角标题 + 主题色竖线」的 _4 系列，和右侧正文拉开层次
-    variants: {
-      SKILL_SPECIALTIES: 'SKILL_SPECIALTIES_4',
-      HOBBIES: 'HOBBIES_4',
-      SELF_EVALUATION: 'SELF_EVALUATION_4',
+      // 左栏只剩 198px，右栏 595px，沿用物料自带的 30~40px 内边距会把正文挤窄，收到 22px
+      pLeftRight: '22px',
+      // 章节之间靠「上一模块的 modelMarginBottom + 下一模块的 pTop」叠加成 34px，
+      // 同时 pTop 也给右栏首屏留出一点起手空档，避免标题贴住页面顶边
+      pTop: '14px',
+      pBottom: '0px',
+      modelMarginTop: '0px',
+      modelMarginBottom: '20px',
     },
     /**
-     * 只把「窄栏友好」的三个模块放进左栏，其余全部显式归入右栏。
+     * 左栏压白字的两件套是专用皮肤，右栏十个模块统一换成 ModelTitle11 薄包装：
+     * 章节标题风格由皮肤里硬编码的 ModelTitle 决定，没有可配置的标题变体。
+     */
+    variants: {
+      BASE_INFO: 'BASE_INFO_11',
+      JOB_INTENTION: 'JOB_INTENTION_11',
+      EDU_BACKGROUND: 'EDU_BACKGROUND_13',
+      SKILL_SPECIALTIES: 'SKILL_SPECIALTIES_18',
+      CAMPUS_EXPERIENCE: 'CAMPUS_EXPERIENCE_11',
+      INTERNSHIP_EXPERIENCE: 'INTERNSHIP_EXPERIENCE_11',
+      WORK_EXPERIENCE: 'WORK_EXPERIENCE_11',
+      PROJECT_EXPERIENCE: 'PROJECT_EXPERIENCE_11',
+      AWARDS: 'AWARDS_11',
+      HOBBIES: 'HOBBIES_11',
+      SELF_EVALUATION: 'SELF_EVALUATION_11',
+      WORKS_DISPLAY: 'WORKS_DISPLAY_11',
+    },
+    /**
+     * 左栏只放「头像+姓名+联系方式」与「求职意向」，其余全部显式归入右栏。
      *
-     * BASE_INFO 与 RESUME_TITLE 刻意两栏都不列：它们要的宽度远超 300px 的左栏（光头像
-     * 118px + 50px 间距就吃掉大半），塞进左栏只会把姓名挤成一行四五个字。不列入任何一栏
-     * 时 layoutOf 返回空串，走 ResumeRender 的通栏分支，作为顶部名片带铺满整页宽。
-     * 反过来也要注意：该进右栏的模块一个都不能漏，漏掉的会掉进通栏、把左栏顶到页面最底部。
+     * 右栏的模块一个都不能漏：漏掉的会掉进通栏、占满整页宽，把左栏从第一条经历处顶到页底。
      */
     columns: {
-      left: ['SKILL_SPECIALTIES', 'HOBBIES', 'SELF_EVALUATION'],
+      left: ['BASE_INFO', 'JOB_INTENTION'],
       right: [
-        'JOB_INTENTION',
         'EDU_BACKGROUND',
+        'SKILL_SPECIALTIES',
         'CAMPUS_EXPERIENCE',
         'INTERNSHIP_EXPERIENCE',
         'WORK_EXPERIENCE',
         'PROJECT_EXPERIENCE',
         'AWARDS',
+        'HOBBIES',
+        'SELF_EVALUATION',
         'WORKS_DISPLAY',
       ],
     },
+    // 版式顶部没有简历标题栏，姓名已经在左栏名片里，标题栏留着会横在蓝栏上把版式切断
+    hidden: ['RESUME_TITLE'],
   },
   {
     id: 'timeline',

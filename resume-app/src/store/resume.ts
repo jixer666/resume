@@ -191,7 +191,12 @@ export const useResumeStore = defineStore(
         // 模板样式是全局样式的预设值，必须无条件扇出（传 keys），否则「刚好等于出厂默认」的那几项不会生效
         const keys = Object.keys(template.style) as (keyof IGlobalStyle)[]
         const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
-        json.COMPONENTS.forEach((item: IMATERIALITEM) => applyGlobalStyleToItem(item, globalStyle, keys))
+        json.COMPONENTS.forEach((item: IMATERIALITEM) => {
+          applyGlobalStyleToItem(item, globalStyle, keys)
+          // 模板声明隐藏的模块初始不渲染（编辑页仍可手动打开）
+          if (template.hidden?.includes(item.model))
+            item.show = false
+        })
       }
       current.value = json
       savedSnapshot.value = ''

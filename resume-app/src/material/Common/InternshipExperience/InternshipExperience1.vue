@@ -20,9 +20,6 @@
         </ul>
         <!-- 简述 -->
         <div class="job-content u-tag-div">
-          <p class="left u-tag-p">
-            实习内容
-          </p>
           <div class="content-list u-tag-div">
             <ul class="u-tag-ul">
               <li v-for="(list, j) in item.jobContent" :key="j" class="u-tag-li">
