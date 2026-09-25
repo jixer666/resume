@@ -45,7 +45,7 @@ public class WxAuthStrategy extends BaseAuthStrategy implements IAuthStrategy {
             RegisterDTO registerDTO = buildRegisterDTO(wxJsCode2SessionResp);
             user = doRegister(registerDTO);
         }
-        AssertUtils.isTrue(!user.getIsDelete().equals(user.getUid()), ExceptionEnum.BIZ_EXCEPTION.getCode(), "用户已被禁用");
+        AssertUtils.isTrue(!user.getIsDelete().equals(user.getId()), ExceptionEnum.BIZ_EXCEPTION.getCode(), "用户已被禁用");
         return new LoginUserDTO(user, null, new HashSet<>());
     }
 

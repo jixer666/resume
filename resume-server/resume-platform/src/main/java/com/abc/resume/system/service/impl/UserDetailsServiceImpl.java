@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.getUserByUsername(username);
         AssertUtils.isNotEmpty(user, ExceptionEnum.LOGIN_EXCEPTION);
-        AssertUtils.isTrue(!user.getIsDelete().equals(user.getUid()), ExceptionEnum.LOGIN_EXCEPTION.getCode(), "用户已被禁用，无法登录");
+        AssertUtils.isTrue(!user.getIsDelete().equals(user.getId()), ExceptionEnum.LOGIN_EXCEPTION.getCode(), "用户已被禁用，无法登录");
         AssertUtils.isTrue(SecurityUtils.matchesPassword(SecurityAuthContext.getContext().getCredentials().toString(),
                 user.getPassword()), ExceptionEnum.LOGIN_EXCEPTION);
 //        List<String> roles = roleService.getRoleKeysByUserId(user.getUserId());

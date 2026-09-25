@@ -5,7 +5,7 @@
 <mapper namespace="com.abc.resume.system.mapper.ConfigMapper">
 
     <resultMap type="com.abc.resume.core.config.model.Config" id="ConfigResult">
-        <result property="configId"    column="config_id"    />
+        <result property="id"    column="id"    />
         <result property="code"    column="code"    />
         <result property="group"    column="group"    />
         <result property="value"    column="value"    />
@@ -17,7 +17,7 @@
     </resultMap>
 
     <sql id="selectConfigVo">
-        select config_id, code, `group`, value, create_time, update_time, status, ver, is_delete from config
+        select id, code, `group`, `value`, create_time, update_time, status, ver, is_delete from config
     </sql>
 
 
@@ -30,10 +30,10 @@
             </if>
             <if test="delete != null">
                 <if test="delete">
-                    and is_delete = config_id
+                    and is_delete = id
                 </if>
                 <if test="!delete">
-                    and is_delete != config_id
+                    and is_delete != id
                 </if>
             </if>
         </where>
