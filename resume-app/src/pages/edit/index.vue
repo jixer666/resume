@@ -536,7 +536,9 @@ function addModule(model: string) {
 
 .modules {
   box-sizing: border-box;
-  padding: 14px 16px 96px;
+  padding: 14px 16px;
+  /* 底栏高度约 97px，再加 iPhone 底部安全区，留足空间避免最后的模块被盖住 */
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
 .section-head {

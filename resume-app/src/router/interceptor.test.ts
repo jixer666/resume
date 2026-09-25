@@ -18,8 +18,21 @@ async function invoke(url: string, userInfo?: { roles?: string[] }) {
   return navigateToInterceptor.invoke({ url })
 }
 
-// 用真实的 tabbar 配置跑：其中 'pages/about/about' 配了 roles: ['admin']
 describe('navigateToInterceptor 角色守卫', () => {
+  // 真实 tabbar 配置对标 resume-app-temp 后只剩两个页签、均未配 roles，
+  // 这里补一个带 roles 的演示项，专门验证角色守卫逻辑
+  beforeEach(() => {
+    vi.doMock('@/tabbar/config', () => ({
+      TABBAR_STRATEGY_MAP: { NO_TABBAR: 0, NATIVE_TABBAR: 1, CUSTOM_TABBAR: 2 },
+      selectedTabbarStrategy: 2,
+      tabbarList: [
+        { text: '简历模板', pagePath: 'pages/index/index', iconType: 'unocss', icon: 'i-carbon-template' },
+        { text: '关于', pagePath: 'pages/about/about', iconType: 'unocss', icon: 'i-carbon-menu', roles: ['admin'] },
+        { text: '我的简历', pagePath: 'pages/me/me', iconType: 'unocss', icon: 'i-carbon-user-profile' },
+      ],
+    }))
+  })
+
   it('角色不足时阻止进入受限 tabbar 页，并回退到可见的 tabbar 页', async () => {
     const result = await invoke('/pages/about/about')
 

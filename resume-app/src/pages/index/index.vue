@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { IResumeTemplate } from '@/schema/templates'
 import { coverBackdrop, TEMPLATES, templateSideColor, templateTheme } from '@/schema/templates'
-import { safeAreaInsets } from '@/utils/systemInfo'
 
 /**
  * 首页 ≡ 模板库。
@@ -13,14 +12,7 @@ import { safeAreaInsets } from '@/utils/systemInfo'
 defineOptions({ name: 'Home' })
 definePage({
   type: 'home',
-  style: {
-    navigationStyle: 'custom',
-    navigationBarTitleText: '简历模板',
-  },
 })
-
-/** 自绘导航栏要自己避开状态栏 */
-const topInset = computed(() => safeAreaInsets?.top || 0)
 
 /** 封面衬底：主题色兑白的极浅渐变，让白纸封面在卡片里不显得空 */
 function coverBg(item: IResumeTemplate): string {
@@ -34,7 +26,7 @@ function openTemplate(id: string) {
 
 <template>
   <view class="page">
-    <view class="hero" :style="{ paddingTop: `${24 + topInset}px` }">
+    <view class="hero">
       <view class="glow glow-a" />
       <view class="glow glow-b" />
       <view class="hero-top">
@@ -55,11 +47,13 @@ function openTemplate(id: string) {
         @click="openTemplate(item.id)"
       >
         <view class="cover-wrap" :style="{ background: coverBg(item) }">
-          <resume-cover
-            :layout="item.layout"
-            :theme-color="templateTheme(item)"
-            :side-color="templateSideColor(item)"
-          />
+          <view class="cover-box">
+            <resume-cover
+              :layout="item.layout"
+              :theme-color="templateTheme(item)"
+              :side-color="templateSideColor(item)"
+            />
+          </view>
         </view>
         <view class="card-body">
           <view class="name-row">
@@ -76,9 +70,11 @@ function openTemplate(id: string) {
 
 <style lang="scss" scoped>
 .page {
-  min-height: 100vh;
-  /* tabbar 自带 50px 流式占位 + 固定条，这里只补一点呼吸位 */
-  padding-bottom: 20px;
+  /* 自定义 tabbar 在文档流里占 50px + 底部安全区，页面按剩余高度铺满，
+     模板少时正好一屏不出现滚动条，模板多了内容撑开才滚动 */
+  min-height: calc(100vh - 50px - env(safe-area-inset-bottom));
+  /* 滚到底时最后一张卡片与固定 tabbar 之间的呼吸空隙 */
+  padding-bottom: 24px;
   background-color: #f4f4f4;
 }
 
@@ -158,9 +154,15 @@ function openTemplate(id: string) {
 
 .cover-wrap {
   display: flex;
-  box-sizing: border-box;
+  align-items: center;
   justify-content: center;
-  padding: 12px 16px 0;
+  height: 190px;
+  padding: 10px;
+}
+
+/* ResumeCover 按 A4 比例自撑高度，给定宽度即锁定 170px 高的内容区 */
+.cover-box {
+  width: 120px;
 }
 
 .card-body {
@@ -184,8 +186,6 @@ function openTemplate(id: string) {
 }
 
 .arrow {
-  flex: none;
-  margin-left: 6px;
   color: #c0c9d6;
   font-size: 16px;
   line-height: 1;

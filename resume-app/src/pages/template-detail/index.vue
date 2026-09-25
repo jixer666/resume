@@ -9,14 +9,10 @@ import { toLoginPage } from '@/utils/toLoginPage'
  *
  * 首页卡片直接生成简历的话，用户挨个点一遍就会攒出一堆空简历，所以中间加一层确认页。
  * 排版对标 resume-app-temp 的同名页面：主题色渐变头部 + 白色相框预览 + 信息卡/参数卡 +
- * 使用建议 + 固定底栏「使用模板」。
+ * 固定底栏「使用模板」。整页按一屏设计，不出现滚动条。
  */
 defineOptions({ name: 'TemplateDetail' })
-definePage({
-  style: {
-    navigationBarTitleText: '模板详情',
-  },
-})
+definePage({})
 
 const tokenStore = useTokenStore()
 /** 当前模板，id 非法时为 null（据此渲染兜底态） */
@@ -94,8 +90,8 @@ function useTemplate() {
     <view v-if="tpl" class="body">
       <view class="info-card">
         <view class="head-row">
-          <text class="tag">精选模板</text>
-          <view class="theme-chip" :style="{ backgroundColor: themeSoft }">
+          <text class="tag" :style="{ backgroundColor: themeSoft, color: theme }">精选模板</text>
+          <view class="theme-chip">
             <view class="theme-dot" :style="{ backgroundColor: theme }" />
             <text class="theme-text">主题配色</text>
           </view>
@@ -108,19 +104,6 @@ function useTemplate() {
         <view v-for="meta in metaList" :key="meta.label" class="meta-item">
           <text class="meta-value">{{ meta.value }}</text>
           <text class="meta-label">{{ meta.label }}</text>
-        </view>
-      </view>
-
-      <view class="section">
-        <view class="section-head">
-          <view class="section-bar" :style="{ backgroundColor: theme }" />
-          <text class="section-name">使用建议</text>
-        </view>
-        <view class="tip-card" :style="{ backgroundColor: themeSoft }">
-          <text class="tip-text">
-            使用后会按这套配色与字号新建一份简历，你只需要逐段填进自己的信息。
-            之后想换配色，回模板库另选一个即可，已填内容不会丢。
-          </text>
         </view>
       </view>
     </view>
@@ -146,17 +129,17 @@ function useTemplate() {
 <style lang="scss" scoped>
 .page {
   min-height: 100vh;
-  /* 固定底栏 48px + 上下留白，非 tab 页可以安全用 fixed */
-  padding-bottom: 104px;
+  /* 恰好等于固定底栏高度（12 + 48 + 12 + 安全区），内容少时整页不出现滚动条 */
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
   background-color: #f4f4f4;
 }
 
 .hero {
-  position: relative;
   display: flex;
   overflow: hidden;
   justify-content: center;
-  padding: 26px 0 78px;
+  /* 20 + 60 收紧上下留白，配 190px 相框保证小屏（iPhone 8 级别）也一屏放下 */
+  padding: 20px 0 60px;
   border-radius: 0 0 28px 28px;
 }
 
@@ -169,8 +152,8 @@ function useTemplate() {
 .glow-lg {
   top: -70px;
   right: -50px;
-  width: 180px;
-  height: 180px;
+  width: 190px;
+  height: 190px;
 }
 .glow-sm {
   bottom: -56px;
@@ -181,7 +164,7 @@ function useTemplate() {
 
 .preview-frame {
   position: relative;
-  width: 204px;
+  width: 190px;
   padding: 8px;
   border-radius: 16px;
   background-color: rgb(255 255 255 / 94%);
@@ -212,10 +195,8 @@ function useTemplate() {
 }
 
 .tag {
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: 10px;
-  background-color: #eff6ff;
-  color: #2563eb;
   font-size: 11px;
   font-weight: 600;
 }
@@ -223,8 +204,6 @@ function useTemplate() {
 .theme-chip {
   display: flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 12px;
 }
 
 .theme-dot {
@@ -234,8 +213,8 @@ function useTemplate() {
 }
 
 .theme-text {
-  margin-left: 6px;
-  color: #64748b;
+  margin-left: 7px;
+  color: #8290a5;
   font-size: 11px;
 }
 
@@ -284,40 +263,6 @@ function useTemplate() {
   margin-top: 5px;
   color: #94a3b8;
   font-size: 11px;
-}
-
-.section {
-  margin-top: 22px;
-}
-
-.section-head {
-  display: flex;
-  align-items: center;
-}
-
-.section-bar {
-  width: 4px;
-  height: 15px;
-  margin-right: 8px;
-  border-radius: 2px;
-}
-
-.section-name {
-  color: #172b4d;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.tip-card {
-  margin-top: 12px;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.tip-text {
-  color: #4b5563;
-  font-size: 13px;
-  line-height: 22px;
 }
 
 .empty {

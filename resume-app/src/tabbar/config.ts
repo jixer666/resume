@@ -42,44 +42,22 @@ export const nativeTabbarList: NativeTabBarItem[] = [
 // 如果需要配置鼓包，需要在 'tabbar/store.ts' 里面设置，最后在 `tabbar/index.vue` 里面更改鼓包的图片
 export const customTabbarList: CustomTabBarItem[] = [
   {
-    text: '首页',
+    text: '简历模板',
     pagePath: 'pages/index/index',
     // 注意 unocss 图标需要如下处理：（二选一）
     // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
     // 2）配置到 unocss.config.ts 的 safelist 中
     iconType: 'unocss',
-    icon: 'i-carbon-home',
+    icon: 'i-carbon-template',
     // badge: 'dot',
-  },
-  // 鼓包配置示例（2025-12-31）
-  // 中间鼓包tabbarItem配置：通常是扫描按钮、发布按钮、更多按钮等，点击触发业务逻辑
-  // {
-  //   pagePath: 'pages/me/me',
-  //   text: '我的',
-  //   // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
-  //   // 2）配置到 unocss.config.ts 的 safelist 中
-  //   iconType: 'image',
-  //   icon: '/static/tabbar/scan.png',
-  //   isBulge: true,
-  // },
-  {
-    pagePath: 'pages/about/about',
-    text: '关于',
-    // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
-    // 2）配置到 unocss.config.ts 的 safelist 中
-    iconType: 'unocss',
-    icon: 'i-carbon-menu',
-    // badge: 10,
-    roles: ['admin'],
   },
   {
     pagePath: 'pages/me/me',
-    text: '我的',
+    text: '我的简历',
     // 1）在fg-tabbar.vue页面上引入一下并注释掉（见tabbar/index.vue代码第2行）
     // 2）配置到 unocss.config.ts 的 safelist 中
     iconType: 'unocss',
-    icon: 'i-carbon-user',
-    // badge: 10,
+    icon: 'i-carbon-user-profile',
   },
 
   // 其他类型演示

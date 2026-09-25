@@ -16,11 +16,7 @@ import { toLoginPage } from '@/utils/toLoginPage'
  * tab 页底部被自定义 tabbar 占着（固定条 z-index 比页面高），所以不做固定底栏。
  */
 defineOptions({ name: 'Me' })
-definePage({
-  style: {
-    navigationBarTitleText: '我的',
-  },
-})
+definePage({})
 
 const resumeStore = useResumeStore()
 const tokenStore = useTokenStore()
@@ -153,7 +149,9 @@ function goLogin() {
       >
         <view class="card-main">
           <view class="thumb" :style="{ background: thumbBg }">
-            <resume-cover :layout="item.layout" size="xs" />
+            <view class="thumb-img">
+              <resume-cover :layout="item.layout" size="xs" />
+            </view>
           </view>
           <view class="info">
             <view class="name-row">
@@ -178,9 +176,11 @@ function goLogin() {
 
 <style lang="scss" scoped>
 .page {
-  min-height: 100vh;
-  /* tabbar 自带 50px 流式占位 + 固定条，这里只补一点呼吸位 */
-  padding-bottom: 20px;
+  /* 自定义 tabbar 在文档流里占 50px + 底部安全区，页面按剩余高度铺满，
+     内容少时正好一屏不出现滚动条，简历多了内容撑开才滚动 */
+  min-height: calc(100vh - 50px - env(safe-area-inset-bottom));
+  /* 滚到底时最后一张卡片与固定 tabbar 之间的呼吸空隙 */
+  padding-bottom: 24px;
   background-color: #f4f4f4;
 }
 
@@ -255,10 +255,17 @@ function goLogin() {
 }
 .thumb {
   display: flex;
-  width: 54px;
+  width: 52px;
+  height: 68px;
   flex: none;
+  align-items: center;
+  justify-content: center;
   padding: 4px;
   border-radius: 10px;
+}
+/* ResumeCover 按 A4 比例自撑高度，42px 宽 ≈ 60px 高，正好填满衬底内容区 */
+.thumb-img {
+  width: 42px;
 }
 
 .info {
@@ -326,7 +333,7 @@ function goLogin() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 72px;
+  padding-top: 96px;
 }
 .empty-icon {
   display: flex;
