@@ -2,7 +2,7 @@ package com.abc.resume.resume.service.impl;
 
 import com.abc.resume.core.base.BaseService;
 import com.abc.resume.core.page.PageResult;
-import com.abc.resume.resume.domain.dto.UserResumeCreateDTO;
+import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 import com.abc.resume.resume.mapper.UserResumeMapper;
@@ -22,7 +22,7 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     }
 
     @Override
-    public UserResumeVO createResume(UserResumeCreateDTO dto) {
+    public UserResumeVO submitResume(UserResumeSubmitDTO dto) {
         return null;
     }
 }

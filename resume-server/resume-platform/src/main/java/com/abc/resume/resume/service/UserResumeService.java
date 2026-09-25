@@ -1,7 +1,7 @@
 package com.abc.resume.resume.service;
 
 import com.abc.resume.core.page.PageResult;
-import com.abc.resume.resume.domain.dto.UserResumeCreateDTO;
+import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 
@@ -11,5 +11,5 @@ import com.abc.resume.resume.domain.vo.UserResumeVO;
 public interface UserResumeService {
     PageResult getUserResumePage(UserResumePageDTO dto);
 
-    UserResumeVO createResume(UserResumeCreateDTO dto);
+    UserResumeVO submitResume(UserResumeSubmitDTO dto);
 }

@@ -1,9 +1,8 @@
 package com.abc.resume.api;
 
-import com.abc.resume.core.page.PageDTO;
 import com.abc.resume.core.page.PageResult;
 import com.abc.resume.core.result.ApiResult;
-import com.abc.resume.resume.domain.dto.UserResumeCreateDTO;
+import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 import com.abc.resume.resume.service.UserResumeService;
@@ -30,11 +29,12 @@ public class UserResumeController {
         return ApiResult.success(pageResult);
     }
 
-    @ApiOperation("创建简历")
-    @PostMapping("/create")
-    public ApiResult<UserResumeVO> createResume(@RequestBody UserResumeCreateDTO dto) {
-        UserResumeVO resumeVO = userResumeService.createResume(dto);
+    @ApiOperation("提交简历")
+    @PostMapping("/submit")
+    public ApiResult<UserResumeVO> createResume(@RequestBody UserResumeSubmitDTO dto) {
+        UserResumeVO resumeVO = userResumeService.submitResume(dto);
         return ApiResult.success(resumeVO);
     }
+
 
 }
