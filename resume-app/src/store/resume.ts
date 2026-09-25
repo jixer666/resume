@@ -51,11 +51,12 @@ function materialGroupOf(model: string): IMATERIALITEM[] {
 }
 
 /**
- * 造一个模块实例：皮肤取该模块的第一套（物料清单首项），
+ * 造一个模块实例：皮肤优先取模板指定的 `cptName`，没指定（或清单里找不到）时回退该模块首套皮肤；
  * 样式沿用皮肤默认值，数据取该模块的默认数据。
  */
-function createMaterialItem(model: string, layout = ''): IMATERIALITEM | null {
-  const variant = materialGroupOf(model)[0]
+function createMaterialItem(model: string, layout = '', cptName?: string): IMATERIALITEM | null {
+  const group = materialGroupOf(model)
+  const variant = (cptName ? group.find(one => one.cptName === cptName) : undefined) ?? group[0]
   if (!variant)
     return null
   return {
@@ -167,7 +168,7 @@ export const useResumeStore = defineStore(
     /**
      * 新建一份简历并设为当前编辑对象。
      *
-     * 传 templateId 时套用该模板的布局与全局样式，并把模板的左右栏配置落到模块上；
+     * 传 templateId 时套用该模板的布局、全局样式与模块皮肤，并把模板的左右栏配置落到模块上；
      * 不传就是出厂基线（经典单列）。
      *
      * 此时还没有 id，靠首次 saveCurrent 拿后端主键，所以不进 list ——
@@ -183,8 +184,9 @@ export const useResumeStore = defineStore(
         json.GLOBAL_STYLE = { ...json.GLOBAL_STYLE, ...template.style }
       }
       json.COMPONENTS = DEFAULT_MODELS
-        .map(model => createMaterialItem(model, layoutOf(model, template)))
+        .map(model => createMaterialItem(model, layoutOf(model, template), template?.variants?.[model]))
         .filter((item): item is IMATERIALITEM => !!item)
+
       if (template) {
         // 模板样式是全局样式的预设值，必须无条件扇出（传 keys），否则「刚好等于出厂默认」的那几项不会生效
         const keys = Object.keys(template.style) as (keyof IGlobalStyle)[]

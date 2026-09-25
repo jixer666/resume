@@ -2,7 +2,7 @@ import type IGlobalStyle from '@/interface/globalStyle'
 import RESUME_JSON from '@/schema/resume'
 
 /**
- * 简历模板 = 一份「全局样式 + 布局」预设。
+ * 简历模板 = 一份「全局样式 + 布局 + 模块皮肤」预设。
  *
  * 这里只存差异部分：套模板时把 style 合并进出厂 GLOBAL_STYLE 再扇出到各模块，
  * 所以模板不需要（也不应该）复制整份 RESUME_JSON，改基线时全部模板自动跟随。
@@ -18,6 +18,13 @@ export interface IResumeTemplate {
   layout: string
   /** 全局样式覆盖值，未写的字段沿用出厂默认 */
   style: Partial<IGlobalStyle>
+  /**
+   * 模块名 → 皮肤 cptName（如 `WORK_EXPERIENCE: 'WORK_EXPERIENCE_8'`）。
+   *
+   * 光靠 style 与 layout 无法让模板产生真正的差异，皮肤才是版式的分水岭：
+   * 未列出的模块沿用物料清单首套皮肤，所以只需要写出想换掉的那几个。
+   */
+  variants?: Partial<Record<string, string>>
   /** 双列布局下模块的左右栏归属，未列出的模块通栏 */
   columns?: { left?: string[], right?: string[] }
 }
@@ -44,54 +51,49 @@ export const TEMPLATES: IResumeTemplate[] = [
   {
     id: 'sidebar',
     name: '侧栏简历',
-    desc: '左侧色块承载基本信息与技能，右侧留给经历正文',
+    desc: '顶部通栏放标题与基本信息，左侧色块承载技能与特长，右侧留给经历正文',
     layout: 'leftRight',
     style: {
       themeColor: '#0b63ce',
-      leftWidth: '36%',
-      rightWidth: '64%',
+      leftWidth: '38%',
+      rightWidth: '62%',
       leftThemeColor: '#eef4ff',
       rightThemeColor: '#ffffff',
       secondTitleColor: '#23304a',
-      textFontColor: '#5b6b82',
       textFontWeight: 400,
+      // 双列后每栏只剩 300~490px，沿用物料自带的 40px 左右内边距会把正文挤窄，收到 20px
+      pLeftRight: '20px',
       modelMarginBottom: '32px',
+      // 刻意不写 textFontColor：它会无条件盖到每个模块的 textColor 上，而 RESUME_TITLE
+      // 的标题栏是「主题色底 + 白字」，被灰字盖住后基本看不见（对比度 1.05）。
     },
-    columns: { left: ['BASE_INFO', 'SKILL_SPECIALTIES', 'HOBBIES', 'SELF_EVALUATION'] },
-  },
-  {
-    id: 'minimal',
-    name: '极简留白',
-    desc: '大字号标题配大面积留白，干净利落，适合设计类岗位',
-    layout: 'classical',
-    style: {
-      themeColor: '#111827',
-      firstTitleFontSize: '22px',
-      secondTitleColor: '#111827',
-      textFontColor: '#4b5563',
-      secondTitleWeight: 600,
-      textFontWeight: 400,
-      pLeftRight: '18px',
-      modelMarginBottom: '52px',
+    // 左栏底色偏浅，左栏三件套统一换成「斜角标题 + 主题色竖线」的 _4 系列，和右侧正文拉开层次
+    variants: {
+      SKILL_SPECIALTIES: 'SKILL_SPECIALTIES_4',
+      HOBBIES: 'HOBBIES_4',
+      SELF_EVALUATION: 'SELF_EVALUATION_4',
     },
-  },
-  {
-    id: 'split',
-    name: '双栏分栏',
-    desc: '青绿点缀的左右双栏，信息密度更高，一页装下更多内容',
-    layout: 'leftRight',
-    style: {
-      themeColor: '#0f766e',
-      leftWidth: '38%',
-      rightWidth: '62%',
-      leftThemeColor: '#f0fdfa',
-      rightThemeColor: '#ffffff',
-      secondTitleColor: '#134e4a',
-      textFontColor: '#4b5563',
-      textFontWeight: 400,
-      modelMarginBottom: '30px',
+    /**
+     * 只把「窄栏友好」的三个模块放进左栏，其余全部显式归入右栏。
+     *
+     * BASE_INFO 与 RESUME_TITLE 刻意两栏都不列：它们要的宽度远超 300px 的左栏（光头像
+     * 118px + 50px 间距就吃掉大半），塞进左栏只会把姓名挤成一行四五个字。不列入任何一栏
+     * 时 layoutOf 返回空串，走 ResumeRender 的通栏分支，作为顶部名片带铺满整页宽。
+     * 反过来也要注意：该进右栏的模块一个都不能漏，漏掉的会掉进通栏、把左栏顶到页面最底部。
+     */
+    columns: {
+      left: ['SKILL_SPECIALTIES', 'HOBBIES', 'SELF_EVALUATION'],
+      right: [
+        'JOB_INTENTION',
+        'EDU_BACKGROUND',
+        'CAMPUS_EXPERIENCE',
+        'INTERNSHIP_EXPERIENCE',
+        'WORK_EXPERIENCE',
+        'PROJECT_EXPERIENCE',
+        'AWARDS',
+        'WORKS_DISPLAY',
+      ],
     },
-    columns: { left: ['BASE_INFO', 'SKILL_SPECIALTIES', 'AWARDS', 'HOBBIES'] },
   },
   {
     id: 'timeline',
@@ -107,52 +109,19 @@ export const TEMPLATES: IResumeTemplate[] = [
       textFontWeight: 400,
       modelMarginBottom: '42px',
     },
-  },
-  {
-    id: 'banner',
-    name: '横幅头图',
-    desc: '超大标题配红色点缀，视觉冲击强，适合运营与市场岗位',
-    layout: 'classical',
-    style: {
-      themeColor: '#dc2626',
-      firstTitleFontSize: '26px',
-      secondTitleFontSize: '15px',
-      secondTitleColor: '#7f1d1d',
-      textFontColor: '#5b6b82',
-      secondTitleWeight: 700,
-      textFontWeight: 400,
-      modelMarginBottom: '44px',
-    },
-  },
-  {
-    id: 'compact',
-    name: '紧凑列表',
-    desc: '小字号高密度排布，经历多也能压在一页之内',
-    layout: 'classical',
-    style: {
-      themeColor: '#374151',
-      secondTitleFontSize: '13px',
-      textFontSize: '12px',
-      secondTitleColor: '#1f2937',
-      textFontColor: '#4b5563',
-      secondTitleWeight: 700,
-      textFontWeight: 400,
-      modelMarginBottom: '24px',
-    },
-  },
-  {
-    id: 'formal',
-    name: '正式文书',
-    desc: '靛蓝加粗标题、行距舒展，适合体制内与国企投递',
-    layout: 'classical',
-    style: {
-      themeColor: '#1e3a8a',
-      firstTitleFontSize: '21px',
-      secondTitleColor: '#1e3a8a',
-      textFontColor: '#374151',
-      secondTitleWeight: 700,
-      textFontWeight: 400,
-      modelMarginBottom: '38px',
+    // 全部换成 _8 时间轴家族（主题色竖线 + 圆点时间轴），这是模板名「时间轴」的来源
+    variants: {
+      JOB_INTENTION: 'JOB_INTENTION_8',
+      EDU_BACKGROUND: 'EDU_BACKGROUND_8',
+      SKILL_SPECIALTIES: 'SKILL_SPECIALTIES_10',
+      CAMPUS_EXPERIENCE: 'CAMPUS_EXPERIENCE_8',
+      INTERNSHIP_EXPERIENCE: 'INTERNSHIP_EXPERIENCE_8',
+      WORK_EXPERIENCE: 'WORK_EXPERIENCE_8',
+      PROJECT_EXPERIENCE: 'PROJECT_EXPERIENCE_8',
+      AWARDS: 'AWARDS_8',
+      HOBBIES: 'HOBBIES_8',
+      SELF_EVALUATION: 'SELF_EVALUATION_8',
+      WORKS_DISPLAY: 'WORKS_DISPLAY_8',
     },
   },
 ]
