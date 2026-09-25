@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
 public class UserResume extends BaseEntity {
 
     /** 用户ID */
-    private Long uid;
+    private String uid;
 
     /** 简历名称 */
     private String title;

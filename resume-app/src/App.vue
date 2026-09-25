@@ -48,5 +48,16 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-
+/**
+ * 全局样式（编译进 app.wxss）。
+ *
+ * 小程序的 `<editor>`（富文本编辑器）内部是 Quill 结构，内容区/占位符分别是
+ * `.ql-editor` / `.ql-editor.ql-blank::before`。这些节点不在组件模板里，
+ * scoped 样式带上 data-v 属性后命中不了，所以只能在全局样式里覆盖。
+ * 字号与内边距对齐编辑页输入框（`.input` / `.textarea`，见 style/editor-form.scss）。
+ */
+.ql-container .ql-editor {
+  padding: 10px 12px;
+  font-size: 14px;
+}
 </style>

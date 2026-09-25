@@ -231,15 +231,15 @@ function clear() {
       <template v-if="hasDateRange">
         <text class="label">时间</text>
         <view class="date-row">
-          <picker mode="date" fields="month" :value="form.dateStart" @change="onStartDate">
-            <view class="picker picker--half">
+          <picker class="date-picker" mode="date" fields="month" :value="form.dateStart" @change="onStartDate">
+            <view class="picker">
               <text :class="{ placeholder: !form.dateStart }">{{ form.dateStart || '开始时间' }}</text>
               <text class="arrow">›</text>
             </view>
           </picker>
           <text class="date-sep">至</text>
-          <picker mode="date" fields="month" :value="form.dateEnd" :disabled="form.toNow" @change="onEndDate">
-            <view class="picker picker--half">
+          <picker class="date-picker" mode="date" fields="month" :value="form.dateEnd" :disabled="form.toNow" @change="onEndDate">
+            <view class="picker">
               <text :class="{ placeholder: !form.dateEnd }">{{ form.toNow ? '至今' : (form.dateEnd || '结束时间') }}</text>
               <text class="arrow">›</text>
             </view>
@@ -339,8 +339,13 @@ function clear() {
   align-items: center;
 }
 
-.picker--half {
+/*
+  flex 必须加在 `<picker>` 上：它才是 .date-row 的 flex item，
+  加在内层 view 上（原 picker--half 的写法）不参与主轴分配，两个 picker 只会缩成文字宽。
+*/
+.date-picker {
   flex: 1;
+  min-width: 0;
 }
 
 .date-sep {

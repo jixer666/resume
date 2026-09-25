@@ -1,16 +1,10 @@
-package com.abc.resume.resume.domain.entity;
+package com.abc.resume.resume.domain.vo;
 
-import com.abc.resume.core.base.BaseEntity;
 import com.abc.resume.resume.domain.entity.template.ResumeTemplateDetail;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-/**
- * 简历模板
- */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class ResumeTemplate extends BaseEntity {
+public class ResumeTemplateVO {
 
     /** 模板编号 */
     private String code;
@@ -27,13 +21,12 @@ public class ResumeTemplate extends BaseEntity {
     /** 分类 */
     private Integer category;
 
-    /** 模板详情 */
-    private ResumeTemplateDetail templateDetail;
-
     /** 来源（1-官方预设 2-用户投稿） */
     private Integer source;
 
     /** 用户ID */
     private Long uid;
 
+    /** 模板明细 */
+    private ResumeTemplateDetail templateDetail;
 }

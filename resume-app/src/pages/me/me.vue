@@ -154,13 +154,7 @@ function goLogin() {
             </view>
           </view>
           <view class="info">
-            <view class="name-row">
-              <text class="name">{{ item.name || '未命名简历' }}</text>
-              <text class="tag" :style="{ background: themeSoft, color: themeColor }">
-                {{ badgeText(item.layout) }}
-              </text>
-            </view>
-            <text class="sub">上次编辑的简历</text>
+            <text class="name">{{ item.name || '未命名简历' }}</text>
           </view>
         </view>
         <view class="card-foot">

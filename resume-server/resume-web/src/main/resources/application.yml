@@ -13,6 +13,7 @@ system:
     - /system/tenant/info
     - /system/spm/track
     - /system/publicKey
+    - /resume/template/**
     - /dms/index/book/button/**
     - /dms/doc/info/**
     - /dms/doc/info/s/**
@@ -111,6 +112,7 @@ spring:
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml,classpath*:mapper/**/*Mapper.xml
   typeAliasesPackage: com.abc.resume.**.domain.entity
+  type-handlers-package: com.abc.resume.resume.handler
   configuration:
     map-underscore-to-camel-case: true
 

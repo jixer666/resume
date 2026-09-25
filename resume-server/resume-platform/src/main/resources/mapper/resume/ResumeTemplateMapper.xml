@@ -11,7 +11,7 @@
         <result property="description"    column="description"    />
         <result property="cover"    column="cover"    />
         <result property="category"    column="category"    />
-        <result property="templateJson"    column="template_json"    />
+        <result property="templateDetail"    column="template_detail"    typeHandler="com.abc.resume.resume.domain.entity.template.ResumeTemplateDetailTypeHandler"    />
         <result property="source"    column="source"    />
         <result property="uid"    column="uid"    />
         <result property="createTime"    column="create_time"    />
@@ -22,11 +22,18 @@
     </resultMap>
 
     <sql id="selectResumeTemplateVo">
-        select id, code, name, description, cover, category, template_json, source, uid, create_time, update_time, status, ver, is_delete from resume_template
+        select id, code, name, description, cover, category, template_detail, source, uid, create_time, update_time, status, ver, is_delete from resume_template
     </sql>
 
     <select id="selectResumeTemplatePage" resultMap="ResumeTemplateResult">
-        select code, name, cover from resume_template
+        select code, name, cover, template_detail from resume_template
+        where is_delete != id and status = 1
+        order by id asc
+    </select>
+
+    <select id="selectResumeTemplateByCode" resultMap="ResumeTemplateResult">
+        <include refid="selectResumeTemplateVo"/>
+        where code = #{code} and is_delete != id and status = 1
     </select>
 
 </mapper>

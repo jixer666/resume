@@ -9,7 +9,7 @@ import { deleteResume, getResumeDetail, getResumeList, saveResume } from '@/api/
 import { MATERIAL_JSON } from '@/schema/materialList'
 import MODEL_DATA_JSON from '@/schema/modelData'
 import RESUME_JSON from '@/schema/resume'
-import { getTemplate } from '@/schema/templates'
+import { useTemplateStore } from '@/store/template'
 import { getUuid } from '@/utils/common'
 
 /** 新建简历的默认名称，用户可在编辑页改成任意名字 */
@@ -175,7 +175,7 @@ export const useResumeStore = defineStore(
      * 否则列表里会多出一条点了就 404 的幽灵记录。
      */
     function createResume(templateId?: string): IRESUMEJSON {
-      const template = templateId ? getTemplate(templateId) : undefined
+      const template = templateId ? useTemplateStore().get(templateId) : undefined
       const json = clone(RESUME_JSON) as IRESUMEJSON
       json.ID = ''
       json.NAME = DEFAULT_RESUME_NAME

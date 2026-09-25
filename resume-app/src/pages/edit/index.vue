@@ -3,6 +3,7 @@ import type { IMATERIALITEM } from '@/interface/material'
 import MODEL_DATA_JSON from '@/schema/modelData'
 import { MATERIAL_JSON } from '@/schema/materialList'
 import { DEFAULT_RESUME_NAME, useResumeStore } from '@/store/resume'
+import { useTemplateStore } from '@/store/template'
 import { formatDate } from '@/utils/common'
 
 /**
@@ -59,6 +60,7 @@ const ENTRY_SECONDARY: Record<string, string[]> = {
 }
 
 const store = useResumeStore()
+const templateStore = useTemplateStore()
 const resume = computed(() => store.current)
 const components = computed(() => resume.value?.COMPONENTS || [])
 
@@ -97,6 +99,9 @@ onLoad(async (query) => {
   // 首页 / 我的页「新建简历」会带 new=1，否则会被下面的「续编辑最近一份」劫持
   const isNew = query?.new === '1' || !!templateId
   try {
+    // 模板预设来自后端，套模板前先确保模板列表已加载
+    if (templateId)
+      await templateStore.fetchList()
     if (!isNew && id && await store.loadResume(id))
       return
     // 没有指定 id 时优先续编辑最近一份，避免每次进页面都新建出一堆空简历

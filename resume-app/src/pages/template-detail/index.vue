@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { IResumeTemplate } from '@/schema/templates'
-import { getTemplate, lightenColor, templateSideColor, templateTheme } from '@/schema/templates'
+import { lightenColor, templateSideColor, templateTheme } from '@/schema/templates'
+import { useTemplateStore } from '@/store/template'
 import { useTokenStore } from '@/store/token'
 import { toLoginPage } from '@/utils/toLoginPage'
 
@@ -9,14 +9,16 @@ import { toLoginPage } from '@/utils/toLoginPage'
  *
  * 首页卡片直接生成简历的话，用户挨个点一遍就会攒出一堆空简历，所以中间加一层确认页。
  * 排版对标 resume-app-temp 的同名页面：主题色渐变头部 + 白色相框预览 + 信息卡/参数卡 +
- * 固定底栏「使用模板」。整页按一屏设计，不出现滚动条。
+ * 底栏「使用模板」。整页按一屏设计：`height: 100vh` 的 flex 列，主体吃掉剩余高度，
+ * 底栏在文档流末尾常驻，页面恒等于一屏，不出现滚动条。
  */
 defineOptions({ name: 'TemplateDetail' })
 definePage({})
 
 const tokenStore = useTokenStore()
+const templateStore = useTemplateStore()
 /** 当前模板，id 非法时为 null（据此渲染兜底态） */
-const tpl = ref<IResumeTemplate | null>(null)
+const tpl = computed(() => templateStore.current)
 
 const theme = computed(() => (tpl.value ? templateTheme(tpl.value) : '#2563eb'))
 const side = computed(() => (tpl.value ? templateSideColor(tpl.value) : '#eef4ff'))
@@ -38,16 +40,19 @@ const metaList = computed(() => {
   ]
 })
 
-onLoad((query) => {
+onLoad(async (query) => {
   const id = query?.id ? String(query.id) : ''
-  const found = getTemplate(id)
-  if (!found)
-    return
-  tpl.value = found
+  await templateStore.fetchDetail(id)
+  syncNavigationBar()
 })
 
 /** 导航栏跟着模板主题色走，滚到顶部时和 hero 连成一片 */
 onReady(() => {
+  syncNavigationBar()
+})
+
+/** 详情拿到后同步导航栏；fetch 与 onReady 谁先谁后都由它兜住 */
+function syncNavigationBar() {
   if (!tpl.value)
     return
   uni.setNavigationBarColor({
@@ -55,7 +60,7 @@ onReady(() => {
     backgroundColor: theme.value,
   })
   uni.setNavigationBarTitle({ title: tpl.value.name })
-})
+}
 
 /** 套用该模板：未登录先去登录，回来后仍停在详情页，再点一次即可 */
 function useTemplate() {
@@ -65,7 +70,7 @@ function useTemplate() {
     toLoginPage()
     return
   }
-  uni.navigateTo({ url: `/pages/edit/index?new=1&template=${tpl.value.id}` })
+  uni.navigateTo({ url: `/pages/edit/index?new=1&template=${tpl.value.code}` })
 }
 </script>
 
@@ -97,7 +102,7 @@ function useTemplate() {
           </view>
         </view>
         <text class="title">{{ tpl.name }}</text>
-        <text class="desc">{{ tpl.desc }}</text>
+        <text class="desc">{{ tpl.description }}</text>
       </view>
 
       <view class="meta-card">
@@ -128,14 +133,19 @@ function useTemplate() {
 
 <style lang="scss" scoped>
 .page {
-  min-height: 100vh;
-  /* 恰好等于固定底栏高度（12 + 48 + 12 + 安全区），内容少时整页不出现滚动条 */
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  /* 一屏定高：hero + 自适应主体 + 文档流底栏，三块加起来恒等于视口高度，页面不产生滚动条 */
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  overflow: hidden;
   background-color: #f4f4f4;
 }
 
 .hero {
+  /* glow 是绝对定位，hero 必须定位，否则会以页面为参照溢出到屏幕外（横向滚动条的来源） */
+  position: relative;
   display: flex;
+  flex: none;
   overflow: hidden;
   justify-content: center;
   /* 20 + 60 收紧上下留白，配 190px 相框保证小屏（iPhone 8 级别）也一屏放下 */
@@ -178,11 +188,16 @@ function useTemplate() {
 }
 
 .body {
+  /* 撑满 hero 与底栏之间的剩余高度：屏幕富余时补足空白，屏幕不够时先压缩自身 */
+  min-height: 0;
+  flex: 1;
   margin-top: -50px;
   padding: 0 16px;
 }
 
 .info-card {
+  /* hero 是定位元素、层级更高，卡片必须同为定位元素才能压在渐变头部之上（-50px 叠压关系） */
+  position: relative;
   padding: 20px;
   border-radius: 8px;
   background-color: #fff;
@@ -267,6 +282,7 @@ function useTemplate() {
 
 .empty {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   padding-top: 96px;
@@ -285,11 +301,9 @@ function useTemplate() {
 }
 
 .bottom {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  /* 参与文档流的底栏（不再 fixed）：高度由 flex 布局直接算进 100vh，不会与页面高度重复累加 */
   box-sizing: border-box;
+  flex: none;
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
   background-color: #fff;
