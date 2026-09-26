@@ -3,24 +3,11 @@
   <div class="skill-specialties u-tag-div">
     <!-- 标题 -->
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 技能特长 -->
+    <!-- 技能描述：整段富文本 -->
     <ul class="u-tag-ul">
-      <!-- 左边部分 -->
-      <div class="left u-tag-div">
-        <template v-for="(item, index) in modelData.LIST" :key="index">
-          <li v-if="index % 2 === 0" class="u-tag-li">
-            <RichTextView :html="item.introduce" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-          </li>
-        </template>
-      </div>
-      <!-- 右边部分 -->
-      <div class="right u-tag-div">
-        <template v-for="(item, index) in modelData.LIST" :key="index">
-          <li v-if="index % 2 !== 0" class="u-tag-li">
-            <RichTextView :html="item.introduce" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-          </li>
-        </template>
-      </div>
+      <li class="u-tag-li">
+        <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
+      </li>
     </ul>
   </div>
 </template>
@@ -52,16 +39,16 @@ defineProps<{
     .right {
       flex: 40%;
       margin-top: 25px;
-      .u-tag-li {
-        letter-spacing: 2px;
-        font-size: v-bind('modelStyle.textFontSize');
-        color: v-bind('modelStyle.textColor');
-        font-weight: v-bind('modelStyle.textFontWeight');
-        line-height: 1.5;
-        &:not(:last-child) {
-          margin-bottom: 10px;
-        }
-      }
+    }
+    .u-tag-li {
+      flex: 100%;
+      margin-top: 25px;
+      list-style: none;
+      letter-spacing: 2px;
+      font-size: v-bind('modelStyle.textFontSize');
+      color: v-bind('modelStyle.textColor');
+      font-weight: v-bind('modelStyle.textFontWeight');
+      line-height: 1.5;
     }
     .left {
       padding: 0 20px;

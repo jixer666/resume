@@ -147,9 +147,6 @@ import WorksDisplay8 from '@/material/WorksDisplay/WorksDisplay8/WorksDisplay.vu
 import WorksDisplay9 from '@/material/WorksDisplay/WorksDisplay9/WorksDisplay.vue'
 import WorksDisplay10 from '@/material/WorksDisplay/WorksDisplay10/WorksDisplay.vue'
 import WorksDisplay11 from '@/material/WorksDisplay/WorksDisplay11/WorksDisplay.vue'
-import Custom1 from '@/material/Custom/Custom1/NameAbstract.vue'
-import Custom2 from '@/material/Custom/Custom2/ResumeTitleWord.vue'
-import Custom3 from '@/material/Custom/Custom3/NameAbstractAvatar.vue'
 
 defineOptions({ name: 'CompatRenderer' })
 
@@ -302,9 +299,6 @@ defineProps<{
   <WorksDisplay9 v-else-if="item.cptName === 'WORKS_DISPLAY_9'" :model-data="item.data" :model-style="item.style" />
   <WorksDisplay10 v-else-if="item.cptName === 'WORKS_DISPLAY_10'" :model-data="item.data" :model-style="item.style" />
   <WorksDisplay11 v-else-if="item.cptName === 'WORKS_DISPLAY_11'" :model-data="item.data" :model-style="item.style" />
-  <Custom1 v-else-if="item.cptName === 'CUSTOM_1'" :model-data="item.data" :model-style="item.style" />
-  <Custom2 v-else-if="item.cptName === 'CUSTOM_2'" :model-data="item.data" :model-style="item.style" />
-  <Custom3 v-else-if="item.cptName === 'CUSTOM_3'" :model-data="item.data" :model-style="item.style" />
   <view v-else class="compat-fallback">
     <text class="compat-fallback__text">
       {{ item.cptTitle || item.cptName }} 暂未适配小程序

@@ -1,5 +1,6 @@
 package com.abc.resume.resume.domain.dto;
 
+import com.abc.resume.resume.domain.entity.resume.UserResumeDetail;
 import lombok.Data;
 
 /**
@@ -29,16 +30,13 @@ public class UserResumeSubmitDTO {
     /** 主键：更新 / 复制 / 删除时必填，新增时为空 */
     private Long id;
 
-    /** 简历名称 */
-    private String name;
-
-    /** 布局：leftRight 双列，其余单列 */
-    private String layout;
-
     /** 缩略图地址，可不传 */
     private String thumbnail;
 
-    /** 整份简历JSON，前端直接传对象 */
-    private Object resumeJson;
+    /** 模板编码 */
+    private String templateCode;
+
+    /** 整份简历详情 */
+    private UserResumeDetail resumeDetail;
 
 }

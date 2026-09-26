@@ -8,16 +8,11 @@
         {{ modelData.title }}
       </h1>
     </div>
-    <!-- 技能特长 -->
+    <!-- 技能描述：整段富文本 -->
     <ul class="u-tag-ul">
-      <template v-for="item in modelData.LIST" :key="item.skillName">
-        <li class="u-tag-li">
-          <p class="u-tag-p">
-            {{ item.skillName }}
-          </p>
-          <skill-slider :proficiency="item.proficiency" color="#4487c6" />
-        </li>
-      </template>
+      <li class="u-tag-li">
+        <RichTextView :html="modelData.content" :model-style="modelStyle" />
+      </li>
     </ul>
   </div>
 </template>
@@ -63,15 +58,11 @@ defineProps<{
     width: 100%;
     flex-direction: column;
     .u-tag-li {
-      height: 44px;
       margin-bottom: 20px;
       list-style: none;
-      .u-tag-p {
-        padding: 0 0 6px 4px;
-        color: v-bind('modelStyle.textColor');
-        font-size: v-bind('modelStyle.textFontSize');
-        font-weight: v-bind('modelStyle.textFontWeight');
-      }
+      color: v-bind('modelStyle.textColor');
+      font-size: v-bind('modelStyle.textFontSize');
+      font-weight: v-bind('modelStyle.textFontWeight');
     }
   }
 }

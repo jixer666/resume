@@ -102,11 +102,8 @@ interface ISKILLSPECIALTIES {
   model: string
   show: boolean
   title: string
-  LIST: Array<{
-    skillName: string // 技能名称
-    proficiency: string // 熟练度
-    introduce: string // 介绍
-  }>
+  /** 整段技能描述，存富文本 HTML */
+  content: string
   [propNams: string]: any
 }
 
@@ -244,41 +241,6 @@ interface IWORKSDISPLAY {
   [propNams: string]: any
 }
 
-// 自定义的任意模块
-interface ICUSTOM1 {
-  iconfont: string
-  model: string
-  show: boolean
-  title: string
-  name: string
-  abstract: string
-  [propNams: string]: any
-}
-
-// 自定义任意模块2
-interface ICUSTOM2 {
-  iconfont: string
-  model: string
-  show: boolean
-  title: string
-  name: string
-  abstract: string
-  [propNams: string]: any
-}
-
-// 自定义任意模块3
-interface ICUSTOM3 {
-  iconfont: string
-  model: string
-  show: boolean
-  title: string
-  name: string
-  abstract: string
-  avatar: string
-  avatarShape: string
-  [propNams: string]: any
-}
-
 // 全局样式主题
 interface IGlobalStyle {
   themeColor: string // 主题色
@@ -312,7 +274,6 @@ interface IResumeJson {
     IHOBBIES,
     ISELFEVALUATION,
     IWORKSDISPLAY,
-    ICUSTOM1,
   ]
   GLOBAL_STYLE: IGlobalStyle
 }
@@ -332,7 +293,6 @@ type TModelList = Array<
     IHOBBIES,
     ISELFEVALUATION,
     IWORKSDISPLAY,
-    ICUSTOM1,
   ]
 >
 
@@ -340,9 +300,6 @@ export {
   IAWARDS,
   IBASEINFO,
   ICAMPUSEXPERIENCE,
-  ICUSTOM1,
-  ICUSTOM2,
-  ICUSTOM3,
   IEDUBACKGROUND,
   IGlobalStyle,
   IHOBBIES,

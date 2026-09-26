@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { IMATERIALITEM } from '@/interface/material'
-import MODEL_DATA_JSON from '@/schema/modelData'
 import { MATERIAL_JSON } from '@/schema/materialList'
+import MODEL_DATA_JSON from '@/schema/modelData'
 import { DEFAULT_RESUME_NAME, useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 import { formatDate } from '@/utils/common'
@@ -29,12 +29,11 @@ const LIST_MODELS: string[] = [
   'PROJECT_EXPERIENCE',
   'INTERNSHIP_EXPERIENCE',
   'CAMPUS_EXPERIENCE',
-  'SKILL_SPECIALTIES',
   'AWARDS',
   'WORKS_DISPLAY',
 ]
 /** 文本类模块：一整段富文本，进 text 子页编辑 */
-const TEXT_MODELS: string[] = ['SELF_EVALUATION', 'HOBBIES']
+const TEXT_MODELS: string[] = ['SELF_EVALUATION', 'HOBBIES', 'SKILL_SPECIALTIES']
 
 /** 条目卡片第一行取哪个字段（字段名对齐 resume-design 的数据模型） */
 const ENTRY_PRIMARY: Record<string, string> = {
@@ -43,7 +42,6 @@ const ENTRY_PRIMARY: Record<string, string> = {
   PROJECT_EXPERIENCE: 'projectName',
   INTERNSHIP_EXPERIENCE: 'companyName',
   CAMPUS_EXPERIENCE: 'campusBriefly',
-  SKILL_SPECIALTIES: 'skillName',
   AWARDS: 'awardsName',
   WORKS_DISPLAY: 'worksName',
 }
@@ -54,7 +52,6 @@ const ENTRY_SECONDARY: Record<string, string[]> = {
   PROJECT_EXPERIENCE: ['posts', 'date'],
   INTERNSHIP_EXPERIENCE: ['posts', 'date'],
   CAMPUS_EXPERIENCE: ['campusDuty', 'date'],
-  SKILL_SPECIALTIES: ['proficiency'],
   AWARDS: ['awardsGrade', 'date'],
   WORKS_DISPLAY: ['worksLink'],
 }
@@ -75,7 +72,7 @@ const settingKeyId = ref('')
 /** 名称弹层的草稿，确认后才写回简历 */
 const nameDraft = ref('')
 
-/** 全部可新增的模块（按物料清单去重，自定义模块的 3 套皮肤各算一个） */
+/** 全部可新增的模块（按物料清单去重） */
 const allModels = computed(() => {
   const models: string[] = []
   Object.values(MATERIAL_JSON).forEach((list) => {
@@ -91,6 +88,15 @@ const addableModels = computed(() => {
   const used = components.value.map(one => one.model)
   return allModels.value.filter(model => !used.includes(model))
 })
+
+/**
+ * onLoad 的异步初始化是否已完成。
+ *
+ * onLoad 里有 await（拉模板列表 / 载简历），而首次 onShow 正好落在 await 挂起期间，
+ * 那时 current 还是上一份草稿：这次保存既漏掉了刚新建的简历（第一次点「使用模板」不落库），
+ * 又会把上次丢弃的草稿存成一条新记录。所以初始化完成前一律不自动保存。
+ */
+const inited = ref(false)
 
 onLoad(async (query) => {
   const id = query?.id ? String(query.id) : ''
@@ -115,12 +121,19 @@ onLoad(async (query) => {
   catch (error) {
     console.error('载入简历失败:', error)
   }
+  finally {
+    // 提前 return 的分支（载入已有简历）也要放行 onShow 的自动保存
+    inited.value = true
+  }
   store.createResume(templateId || undefined)
+  // 新建的简历靠首次落库拿后端主键：这里补一次，不能等下一次 onShow
+  autoSave()
 })
 
 onShow(() => {
-  // 子页改的是同一份 JSON，返回本页时统一落库
-  autoSave()
+  // 子页改的是同一份 JSON，返回本页时统一落库；onLoad 没跑完时跳过（见 inited）
+  if (inited.value)
+    autoSave()
 })
 
 /**

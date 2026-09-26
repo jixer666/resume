@@ -7,9 +7,7 @@
     <resultMap type="com.abc.resume.resume.domain.entity.UserResume" id="UserResumeResult">
         <result property="id"    column="id"    />
         <result property="uid"    column="uid"    />
-        <result property="title"    column="title"    />
-        <result property="layout"    column="layout"    />
-        <result property="resumeJson"    column="resume_json"    />
+        <result property="resumeDetail"    column="resume_detail"    typeHandler="com.abc.resume.resume.domain.entity.resume.UserResumeDetailTypeHandler"    />
         <result property="thumbnail"    column="thumbnail"    />
         <result property="templateCode"    column="template_code"    />
         <result property="createTime"    column="create_time"    />
@@ -20,7 +18,7 @@
     </resultMap>
 
     <sql id="selectUserResumeVo">
-        select id, uid, title, layout, resume_json, thumbnail, template_code, create_time, status, update_time, ver, is_delete from user_resume
+        select id, uid, resume_detail, thumbnail, template_code, create_time, status, update_time, ver, is_delete from user_resume
     </sql>
 
     <select id="selectUserResumePage" resultMap="UserResumeResult">
@@ -35,15 +33,13 @@
     </select>
 
     <insert id="insertUserResume" useGeneratedKeys="true" keyProperty="id">
-        insert into user_resume (uid, title, layout, resume_json, thumbnail, template_code, create_time, status, update_time, ver, is_delete)
-        values (#{uid}, #{title}, #{layout}, #{resumeJson}, #{thumbnail}, #{templateCode}, #{createTime}, #{status}, #{updateTime}, #{ver}, #{isDelete})
+        insert into user_resume (uid, resume_detail, thumbnail, template_code, create_time, status, update_time, ver, is_delete)
+        values (#{uid}, #{resumeDetail, typeHandler=com.abc.resume.resume.domain.entity.resume.UserResumeDetailTypeHandler}, #{thumbnail}, #{templateCode}, #{createTime}, #{status}, #{updateTime}, #{ver}, #{isDelete})
     </insert>
 
     <update id="updateUserResume">
         update user_resume
-        set title = #{title},
-            layout = #{layout},
-            resume_json = #{resumeJson},
+        set resume_detail = #{resumeDetail, typeHandler=com.abc.resume.resume.domain.entity.resume.UserResumeDetailTypeHandler},
             thumbnail = #{thumbnail},
             template_code = #{templateCode},
             update_time = #{updateTime},

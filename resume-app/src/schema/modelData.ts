@@ -12,16 +12,16 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     model: 'BASE_INFO',
     show: true,
     title: '基本资料',
-    name: '猫步简历',
+    name: '小明',
     age: 25,
     avatarShape: '', // 头像形状
-    address: '所在地区', // 所在地址
+    address: '四川成都', // 所在地址
     avatar: 'https://maobucv.com:9000/resume/avatar/file-1663290281512.jpg', // 头像地址
     workService: 3, // 工作年限
     phoneNumber: '028-1234321', // 联系电话
     email: '12322233@qq.com', // 邮箱
-    abstract: '一句话简介，尽量不要太长', // 简介
-    degree: '学历',
+    abstract: '', // 简介
+    degree: '本科',
     isShow: {
       age: true,
       address: true, // 所在地址
@@ -38,11 +38,11 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     model: 'JOB_INTENTION',
     show: true,
     title: '求职意向',
-    intendedPositions: '求职岗位名称', // 意向岗位
-    intendedCity: '城市', // 意向城市
+    intendedPositions: '工程师', // 意向岗位
+    intendedCity: '成都', // 意向城市
     expectSalary: '8000-10000', // 期望薪资
     jobStatus: '随时入职', // 求职状态
-    jobSearchType: '求职类型',
+    jobSearchType: '全职',
     isShow: {
       intendedPositions: true,
       intendedCity: true,
@@ -58,18 +58,11 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     title: '教育背景',
     LIST: [
       {
-        date: ['2015-5', '2019-6'],
-        schoolName: '学校名称', // 学校名称
-        specialized: '专业名称', // 专业
-        degree: '学历', // 学历
-        majorCourse: '主修的一些专业课程等等', // 主修课程
-      },
-      {
-        date: ['2015-5', '2019-6'],
-        schoolName: '学校名称', // 学校名称
-        specialized: '专业名称', // 专业
-        degree: '学历', // 学历
-        majorCourse: '主修的一些专业课程等等', // 主修课程
+        date: ['2021-9', '2025-6'],
+        schoolName: '四川大学', // 学校名称
+        specialized: '软件工程', // 专业
+        degree: '本科', // 学历
+        majorCourse: 'Java、数据库、前端、后端、移动开发、测试、项目管理', // 主修课程
       },
     ],
     isShow: {
@@ -84,29 +77,9 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     iconfont: 'icon-zhuanyezhishijineng',
     model: 'SKILL_SPECIALTIES',
     show: true,
-    title: '技能特长',
-    LIST: [
-      {
-        skillName: 'PPT', // 技能名称
-        proficiency: '了解', // 熟练度
-        introduce: '简要概述对该项技能的掌握及运用程度等等', // 介绍
-      },
-      {
-        skillName: 'EXCEL', // 技能名称
-        proficiency: '一般', // 熟练度
-        introduce: '简要概述对该项技能的掌握及运用程度等等', // 介绍
-      },
-      {
-        skillName: 'Word', // 技能名称
-        proficiency: '熟悉', // 熟练度
-        introduce: '简要概述对该项技能的掌握及运用程度等等', // 介绍
-      },
-      {
-        skillName: 'JavaScript', // 技能名称
-        proficiency: '精通', // 熟练度
-        introduce: '简要概述对该项技能的掌握及运用程度等等', // 介绍
-      },
-    ],
+    title: '专业技能',
+    // 整段富文本，用户自由输入技能描述
+    content: '',
   },
   CAMPUS_EXPERIENCE: {
     iconfont: 'icon-jiatimianban_timu',
@@ -116,14 +89,8 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     LIST: [
       {
         date: ['2021-9', '2022-10'], // 经历时间
-        campusBriefly: '经历简要，如社团名称',
-        campusDuty: '主要职责',
-        campusContent: '简要概述经历内容或者工作内容等等',
-      },
-      {
-        date: ['2021-9', '2022-10'], // 经历时间
-        campusBriefly: '经历简要，如社团名称',
-        campusDuty: '主要职责',
+        campusBriefly: '计算机技术协会',
+        campusDuty: '部长',
         campusContent: '简要概述经历内容或者工作内容等等',
       },
     ],
@@ -142,15 +109,9 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     LIST: [
       {
         date: ['2021-9', '2022-10'], // 实习时间
-        companyName: '公司名称', // 公司名称
-        posts: '所担任岗位', // 职位
+        companyName: 'XXX有限公司', // 公司名称
+        posts: 'XXX实习生', // 职位
         jobContent: [
-          {
-            content: '简要概述在岗时的工作内容',
-          },
-          {
-            content: '简要概述在岗时的工作内容',
-          },
           {
             content: '简要概述在岗时的工作内容',
           },
@@ -172,8 +133,8 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     LIST: [
       {
         date: ['2021-9', '2022-10'], // 工作时间
-        companyName: '公司名称', // 公司名称
-        posts: '所担任岗位', // 职位
+        companyName: 'XXX公司', // 公司名称
+        posts: 'XXX工程师', // 职位
         jobContent: [
           {
             content: '简要概述在岗时的工作内容',
@@ -195,8 +156,8 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     LIST: [
       {
         date: ['2021-9', '2022-10'], // 项目时间
-        projectName: '项目名称', // 项目名称
-        posts: '所担任项目角色', // 项目职责
+        projectName: '苍穹外卖', // 项目名称
+        posts: 'XXX开发', // 项目职责
         projectContent: [
           {
             content: '简要介绍该项目以及你在项目内的主要工作内容',
@@ -218,8 +179,8 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     LIST: [
       {
         date: '2021-9', // 获奖时间
-        awardsName: '奖项名称',
-        awardsGrade: '获奖等级',
+        awardsName: 'ACM',
+        awardsGrade: '金牌',
       },
     ],
     isShow: {
@@ -261,45 +222,6 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
         worksIntroduce: '简要介绍该作品是什么，解决了什么问题等等',
       },
     ],
-  },
-  CUSTOM_1: {
-    iconfont: 'icon-jibenziliao',
-    model: 'CUSTOM_1',
-    show: true,
-    title: '姓名简介',
-    name: '猫步简历',
-    abstract: '一句话介绍自己，不宜过长',
-    isShow: {
-      abstract: true,
-      name: true,
-    },
-  },
-  CUSTOM_2: {
-    iconfont: 'icon-jibenziliao',
-    model: 'CUSTOM_2',
-    show: true,
-    title: '简历标题',
-    name: '个人简历',
-    abstract: '给我一个机会，我必全力以赴！',
-    isShow: {
-      abstract: true,
-      name: true,
-    },
-  },
-  CUSTOM_3: {
-    iconfont: 'icon-jibenziliao',
-    model: 'CUSTOM_3',
-    show: true,
-    title: '姓名简介',
-    name: '猫步简历',
-    abstract: '给我一个机会，我必全力以赴！',
-    avatarShape: 'CIRCLE_AVATAR', // 头像形状
-    avatar: 'https://maobucv.com:9000/resume/avatar/file-1663290281512.jpg', // 头像地址
-    isShow: {
-      abstract: true,
-      name: true,
-      avatar: true,
-    },
   },
 }
 export default MODEL_DATA_JSON

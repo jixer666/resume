@@ -40,8 +40,8 @@ function clone<T>(value: T): T {
 /**
  * 取某个模块的全部皮肤。
  *
- * 传入的既可能是物料清单的分组键（如 `CUSTOM`），也可能是模块名（如 `CUSTOM_2`）——
- * 自定义模块有 3 套皮肤共用一个 `CUSTOM` 分组，只有按 `model` 才能定位到具体那套。
+ * 传入的通常是模块名（如 `SKILL_SPECIALTIES`），与物料清单的分组键一一对应；
+ * 兜底支持分组内 `model` 不同的场景，按 `model` 遍历定位。
  */
 function materialGroupOf(model: string): IMATERIALITEM[] {
   const group = MATERIAL_JSON[model]
@@ -66,6 +66,37 @@ function createMaterialItem(model: string, layout = '', cptName?: string): IMATE
     show: true,
     data: clone(MODEL_DATA_JSON[model] ?? {}),
   }
+}
+
+/**
+ * 用本地物料表给「骨架模块」补齐 style / data。
+ *
+ * 后端新增简历时只落模块描述（model / cptName / layout / show），这里按 cptName
+ * 取皮肤默认样式、按 model 取默认数据；已有值优先保留，因此载入用户编辑过的
+ * 完整 JSON 时不会覆盖用户数据。
+ */
+function hydrateComponents(json: IRESUMEJSON): IRESUMEJSON {
+  const list = json.COMPONENTS
+  if (!Array.isArray(list) || !list.length)
+    return json
+  json.COMPONENTS = list.map((raw: any) => {
+    if (!raw?.model)
+      return raw
+    const base = createMaterialItem(raw.model, raw.layout ?? '', raw.cptName || undefined)
+    if (!base)
+      return raw
+    const merged: any = { ...base }
+    Object.keys(raw).forEach((key) => {
+      const value = raw[key]
+      if (value === null || value === undefined)
+        return
+      merged[key] = value
+    })
+    merged.style = { ...base.style, ...(raw.style || {}) }
+    merged.data = { ...base.data, ...(raw.data || {}) }
+    return merged
+  })
+  return json
 }
 
 /** 全局样式字段 → 模块样式字段的映射（全局面板与模块级 style 命名不一致的那几项靠它对齐） */
@@ -133,6 +164,10 @@ export const useResumeStore = defineStore(
     const current = ref<IRESUMEJSON | null>(null)
     /** 最近一次载入 / 保存时的内容快照，用来跳过没有改动的自动保存 */
     const savedSnapshot = ref('')
+    /** 当前草稿套用的模板编码：新建时提交给后端（更新时用不到） */
+    const currentTemplateCode = ref('')
+    /** 在途的落库请求，用来把并发保存串成一条队列 */
+    let pendingSave: Promise<IResumeBrief | null> | null = null
 
     /** 当前简历的模块列表 */
     const components = computed<IMATERIALITEM[]>(() => current.value?.COMPONENTS || [])
@@ -176,6 +211,7 @@ export const useResumeStore = defineStore(
      */
     function createResume(templateId?: string): IRESUMEJSON {
       const template = templateId ? useTemplateStore().get(templateId) : undefined
+      currentTemplateCode.value = templateId || ''
       const json = clone(RESUME_JSON) as IRESUMEJSON
       json.ID = ''
       json.NAME = DEFAULT_RESUME_NAME
@@ -221,6 +257,9 @@ export const useResumeStore = defineStore(
       }
       // 主键以后端为准，避免本地 ID 和后端对不上
       json.ID = String(detail.id)
+      // 后端新建时只落骨架，缺的 style / data 由本地物料表补齐
+      hydrateComponents(json)
+      currentTemplateCode.value = ''
       current.value = json
       savedSnapshot.value = snapshotOf(json)
       return json
@@ -234,25 +273,37 @@ export const useResumeStore = defineStore(
     /**
      * 把当前简历保存到后端（无 id 新建，有 id 覆盖更新），内容没改过直接跳过。
      *
+     * 新建只提交模板编码，整份简历由后端按模板构造（后端落的是骨架，
+     * 本地已补齐的草稿原样保留，不回读覆盖）；更新才回传整份 JSON。
+     *
      * @returns 落库后的摘要；内容无改动或没有当前简历时返回 null
      */
     async function saveCurrent(): Promise<IResumeBrief | null> {
+      // 已有落库在途时先排队：新建靠这次拿到主键，等它结束后再按最新状态判断要不要再存，
+      // 否则同一份还没有 id 的草稿会被并发存成两条记录
+      if (pendingSave)
+        await pendingSave.catch(() => {})
       const json = current.value
       if (!json)
         return null
       if (snapshotOf(json) === savedSnapshot.value)
         return null
       const rawId = Number(json.ID)
-      const brief = await saveResume({
-        id: Number.isFinite(rawId) && rawId > 0 ? rawId : undefined,
-        name: json.NAME || DEFAULT_RESUME_NAME,
-        layout: json.LAYOUT,
-        resumeJson: json,
+      const isNew = !Number.isFinite(rawId) || rawId <= 0
+      pendingSave = (isNew
+        ? saveResume({ templateCode: currentTemplateCode.value || undefined })
+        : saveResume({ id: rawId, resumeDetail: json })).then((brief) => {
+        json.ID = String(brief.id)
+        savedSnapshot.value = snapshotOf(json)
+        upsertBrief(brief)
+        return brief
       })
-      json.ID = String(brief.id)
-      savedSnapshot.value = snapshotOf(json)
-      upsertBrief(brief)
-      return brief
+      try {
+        return await pendingSave
+      }
+      finally {
+        pendingSave = null
+      }
     }
 
     /** 列表里按 id 覆盖或插入一条摘要 */

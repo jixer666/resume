@@ -24,7 +24,7 @@ const emit = defineEmits<{ close: [] }>()
 const store = useResumeStore()
 
 const item = computed<IMATERIALITEM | undefined>(() => store.findModuleByKey(props.keyId))
-/** 该模块的全部皮肤：自定义模块的 3 套皮肤共用一个物料分组，只能按 model 定位 */
+/** 该模块的全部皮肤 */
 const variants = computed(() => (item.value ? store.variantsOf(item.value.model) : []))
 
 const moduleName = computed(() => {

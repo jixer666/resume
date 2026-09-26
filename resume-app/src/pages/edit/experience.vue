@@ -4,7 +4,7 @@ import { useResumeStore } from '@/store/resume'
 import { cleanHtml, plainToHtml } from '@/utils/richText'
 
 /**
- * 列表类模块的单条编辑：教育 / 工作 / 项目 / 实习 / 校园 / 技能 / 荣誉 / 作品。
+ * 列表类模块的单条编辑：教育 / 工作 / 项目 / 实习 / 校园 / 荣誉 / 作品。
  * 按 keyId 定位 store 里的模块，index 为 -1 表示新增一条。
  *
  * 字段名对齐 resume-design 的数据模型（`src/interface/model.ts`），与 temp 的 ENTRY 字段不同：
@@ -18,9 +18,6 @@ definePage({
     navigationBarTitleText: '编辑经历',
   },
 })
-
-/** 技能熟练度：与 utils/common 的 textToNumber 取值一一对应 */
-const PROFICIENCY = ['了解', '一般', '熟悉', '精通']
 
 const store = useResumeStore()
 const keyId = ref('')
@@ -37,8 +34,6 @@ interface IEntryForm {
   posts: string
   campusBriefly: string
   campusDuty: string
-  skillName: string
-  proficiency: string
   awardsName: string
   awardsGrade: string
   worksName: string
@@ -59,8 +54,6 @@ function createForm(): IEntryForm {
     posts: '',
     campusBriefly: '',
     campusDuty: '',
-    skillName: '',
-    proficiency: '',
     awardsName: '',
     awardsGrade: '',
     worksName: '',
@@ -82,7 +75,6 @@ const hasSingleDate = computed(() => model.value === 'AWARDS')
 /** 用富文本描述「经历内容」的模块及其字段名 */
 const RICH_FIELDS: Record<string, string> = {
   EDU_BACKGROUND: 'majorCourse',
-  SKILL_SPECIALTIES: 'introduce',
   CAMPUS_EXPERIENCE: 'campusContent',
   INTERNSHIP_EXPERIENCE: 'jobContent',
   WORK_EXPERIENCE: 'jobContent',
@@ -141,8 +133,6 @@ function fillForm(entry: Record<string, unknown>) {
     posts: String(entry.posts || ''),
     campusBriefly: String(entry.campusBriefly || ''),
     campusDuty: String(entry.campusDuty || ''),
-    skillName: String(entry.skillName || ''),
-    proficiency: String(entry.proficiency || ''),
     awardsName: String(entry.awardsName || ''),
     awardsGrade: String(entry.awardsGrade || ''),
     worksName: String(entry.worksName || ''),
@@ -162,8 +152,6 @@ function buildEntry(): Record<string, unknown> {
   switch (model.value) {
     case 'EDU_BACKGROUND':
       return { date, schoolName: form.schoolName, specialized: form.specialized, degree: form.degree, majorCourse: detail }
-    case 'SKILL_SPECIALTIES':
-      return { skillName: form.skillName, proficiency: form.proficiency, introduce: detail }
     case 'CAMPUS_EXPERIENCE':
       return { date, campusBriefly: form.campusBriefly, campusDuty: form.campusDuty, campusContent: detail }
     case 'AWARDS':
@@ -184,10 +172,6 @@ onLoad((query) => {
   if (entry)
     fillForm(entry)
 })
-
-function pickProficiency(e: { detail: { value: number | string } }) {
-  form.proficiency = PROFICIENCY[Number(e.detail.value)] || ''
-}
 
 function onStartDate(e: { detail: { value: string } }) {
   form.dateStart = e.detail.value
@@ -270,18 +254,6 @@ function clear() {
         <input v-model="form.degree" class="input" placeholder="如：本科">
       </template>
 
-      <template v-else-if="model === 'SKILL_SPECIALTIES'">
-        <text class="label">技能名称</text>
-        <input v-model="form.skillName" class="input" placeholder="如：Vue3">
-        <text class="label">熟练度</text>
-        <picker :range="PROFICIENCY" @change="pickProficiency">
-          <view class="picker">
-            <text :class="{ placeholder: !form.proficiency }">{{ form.proficiency || '请选择熟练度' }}</text>
-            <text class="arrow">›</text>
-          </view>
-        </picker>
-      </template>
-
       <template v-else-if="model === 'CAMPUS_EXPERIENCE'">
         <text class="label">校园组织 / 活动名称</text>
         <input v-model="form.campusBriefly" class="input" placeholder="如：校学生会">
@@ -314,8 +286,8 @@ function clear() {
         <text class="label">{{ model === 'EDU_BACKGROUND' ? '主修课程' : '内容描述' }}</text>
         <rich-text-editor
           v-model="form.detail"
-          :placeholder="model === 'EDU_BACKGROUND' || model === 'SKILL_SPECIALTIES' || model === 'WORKS_DISPLAY' ? '请输入内容' : DETAIL_PLACEHOLDER"
-          :height="model === 'EDU_BACKGROUND' || model === 'SKILL_SPECIALTIES' ? '180px' : '280px'"
+          :placeholder="model === 'EDU_BACKGROUND' || model === 'WORKS_DISPLAY' ? '请输入内容' : DETAIL_PLACEHOLDER"
+          :height="model === 'EDU_BACKGROUND' ? '180px' : '280px'"
         />
       </template>
     </view>

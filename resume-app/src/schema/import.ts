@@ -231,28 +231,7 @@ const IMPORT_JSON = {
         model: 'SKILL_SPECIALTIES',
         show: true,
         title: '技能特长',
-        LIST: [
-          {
-            skillName: 'JavaScript',
-            proficiency: '了解',
-            introduce: '熟练掌握该项技术',
-          },
-          {
-            skillName: 'JavaScript',
-            proficiency: '一般',
-            introduce: '熟练掌握该项技术熟练掌握该项技术熟练掌握该项技术熟练掌握该项技术',
-          },
-          {
-            skillName: 'JavaScript',
-            proficiency: '熟悉',
-            introduce: '熟练掌握该项技术熟练掌握该项技术熟练掌握该项技术熟练掌握该项技术',
-          },
-          {
-            skillName: 'JavaScript',
-            proficiency: '精通',
-            introduce: '熟练掌握该项技术',
-          },
-        ],
+        content: '熟练掌握 JavaScript、Vue3 等前端技术栈，了解 Node.js 与自动化构建',
       },
     },
     {

@@ -25,7 +25,7 @@ CREATE TABLE `config`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '配置编号',
   `group` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '分组',
-  `value` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '配置值',
+  `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '配置值',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime NOT NULL COMMENT '更新时间',
   `status` tinyint NOT NULL COMMENT '状态',
@@ -38,6 +38,8 @@ CREATE TABLE `config`  (
 -- ----------------------------
 -- Records of config
 -- ----------------------------
+INSERT INTO `config` (`code`, `group`, `value`, `create_time`, `update_time`, `status`, `ver`, `is_delete`) VALUES
+('resume_model_data_config', 'com.abc.resume.config.AppConfig', '{"modelData":{"RESUME_TITLE":{"iconfont":"icon-xiangmujingli-04","model":"RESUME_TITLE","show":true,"title":"我的简历"},"BASE_INFO":{"iconfont":"icon-jibenziliao","model":"BASE_INFO","show":true,"title":"基本资料","name":"小明","age":25,"avatarShape":"","address":"四川成都","avatar":"https://maobucv.com:9000/resume/avatar/file-1663290281512.jpg","workService":3,"phoneNumber":"028-1234321","email":"12322233@qq.com","abstract":"","degree":"本科","isShow":{"age":true,"address":true,"avatar":true,"workService":true,"phoneNumber":true,"email":true,"abstract":true,"degree":true}},"JOB_INTENTION":{"iconfont":"icon-yixianggangwei","model":"JOB_INTENTION","show":true,"title":"求职意向","intendedPositions":"工程师","intendedCity":"成都","expectSalary":"8000-10000","jobStatus":"随时入职","jobSearchType":"全职","isShow":{"intendedPositions":true,"intendedCity":true,"expectSalary":true,"jobStatus":true,"jobSearchType":true}},"EDU_BACKGROUND":{"iconfont":"icon-education-1-copy","model":"EDU_BACKGROUND","show":true,"title":"教育背景","LIST":[{"date":["2021-9","2025-6"],"schoolName":"四川大学","specialized":"软件工程","degree":"本科","majorCourse":"Java、数据库、前端、后端、移动开发、测试、项目管理"}],"isShow":{"date":true,"schoolName":true,"specialized":true,"degree":true,"majorCourse":true}},"SKILL_SPECIALTIES":{"iconfont":"icon-zhuanyezhishijineng","model":"SKILL_SPECIALTIES","show":true,"title":"专业技能","content":""},"CAMPUS_EXPERIENCE":{"iconfont":"icon-jiatimianban_timu","model":"CAMPUS_EXPERIENCE","show":true,"title":"校园经历","LIST":[{"date":["2021-9","2022-10"],"campusBriefly":"计算机技术协会","campusDuty":"部长","campusContent":"简要概述经历内容或者工作内容等等"}],"isShow":{"date":true,"campusBriefly":true,"campusDuty":true,"campusContent":true}},"INTERNSHIP_EXPERIENCE":{"iconfont":"icon-biyeshixi","model":"INTERNSHIP_EXPERIENCE","show":true,"title":"实习经验","LIST":[{"date":["2021-9","2022-10"],"companyName":"XXX有限公司","posts":"XXX实习生","jobContent":[{"content":"简要概述在岗时的工作内容"}]}],"isShow":{"date":true,"companyName":true,"posts":true,"jobContent":true}},"WORK_EXPERIENCE":{"iconfont":"icon-gongzuojingyan","model":"WORK_EXPERIENCE","show":true,"title":"工作经验","LIST":[{"date":["2021-9","2022-10"],"companyName":"XXX公司","posts":"XXX工程师","jobContent":[{"content":"简要概述在岗时的工作内容"}]}],"isShow":{"date":true,"companyName":true,"posts":true}},"PROJECT_EXPERIENCE":{"iconfont":"icon-xiangmu","model":"PROJECT_EXPERIENCE","show":true,"title":"项目经验","LIST":[{"date":["2021-9","2022-10"],"projectName":"苍穹外卖","posts":"XXX开发","projectContent":[{"content":"简要介绍该项目以及你在项目内的主要工作内容"}]}],"isShow":{"date":true,"projectName":true,"posts":true}},"AWARDS":{"iconfont":"icon-rongyu1","model":"AWARDS","show":true,"title":"荣誉奖项","LIST":[{"date":"2021-9","awardsName":"ACM","awardsGrade":"金牌"}],"isShow":{"date":true,"awardsName":true,"awardsGrade":true}},"HOBBIES":{"iconfont":"icon-xingquaihao","model":"HOBBIES","show":true,"title":"兴趣爱好","content":"简要介绍一些自己的兴趣爱好，比如逛技术博客、运动等等","style":{"textColor":"#757575","textFontSize":"14px","textFontWeight":500,"mBottom":"45px","mTop":"0px"}},"SELF_EVALUATION":{"iconfont":"icon-ziwopingjia","model":"SELF_EVALUATION","show":true,"title":"自我评价","content":"对自己做一个简单的评价，比如有较强的责任心等等"},"WORKS_DISPLAY":{"iconfont":"icon-zhuanyezhishijineng","model":"WORKS_DISPLAY","show":true,"title":"作品展示","LIST":[{"worksName":"作品名称","worksLink":"https://maobucv.com","worksIntroduce":"简要介绍该作品是什么，解决了什么问题等等"}]}}}', NOW(), NOW(), 1, 1, 0);
 
 -- ----------------------------
 -- Table structure for resume_template
@@ -104,9 +106,7 @@ DROP TABLE IF EXISTS `user_resume`;
 CREATE TABLE `user_resume`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `uid` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户ID',
-  `title` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '简历名称',
-  `layout` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'classical' COMMENT '布局',
-  `resume_json` json NULL COMMENT '简历JSON',
+  `resume_detail` json NULL COMMENT '简历JSON',
   `thumbnail` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '缩略图地址，未生成时为空串',
   `template_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '模板编码',
   `create_time` datetime NOT NULL COMMENT '创建时间',

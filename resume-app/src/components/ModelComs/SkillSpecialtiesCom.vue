@@ -3,25 +3,8 @@
   <div class="skill-specialties u-tag-div">
     <!-- 标题 -->
     <slot name="model-title" />
-    <!-- 技能特长 -->
-    <ul class="u-tag-ul">
-      <!-- 左边部分 -->
-      <div class="left u-tag-div">
-        <template v-for="(item, index) in modelData.LIST" :key="index">
-          <li v-if="index % 2 === 0" class="u-tag-li">
-            <RichTextView :html="item.introduce" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-          </li>
-        </template>
-      </div>
-      <!-- 右边部分 -->
-      <div class="right u-tag-div">
-        <template v-for="(item, index) in modelData.LIST" :key="index">
-          <li v-if="index % 2 !== 0" class="u-tag-li">
-            <RichTextView :html="item.introduce" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-          </li>
-        </template>
-      </div>
-    </ul>
+    <!-- 技能描述：整段富文本 -->
+    <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
   </div>
 </template>
 
@@ -57,29 +40,18 @@ const { left } = useGetLineLeft(props.modelStyle)
     left: v-bind('left');
     top: 5px;
   }
-  .u-tag-ul {
+  .skill-content {
     display: flex;
     flex-wrap: wrap;
-    .left,
-    .right {
-      flex: 40%;
-      margin-top: 25px;
-      .u-tag-li {
-        letter-spacing: 2px;
-        font-size: v-bind('modelStyle.textFontSize');
-        color: v-bind('modelStyle.textColor');
-        font-weight: v-bind('modelStyle.textFontWeight');
-        line-height: 1.5;
-        &:not(:last-child) {
-          margin-bottom: 10px;
-        }
-      }
-    }
+    margin-top: 25px;
     .left {
+      flex: 40%;
       padding: 0 20px;
-    }
-    .right {
-      padding: 0 0 0 10px;
+      letter-spacing: 2px;
+      font-size: v-bind('modelStyle.textFontSize');
+      color: v-bind('modelStyle.textColor');
+      font-weight: v-bind('modelStyle.textFontWeight');
+      line-height: 1.5;
     }
   }
 }

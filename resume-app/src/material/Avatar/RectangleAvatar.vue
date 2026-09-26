@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { IBASEINFO, ICUSTOM3 } from '@/interface/model'
+import type { IBASEINFO } from '@/interface/model'
 import defaultImg from '@img/people.jpg'
 
 defineOptions({
@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<IAvatar>(), {
 interface IAvatar {
   width?: string
   height?: string
-  modelData?: IBASEINFO | ICUSTOM3 | null // 模块数据
+  modelData?: IBASEINFO | null // 模块数据
 }
 </script>
 

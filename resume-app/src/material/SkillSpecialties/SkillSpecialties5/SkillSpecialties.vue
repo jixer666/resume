@@ -3,10 +3,10 @@
   <div class="skill-specialties u-tag-div">
     <!-- 标题 -->
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 技能特长 -->
+    <!-- 技能描述：整段富文本 -->
     <ul class="u-tag-ul">
-      <li v-for="(item, index) in modelData.LIST" :key="index" class="u-tag-li">
-        <RichTextView :html="item.introduce" :model-style="modelStyle" extra-style="letter-spacing:2px" />
+      <li class="u-tag-li">
+        <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
       </li>
     </ul>
   </div>
@@ -55,7 +55,7 @@ const { left } = useGetLineLeft(props.modelStyle, -23)
       font-weight: v-bind('modelStyle.textFontWeight');
       line-height: 1.5;
       text-align: justify;
-      margin-bottom: 10px;
+      list-style: none;
     }
   }
 }

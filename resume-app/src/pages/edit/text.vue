@@ -18,6 +18,7 @@ definePage({
 const PLACEHOLDER: Record<string, string> = {
   SELF_EVALUATION: '对自己做一个简单评价，如：5 年产品经验，擅长从 0 到 1 搭建业务线…',
   HOBBIES: '简要介绍自己的兴趣爱好，如：逛技术博客、长跑、摄影',
+  SKILL_SPECIALTIES: '详细输入你的技能，如：熟练使用 Figma、PS，掌握 Vue3 / React 技术栈，了解 Node.js…',
 }
 
 const store = useResumeStore()
