@@ -10,7 +10,8 @@ import { MATERIAL_JSON } from '@/schema/materialList'
 import MODEL_DATA_JSON from '@/schema/modelData'
 import RESUME_JSON from '@/schema/resume'
 import { useTemplateStore } from '@/store/template'
-import { getUuid } from '@/utils/common'
+import { getUuid, pxTonumber } from '@/utils/common'
+import { FONT_SIZES } from '@/utils/styleOptions'
 
 /** 新建简历的默认名称，用户可在编辑页改成任意名字 */
 export const DEFAULT_RESUME_NAME = '未命名简历'
@@ -120,6 +121,47 @@ const GLOBAL_STYLE_MAP: [keyof IGlobalStyle, keyof IMODELSTYLE][] = [
 const GLOBAL_STYLE_DEFAULTS = RESUME_JSON.GLOBAL_STYLE as unknown as Record<string, unknown>
 
 /**
+ * 用户在本会话里手动改过的样式字段 —— 换模板时要把这些值盖回模板预设之上。
+ *
+ * 用模块级变量而不是 store state：它只服务于「编辑一份简历的期间换模板」这个场景，
+ * 不需要响应式，也不该被 persist 持久化（持久化了会在下次载入另一份简历时串味）。
+ * 载入 / 新建简历时统一清空（见 resetStyleEdits）。
+ */
+let editedGlobalKeys = new Set<string>()
+/** 用户改过的模块样式字段：模块 keyId → 字段名集合 */
+let editedModuleKeys = new Map<string, Set<string>>()
+
+/** 载入 / 新建简历时清空改动记录：换了一份简历，上一份的编辑痕迹不再适用 */
+function resetStyleEdits(): void {
+  editedGlobalKeys = new Set()
+  editedModuleKeys = new Map()
+}
+
+/** 记录用户手动改过的全局字段 */
+function markGlobalEdited(keys: readonly string[]): void {
+  keys.forEach(key => editedGlobalKeys.add(key))
+}
+
+/** 记录用户手动改过的模块字段 */
+function markModuleEdited(keyId: string, keys: readonly string[]): void {
+  if (!editedModuleKeys.has(keyId))
+    editedModuleKeys.set(keyId, new Set())
+  const set = editedModuleKeys.get(keyId)!
+  keys.forEach(key => set.add(key))
+}
+
+/** 从模块 style 里挑出用户改过的字段（用于换模板后盖回个性化值） */
+function pickEditedStyle(style: unknown, keys?: Set<string>): Record<string, unknown> {
+  const source = (style || {}) as Record<string, unknown>
+  const picked: Record<string, unknown> = {}
+  keys?.forEach((key) => {
+    if (source[key] !== undefined)
+      picked[key] = source[key]
+  })
+  return picked
+}
+
+/**
  * 把全局样式扇出到单个模块的 style 上。
  *
  * - 传 `keys`：这些字段无条件套用 —— 面板里把某项改回默认值也必须生效；
@@ -144,6 +186,41 @@ function applyGlobalStyleToItem(
       return
     style[styleKey] = value
   })
+}
+
+/** 「一键整理成一页」要压缩的模块样式字段：全是纵向项，直接影响内容高度（左右内边距、配色与高度无关，不参与） */
+const FIT_MODULE_KEYS = ['pTop', 'pBottom', 'mTop', 'mBottom', 'firstTitleFontSize', 'titleFontSize', 'textFontSize'] as const
+/** 同步缩放的全局字号字段：让样式面板显示的值与模块实际渲染对得上 */
+const FIT_GLOBAL_FONT_KEYS = ['firstTitleFontSize', 'secondTitleFontSize', 'textFontSize'] as const
+
+/**
+ * 「一键整理成一页」的基准快照：模块 keyId → 该模块**自己**当时的样式原值（字符串，保证能无损还原）。
+ *
+ * 为什么按模块记而不是记一份全局值：各皮肤自带的 pTop / mBottom 差别很大
+ * （40px 与 0 都有），拿全局值扇出会把设计好的留白抹平、把本来 0 的下间距抬到 45px，
+ * 结果越整越高。按模块记基准后，每档都是「在模块自己的原值上乘比例」，只收紧、不改性质。
+ */
+export interface IFitBase {
+  /** 模块 keyId → 压缩字段的原始样式值 */
+  modules: Record<string, Record<string, string>>
+  /** 全局字号的原始值 */
+  global: Record<string, string>
+}
+
+/** 字号吸附到样式面板的档位（10px 起、步长 2px、到 60px），避免面板把非档位值显示成「10px」 */
+function snapFontSize(px: number): string {
+  const stepped = Math.max(10, Math.min(60, Math.round(px / 2) * 2))
+  return FONT_SIZES.includes(`${stepped}px`) ? `${stepped}px` : FONT_SIZES[0]
+}
+
+/** 压缩单个值：字号吸附档位，间距取整且不为负；`ratio >= 1` 时原样返回，保证能无损还原 */
+function scaleFitValue(key: string, raw: string, ratio: number): string {
+  const value = pxTonumber(raw)
+  if (!value || ratio >= 1)
+    return raw
+  if (key.endsWith('FontSize'))
+    return snapFontSize(value * ratio)
+  return `${Math.max(0, Math.round(value * ratio))}px`
 }
 
 /**
@@ -236,6 +313,7 @@ export const useResumeStore = defineStore(
       }
       current.value = json
       savedSnapshot.value = ''
+      resetStyleEdits()
       return json
     }
 
@@ -262,6 +340,7 @@ export const useResumeStore = defineStore(
       currentTemplateCode.value = ''
       current.value = json
       savedSnapshot.value = snapshotOf(json)
+      resetStyleEdits()
       return json
     }
 
@@ -376,8 +455,11 @@ export const useResumeStore = defineStore(
     /** 改模块样式覆盖值（模块级样式面板落点） */
     function updateModuleStyle(keyId: string, patch: Partial<IMODELSTYLE>): void {
       const item = findModuleByKey(keyId)
-      if (item)
-        item.style = { ...item.style, ...patch }
+      if (!item)
+        return
+      item.style = { ...item.style, ...patch }
+      // 记下用户改过哪些字段：换模板时要保留这些个性化值（见 applyTemplate）
+      markModuleEdited(keyId, Object.keys(patch))
     }
 
     /**
@@ -394,6 +476,63 @@ export const useResumeStore = defineStore(
       const keys = Object.keys(patch) as (keyof IGlobalStyle)[]
       const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
       json.COMPONENTS.forEach((item: IMATERIALITEM) => applyGlobalStyleToItem(item, globalStyle, keys))
+      // 记下用户改过哪些全局字段：换模板时要保留这些个性化值（见 applyTemplate）
+      markGlobalEdited(keys as string[])
+    }
+
+    /** 量一份「一键整理成一页」的基准快照（见 IFitBase），供 applyFitScale 反复套用不同比例 */
+    function captureFitBase(): IFitBase {
+      const modules: Record<string, Record<string, string>> = {}
+      current.value?.COMPONENTS.forEach((item: IMATERIALITEM) => {
+        const style = item.style as unknown as Record<string, unknown>
+        const values: Record<string, string> = {}
+        FIT_MODULE_KEYS.forEach((key) => {
+          const raw = style[key]
+          if (typeof raw === 'string')
+            values[key] = raw
+        })
+        modules[item.keyId] = values
+      })
+      const globalStyle = current.value?.GLOBAL_STYLE as unknown as Record<string, unknown>
+      const global: Record<string, string> = {}
+      FIT_GLOBAL_FONT_KEYS.forEach((key) => {
+        const raw = globalStyle?.[key]
+        if (typeof raw === 'string')
+          global[key] = raw
+      })
+      return { modules, global }
+    }
+
+    /**
+     * 按比例套用一档压缩：每个模块的纵向样式按**各自基准**缩放，全局字号同步缩放。
+     *
+     * 比例是相对基准算的（不是叠乘），所以档位之间互不影响，反复调用也不会越压越小；
+     * 传 1 即无损还原基准（`scaleFitValue` 在 ratio >= 1 时原样返回）。
+     *
+     * 刻意不记入「用户改过的字段」：整理是一次性的排版动作，不是样式偏好。
+     * 记进去的话，之后每次换模板都会拿这 7 个字段盖掉新模板的字体与留白，换模板就看不出变化了。
+     */
+    function applyFitScale(base: IFitBase, ratio: number): void {
+      const json = current.value
+      if (!json)
+        return
+      const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
+      FIT_GLOBAL_FONT_KEYS.forEach((key) => {
+        const raw = base.global[key]
+        if (raw !== undefined)
+          globalStyle[key] = scaleFitValue(key, raw, ratio)
+      })
+      json.COMPONENTS.forEach((item: IMATERIALITEM) => {
+        const values = base.modules[item.keyId]
+        if (!values)
+          return
+        const style = item.style as unknown as Record<string, unknown>
+        FIT_MODULE_KEYS.forEach((key) => {
+          const raw = values[key]
+          if (raw !== undefined)
+            style[key] = scaleFitValue(key, raw, ratio)
+        })
+      })
     }
 
     /** 改模块小标题（模块设置面板落点） */
@@ -433,6 +572,10 @@ export const useResumeStore = defineStore(
      * 只动四类字段 —— LAYOUT、GLOBAL_STYLE、模块栏位 layout、模块皮肤（cptName / cptTitle / style）；
      * 模块顺序、显隐状态、业务数据 data 一律不动，换模板不该丢用户填过的东西。
      *
+     * 样式冲突的优先级：**用户手动改过的值 > 模板预设 > 皮肤默认**。
+     * 也就是说换模板能看出变化（版式 / 皮肤 / 模板样式），但用户在样式面板里调过的
+     * 全局字段与模块字段会被盖回来，不会被模板重置（改动痕迹见 markGlobalEdited / markModuleEdited）。
+     *
      * @returns 模板不存在或没有当前简历时返回 false
      */
     function applyTemplate(templateId: string): boolean {
@@ -441,12 +584,27 @@ export const useResumeStore = defineStore(
       if (!json || !template)
         return false
       json.LAYOUT = template.layout
-      json.GLOBAL_STYLE = { ...json.GLOBAL_STYLE, ...template.style }
-      // 模板样式是全局样式的预设值，必须无条件扇出（传 keys），否则「刚好等于出厂默认」的那几项不会生效
-      const keys = Object.keys(template.style) as (keyof IGlobalStyle)[]
+
+      // 模板预设打底，用户改过的全局字段再盖回原值
+      const prevGlobal = { ...(json.GLOBAL_STYLE as unknown as Record<string, unknown>) }
+      const nextGlobal: Record<string, unknown> = { ...prevGlobal, ...(template.style as unknown as Record<string, unknown>) }
+      editedGlobalKeys.forEach((key) => {
+        if (prevGlobal[key] !== undefined)
+          nextGlobal[key] = prevGlobal[key]
+      })
+      json.GLOBAL_STYLE = nextGlobal as unknown as IGlobalStyle
+
+      // 模板字段与用户改过的全局字段都要无条件扇出：模板里「刚好等于出厂默认」的那几项也必须生效，
+      // 用户改过的值同样不能被皮肤默认值盖掉。
+      const fanoutKeys = Array.from(
+        new Set<string>([...Object.keys(template.style || {}), ...Array.from(editedGlobalKeys)]),
+      ) as (keyof IGlobalStyle)[]
       const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
+
       json.COMPONENTS.forEach((item: IMATERIALITEM) => {
         item.layout = layoutOf(item.model, template)
+        // 用户对这个模块的个性化改动先留一份，换完皮肤与全局扇出后再盖回去
+        const userEdits = pickEditedStyle(item.style, editedModuleKeys.get(item.keyId))
         const cptName = template.variants?.[item.model]
         const variant = cptName ? materialGroupOf(item.model).find(one => one.cptName === cptName) : undefined
         if (variant) {
@@ -454,7 +612,8 @@ export const useResumeStore = defineStore(
           item.cptTitle = variant.cptTitle
           item.style = clone(variant.style)
         }
-        applyGlobalStyleToItem(item, globalStyle, keys)
+        applyGlobalStyleToItem(item, globalStyle, fanoutKeys)
+        Object.assign(item.style as Record<string, unknown>, userEdits)
       })
       // 还没落库的草稿靠模板编码新建，这里同步上，否则换的模板不会被后端采用
       currentTemplateCode.value = templateId
@@ -481,6 +640,8 @@ export const useResumeStore = defineStore(
       updateModuleData,
       updateModuleStyle,
       updateGlobalStyle,
+      captureFitBase,
+      applyFitScale,
       updateModuleTitle,
       changeVariant,
       applyTemplate,

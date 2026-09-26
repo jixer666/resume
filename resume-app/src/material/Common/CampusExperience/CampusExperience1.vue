@@ -47,7 +47,7 @@ defineProps<{
       display: flex;
       flex-direction: column;
       &:not(:last-child) {
-        margin-bottom: 25px;
+        margin-bottom: var(--entry-mb, 25px);
       }
       .u-tag-ul {
         display: flex;

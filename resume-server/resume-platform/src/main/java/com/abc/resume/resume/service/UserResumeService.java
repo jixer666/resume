@@ -4,6 +4,7 @@ import com.abc.resume.core.page.PageResult;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
+import org.springframework.http.ResponseEntity;
 
 /**
  * 用户简历服务
@@ -28,5 +29,5 @@ public interface UserResumeService {
     /**
      * 导出简历为 PDF
      */
-    byte[] exportPdf(Long id);
+    ResponseEntity<byte[]> exportPdf(Long id);
 }

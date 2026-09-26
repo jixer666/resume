@@ -17,13 +17,17 @@
           <li v-if="modelData.isShow.posts" class="list-title u-tag-li">
             {{ item.posts }}
           </li>
+          <!-- 部门 -->
+          <li v-if="modelData.isShow.department" class="list-title u-tag-li">
+            {{ item.department }}
+          </li>
         </ul>
         <!-- 简述 -->
         <div class="job-content u-tag-div">
           <div class="content-list u-tag-div">
             <ul class="u-tag-ul">
-              <li v-for="(list, j) in item.jobContent" :key="j" class="u-tag-li">
-                <RichTextView :html="list.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
+              <li v-if="item.jobContent" class="u-tag-li">
+                <RichTextView :html="item.jobContent" :model-style="modelStyle" extra-style="letter-spacing:2px" />
               </li>
             </ul>
           </div>
@@ -53,7 +57,7 @@ defineProps<{
       display: flex;
       flex-direction: column;
       &:not(:last-child) {
-        margin-bottom: 25px;
+        margin-bottom: var(--entry-mb, 25px);
       }
       .u-tag-ul {
         display: flex;

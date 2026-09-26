@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templates'
 import { exportResumePdf } from '@/api/resume'
 import ResumeRender from '@/components/ResumeRender/ResumeRender.vue'
+import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templates'
 import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 
@@ -46,16 +46,28 @@ const slotStyle = computed(() => ({
 const paperStyle = computed(() => ({ transform: `scale(${paperScale.value})` }))
 
 const showModuleSheet = ref(false)
-const showGlobalStyle = ref(false)
+/** 样式弹层：内含「全局样式 / 组件样式」两栏 */
+const showStyleSheet = ref(false)
 const showTemplateSheet = ref(false)
 /** 本次会话内换过的模板编码，用来在列表里标出当前项（后端不返回该字段） */
 const activeTemplateCode = ref('')
 /** 导出中：生成 PDF 有耗时，按钮连点会重复请求 */
 const exporting = ref(false)
+/** 一键整理中：逐档压缩要反复测量，期间锁住按钮 */
+const fitting = ref(false)
+
+/**
+ * 一键整理的压缩档位：从「几乎不动」逐档收紧，取第一个能装进一页的档位。
+ *
+ * 每档对基准值乘一次比例（不是叠乘），所以档位之间互不影响、也不会越压越离谱。
+ */
+const FIT_RATIOS = [0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58]
+/** 内容恰好等于纸高也算装得下，留 2px 给亚像素误差 */
+const FIT_TOLERANCE = 2
 
 onShow(() => {
   syncPaperScale()
-  nextTick(() => setTimeout(measurePaper, 60))
+  measurePaper()
 })
 
 /** 按窗口宽度算缩放比，保证 A4 整页横向放得下 */
@@ -64,27 +76,99 @@ function syncPaperScale() {
   paperScale.value = Math.min(1, Math.max(0.35, (width - 24) / PAPER_WIDTH))
 }
 
+/** 等一次渲染 + 布局完成（小程序没有布局就绪事件，给一帧多一点的时间） */
+function waitRender(ms = 90): Promise<void> {
+  return new Promise((resolve) => {
+    nextTick(() => setTimeout(resolve, ms))
+  })
+}
+
+/** 量未缩放的内容高度（px）；量不到返回 0 */
+function measureHeight(): Promise<number> {
+  return new Promise((resolve) => {
+    uni.createSelectorQuery()
+      .select('#resumePaper')
+      .boundingClientRect((rect) => {
+        const info = Array.isArray(rect) ? rect[0] : rect
+        const height = info && 'height' in info ? Number(info.height) : 0
+        resolve(height ? height / paperScale.value : 0)
+      })
+      .exec()
+  })
+}
+
 /** 量未缩放的内容高度，据此算页数 */
-function measurePaper() {
-  uni.createSelectorQuery()
-    .select('#resumePaper')
-    .boundingClientRect((rect) => {
-      const info = Array.isArray(rect) ? rect[0] : rect
-      const height = info && 'height' in info ? Number(info.height) : 0
-      if (height)
-        contentHeight.value = Math.max(PAPER_HEIGHT, height / paperScale.value)
-    })
-    .exec()
+async function measurePaper(): Promise<void> {
+  await waitRender(60)
+  const height = await measureHeight()
+  if (height)
+    contentHeight.value = Math.max(PAPER_HEIGHT, height)
+}
+
+/**
+ * 一键整理成一页 A4：逐档压缩字号与模块纵向间距，直到内容量出来不超过一张 A4。
+ *
+ * 压缩写的是真实样式数据（模块各自的 pTop / pBottom / mTop / mBottom 与字号，全局字号同步），
+ * 所以预览与导出的 PDF 都是一页。每档都在**整理前的基准值**上乘比例（见 store.captureFitBase），
+ * 而不是在上一档的结果上继续乘 —— 档位之间互不影响，也不会把皮肤自带的留白抹平。
+ *
+ * 一路压到底还装不下就还原基准：既然挤不进一页，就别把版式改坏。
+ */
+async function fitToOnePage() {
+  if (fitting.value || !resume.value)
+    return
+  fitting.value = true
+  uni.showLoading({ title: '正在整理', mask: true })
+  let message = ''
+  try {
+    const height = await measureHeight()
+    if (!height) {
+      message = '暂时量不到简历高度，请稍后重试'
+    }
+    else if (height <= PAPER_HEIGHT + FIT_TOLERANCE) {
+      message = '当前已经是一页啦'
+    }
+    else {
+      const base = store.captureFitBase()
+      let fitted = false
+      for (const ratio of FIT_RATIOS) {
+        store.applyFitScale(base, ratio)
+        await waitRender()
+        const next = await measureHeight()
+        if (next > 0 && next <= PAPER_HEIGHT + FIT_TOLERANCE) {
+          fitted = true
+          break
+        }
+      }
+      if (!fitted)
+        store.applyFitScale(base, 1)
+      await measurePaper()
+      store.saveCurrent().catch((error) => {
+        console.error('保存简历失败:', error)
+      })
+      message = fitted ? '已整理成一页 A4' : '内容较多，压不进一页，样式已还原'
+    }
+  }
+  catch (error) {
+    console.error('整理成一页失败:', error)
+    message = '整理失败，请重试'
+  }
+  finally {
+    fitting.value = false
+  }
+  uni.hideLoading()
+  if (message)
+    uni.showToast({ title: message, icon: 'none' })
 }
 
 /** 样式 / 模块改动会改变内容高度，关闭弹层时落库并重新分页 */
 function closeSheet() {
   showModuleSheet.value = false
-  showGlobalStyle.value = false
+  showStyleSheet.value = false
   store.saveCurrent().catch((error) => {
     console.error('保存简历失败:', error)
   })
-  nextTick(() => setTimeout(measurePaper, 60))
+  measurePaper()
 }
 
 /** 打开换模板面板：首次进入顺带拉一遍模板列表 */
@@ -111,7 +195,7 @@ function chooseTemplate(code: string) {
   store.saveCurrent().catch((error) => {
     console.error('保存简历失败:', error)
   })
-  nextTick(() => setTimeout(measurePaper, 60))
+  measurePaper()
 }
 
 /**
@@ -176,7 +260,11 @@ async function exportPdf() {
         <mp-icon name="ui-download" color="#ffffff" size="24px" />
         <text class="action-text">导出</text>
       </view>
-      <view class="action" hover-class="action--press" @click="showGlobalStyle = true">
+      <view class="action" hover-class="action--press" @click="fitToOnePage">
+        <mp-icon name="ui-compress" color="#ffffff" size="24px" />
+        <text class="action-text">{{ fitting ? '整理中' : '整理成一页' }}</text>
+      </view>
+      <view class="action" hover-class="action--press" @click="showStyleSheet = true">
         <mp-icon name="ui-palette" color="#ffffff" size="24px" />
         <text class="action-text">样式</text>
       </view>
@@ -192,7 +280,7 @@ async function exportPdf() {
 
     <module-manager-sheet :visible="showModuleSheet" @close="closeSheet" @change="closeSheet" />
 
-    <global-style-sheet :visible="showGlobalStyle" @close="closeSheet" />
+    <style-sheet :visible="showStyleSheet" @close="closeSheet" />
 
     <view v-if="showTemplateSheet" class="mask" @click="showTemplateSheet = false">
       <view class="sheet sheet--tall" @click.stop>
@@ -300,7 +388,6 @@ async function exportPdf() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6px 0;
   border-radius: 12px;
 
   &--press {

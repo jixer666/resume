@@ -8,9 +8,10 @@
           v-show="isShow.avatar"
           class="u-tag-div"
           :class="modelData.avatarShape ? 'avatar-shape-box' : 'avatar-box'"
+          :style="avatarStyle"
         >
           <AvatarShape v-if="modelData.avatarShape" :model-data="modelData" />
-          <image v-else mode="aspectFill" :src="modelData.avatar" style="width: 115px; height: 115px" />
+          <image v-else mode="aspectFill" :src="modelData.avatar" style="width: 115px; height: 115px" :style="avatarStyle" />
         </div>
         <div class="right u-tag-div">
           <h1 class="u-tag-h1">
@@ -55,6 +56,15 @@ const props = defineProps<{
   modelStyle: IMODELSTYLE // 模块样式
 }>()
 const isShow = reactive(props.modelData.isShow)
+
+const avatarStyle = computed(() => {
+  const style: Record<string, string> = {}
+  if (props.modelStyle?.avatarWidth)
+    style.width = props.modelStyle.avatarWidth
+  if (props.modelStyle?.avatarHeight)
+    style.height = props.modelStyle.avatarHeight
+  return style
+})
 </script>
 
 <style lang="scss" scoped>

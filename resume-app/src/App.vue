@@ -60,4 +60,23 @@ onUnmounted(() => {
   padding: 10px 12px;
   font-size: 14px;
 }
+
+/**
+ * 模板里的标题行/正文行都用 `<ul class="u-tag-ul"><li class="u-tag-li">`。
+ * 浏览器 UA 会给 `<ul>` 加 40px 左内边距、给 `<li>` 加列表符号，
+ * 模板自身（scoped）已经定义了行距/字号，这里统一清掉 UA 默认值，
+ * 否则「专业技能/工作/项目经验」的正文会比标题额外缩进一大截、还多一个「•」。
+ * 各模块要不要留左缩进、留多少，改由模块级样式面板（contentPaddingLeft / pLeftRight）控制。
+ *
+ * 注意：小程序端编译时 `<ul>`/`<li>` 会被转成 `<view>`，所以这里只能用类名选择器，
+ * 不能写 `ul.u-tag-ul` / `li.u-tag-li`，否则 mp 端匹配不到。
+ */
+.u-tag-ul {
+  padding-left: 0;
+  margin: 0;
+}
+
+.u-tag-li {
+  list-style: none;
+}
 </style>

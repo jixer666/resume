@@ -74,7 +74,7 @@ const { left } = useGetLineLeft(props.modelStyle)
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-top: 20px;
+      margin-top: var(--entry-mb, 20px);
       .date-school-box {
         width: 100%;
         display: flex;

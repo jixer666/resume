@@ -313,8 +313,6 @@ function useTemplate() {
 .primary {
   height: 48px;
   border: none;
-  border-radius: 24px;
-  box-shadow: 0 6px 16px rgb(37 99 235 / 26%);
   color: #fff;
   font-size: 16px;
   font-weight: 600;

@@ -47,6 +47,9 @@ const nodes = computed(() => {
     return ''
   return `<div style="${nodeStyle.value}">${html}</div>`
 })
+
+/** 正文左缩进，空值即 0（模块级样式面板控制） */
+const contentIndent = computed(() => props.modelStyle?.contentPaddingLeft || '')
 </script>
 
 <template>
@@ -64,11 +67,26 @@ const nodes = computed(() => {
 <style lang="scss" scoped>
 .rich-text-view {
   display: block;
+  box-sizing: border-box;
   width: 100%;
+  /* 正文左缩进：默认 0，由模块级样式面板的 contentPaddingLeft 单独控制 */
+  padding-left: v-bind('contentIndent');
 
   &__body {
     display: block;
     width: 100%;
+
+    /*
+     * 富文本内容里若自带 <ul>/<ol>（编辑器的项目符号列表），
+     * 清掉 UA 默认的 40px 左内边距，避免与模块内边距叠加导致「太靠右」。
+     * 注意：小程序端 rich-text 节点不吃外部样式，仅在 H5 / App 生效。
+     */
+    :deep(ul),
+    :deep(ol) {
+      padding-left: 0;
+      margin: 0;
+      list-style-position: inside;
+    }
   }
 }
 </style>

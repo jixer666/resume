@@ -39,7 +39,6 @@ const isShow = reactive(props.modelData.isShow)
   .user-info-1-box {
   .user-name {
     display: block;
-    margin: 0 0 20px;
     font-size: v-bind('modelStyle.titleFontSize');
     color: v-bind('modelStyle.titleColor');
     font-weight: v-bind('modelStyle.titleFontWeight');

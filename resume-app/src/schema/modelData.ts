@@ -110,17 +110,15 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
       {
         date: ['2021-9', '2022-10'], // 实习时间
         companyName: 'XXX有限公司', // 公司名称
+        department: 'XXX部门', // 部门
         posts: 'XXX实习生', // 职位
-        jobContent: [
-          {
-            content: '简要概述在岗时的工作内容',
-          },
-        ],
+        jobContent: '简要概述在岗时的工作内容',
       },
     ],
     isShow: {
       date: true,
       companyName: true,
+      department: true,
       posts: true,
       jobContent: true,
     },
@@ -134,17 +132,15 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
       {
         date: ['2021-9', '2022-10'], // 工作时间
         companyName: 'XXX公司', // 公司名称
+        department: 'XXX部门', // 部门
         posts: 'XXX工程师', // 职位
-        jobContent: [
-          {
-            content: '简要概述在岗时的工作内容',
-          },
-        ],
+        jobContent: '简要概述在岗时的工作内容',
       },
     ],
     isShow: {
       date: true,
       companyName: true,
+      department: true,
       posts: true,
     },
   },
@@ -158,11 +154,7 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
         date: ['2021-9', '2022-10'], // 项目时间
         projectName: '苍穹外卖', // 项目名称
         posts: 'XXX开发', // 项目职责
-        projectContent: [
-          {
-            content: '简要介绍该项目以及你在项目内的主要工作内容',
-          },
-        ],
+        projectContent: '简要介绍该项目以及你在项目内的主要工作内容',
       },
     ],
     isShow: {

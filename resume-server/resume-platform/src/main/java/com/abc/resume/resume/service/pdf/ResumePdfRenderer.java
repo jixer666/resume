@@ -10,7 +10,12 @@ import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.Margin;
 import com.microsoft.playwright.options.WaitUntilState;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -19,7 +24,7 @@ import java.net.URLEncoder;
 
 /**
  * 简历 PDF 渲染器：无头浏览器打开 H5 导出预览页，再按 A4 打印成 PDF。
- *
+ * <p>
  * 不在 Java 侧重写渲染逻辑 —— 简历物料有近两百套皮肤（Vue SFC + scoped SCSS），
  * 后端无法复用；所以让浏览器去跑前端已有的预览页，所见即所得。
  */
@@ -27,28 +32,44 @@ import java.net.URLEncoder;
 @Component
 public class ResumePdfRenderer {
 
-    /** H5 导出预览页地址（hash 路由），导出时在末尾拼 ?id=xxx&token=xxx */
-    @Value("${resume.export.preview-url:http://127.0.0.1:9001/#/pages/export/index}")
+    @Value("${resume.system.export.preview-url}")
     private String previewUrl;
 
-    /** 单次导出的整体超时（毫秒）：页面加载 + 渲染 + 打印 */
-    @Value("${resume.export.timeout:60000}")
+    @Value("${resume.system.export.timeout}")
     private double timeout;
 
-    /** A4 纸宽（px）：与物料层字号 / 间距同一坐标系，也是 H5 预览页的设计宽度 */
+    @Autowired
+    @Qualifier("commonTaskExecutor")
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
+    /**
+     * A4 纸宽（px）
+     */
     private static final int VIEWPORT_WIDTH = 794;
-    /** A4 纸高（px） */
+    /**
+     * A4 纸高（px）
+     */
     private static final int VIEWPORT_HEIGHT = 1123;
-
-    /** 简历渲染完成的标志：ResumeRender 的根节点，数据没到位时不会出现 */
+    /**
+     * 简历渲染完成的标志：ResumeRender 的根节点，数据没到位时不会出现
+     */
     private static final String RESUME_SELECTOR = ".rs-page";
-
     private Playwright playwright;
     private Browser browser;
 
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
+        threadPoolTaskExecutor.execute(() -> {
+            playwright = Playwright.create();
+            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+            log.info("简历导出浏览器初始化完成");
+        });
+    }
+
     /**
      * 把简历打印成 PDF。
-     *
+     * <p>
      * Playwright 的对象不是线程安全的，且单个 Chromium 实例渲染大文档很吃资源，
      * 所以这里串行化导出 —— 简历导出是低频操作，排队比并发崩掉划算。
      *
@@ -78,12 +99,12 @@ public class ResumePdfRenderer {
 
     /**
      * 开一个干净的浏览器上下文打开导出预览页，等简历真正渲染出来。
-     *
+     * <p>
      * 每次导出都新开 context：预览页要把 URL 里的 token 写进 storage，
      * 复用上下文会把上一份简历的登录态和缓存带过来。
      */
     private Page newPage(Long id, String token) {
-        Page page = browser().newContext(new Browser.NewContextOptions()
+        Page page = browser.newContext(new Browser.NewContextOptions()
                         .setViewportSize(VIEWPORT_WIDTH, VIEWPORT_HEIGHT))
                 .newPage();
         page.setDefaultTimeout(timeout);
@@ -101,23 +122,15 @@ public class ResumePdfRenderer {
         return previewUrl + separator + "id=" + id + "&token=" + urlEncode(token);
     }
 
-    /** token 是 JWT，含 `.` / `-` / `_` 等安全字符，编码只为兜底 */
+    /**
+     * token 是 JWT，含 `.` / `-` / `_` 等安全字符，编码只为兜底
+     */
     private String urlEncode(String value) {
         try {
             return URLEncoder.encode(value, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return value;
         }
-    }
-
-    /** 懒启动：服务启动时不拉起 Chromium，第一次导出才下载 / 启动 */
-    private Browser browser() {
-        if (browser == null || !browser.isConnected()) {
-            playwright = Playwright.create();
-            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-            log.info("简历导出浏览器已启动");
-        }
-        return browser;
     }
 
     @PreDestroy

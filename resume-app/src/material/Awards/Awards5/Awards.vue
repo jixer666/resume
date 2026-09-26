@@ -75,7 +75,7 @@ const { left } = useGetLineLeft(props.modelStyle, -23)
         letter-spacing: 2px;
       }
       &:not(:last-child) {
-        margin-bottom: 20px;
+        margin-bottom: var(--entry-mb, 20px);
       }
     }
   }

@@ -5,7 +5,11 @@
       <div class="banner-texture u-tag-div" />
       <div class="banner-content u-tag-div">
         <div v-show="isShow.avatar" class="banner-avatar u-tag-div">
-          <circle-avatar :model-data="modelData" width="104px" height="104px" />
+          <circle-avatar
+            :model-data="modelData"
+            :width="modelStyle?.avatarWidth || '104px'"
+            :height="modelStyle?.avatarHeight || '104px'"
+          />
         </div>
         <h1 class="banner-name u-tag-h1">
           {{ modelData.name }}

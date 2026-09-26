@@ -384,11 +384,11 @@ function confirmDelete() {
 
     <view v-if="resume" class="footer">
       <view class="tab" hover-class="tab--press" @click="preview">
-        <mp-icon name="ui-view" color="#64748b" size="30px" />
+        <mp-icon name="ui-view" color="#64748b" size="24px" />
         <text class="tab-text">简历预览</text>
       </view>
       <view class="tab" hover-class="tab--press" @click="showModuleSheet = true">
-        <mp-icon name="ui-list" color="#64748b" size="30px" />
+        <mp-icon name="ui-list" color="#64748b" size="24px" />
         <text class="tab-text">模块管理</text>
       </view>
       <view class="tab" hover-class="tab--press" @click="showSettingSheet = true">
@@ -447,7 +447,7 @@ function confirmDelete() {
       @close="closeModuleManager"
       @change="autoSave"
     />
-    <global-style-sheet :visible="showGlobalStyle" @close="closeGlobalStyle" />
+    <style-sheet :visible="showGlobalStyle" :show-module-tab="false" @close="closeGlobalStyle" />
   </view>
 </template>
 
@@ -602,7 +602,6 @@ function confirmDelete() {
   bottom: 0;
   left: 0;
   display: flex;
-  padding: 8px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   background-color: #fff;
   box-shadow: 0 -6px 18px rgb(23 43 77 / 8%);
@@ -625,7 +624,7 @@ function confirmDelete() {
 .tab-text {
   margin-top: 3px;
   color: #64748b;
-  font-size: 10px;
+  font-size: 12px;
 }
 </style>
 

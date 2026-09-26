@@ -1,7 +1,7 @@
 <!-- 基础资料·左侧栏名片：白框竖版头像 + 白色姓名 + 联系方式，白字直接压在栏底色上 -->
 <template>
   <div class="base-info-11-box u-tag-div">
-    <div v-show="modelData.isShow.avatar" class="side-avatar u-tag-div">
+    <div v-show="modelData.isShow.avatar" class="side-avatar u-tag-div" :style="avatarStyle">
       <image class="side-avatar__pic" :src="modelData.avatar || defaultImg" mode="aspectFill" />
     </div>
     <h1 class="side-name u-tag-h1">
@@ -27,10 +27,19 @@ import type { IBASEINFO } from '@/interface/model'
 import type IMODELSTYLE from '@/interface/modelStyle'
 import defaultImg from '@img/people.jpg'
 
-defineProps<{
+const props = defineProps<{
   modelData: IBASEINFO // 模块数据
   modelStyle: IMODELSTYLE // 模块样式
 }>()
+
+const avatarStyle = computed(() => {
+  const style: Record<string, string> = {}
+  if (props.modelStyle?.avatarWidth)
+    style.width = props.modelStyle.avatarWidth
+  if (props.modelStyle?.avatarHeight)
+    style.height = props.modelStyle.avatarHeight
+  return style
+})
 </script>
 
 <style lang="scss" scoped>

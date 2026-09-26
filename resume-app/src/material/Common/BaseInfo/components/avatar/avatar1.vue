@@ -2,6 +2,7 @@
   <view
     v-show="isShow.avatar"
     :class="modelData.avatarShape ? 'avatar-shape-box' : 'avatar-box'"
+    :style="avatarStyle"
   >
     <AvatarShape v-if="modelData.avatarShape" :model-data="modelData" />
     <image
@@ -10,6 +11,7 @@
       :src="modelData.avatar"
       mode="aspectFill"
       style="width: 115px; height: 145px"
+      :style="avatarStyle"
     />
   </view>
 </template>
@@ -24,6 +26,15 @@ const props = defineProps<{
   modelStyle: IMODELSTYLE // 模块样式
 }>()
 const isShow = reactive(props.modelData.isShow)
+
+const avatarStyle = computed(() => {
+  const style: Record<string, string> = {}
+  if (props.modelStyle?.avatarWidth)
+    style.width = props.modelStyle.avatarWidth
+  if (props.modelStyle?.avatarHeight)
+    style.height = props.modelStyle.avatarHeight
+  return style
+})
 </script>
 
 <style lang="scss" scoped>

@@ -136,14 +136,14 @@ interface IINTERNSHIPEXPERIENCE {
   LIST: Array<{
     date: Array<string> // 实习时间
     companyName: string // 公司名称
+    department: string // 部门
     posts: string // 职位
-    jobContent: Array<{
-      content: string
-    }>
+    jobContent: string // 工作内容，富文本 HTML
   }>
   isShow: {
     date: boolean
     companyName: boolean
+    department: boolean
     posts: boolean
     jobContent: boolean
   }
@@ -158,14 +158,14 @@ interface IWORKEXPERIENCE {
   LIST: Array<{
     date: Array<string> // 工作时间
     companyName: string // 公司名称
+    department: string // 部门
     posts: string // 职位
-    jobContent: Array<{
-      content: string
-    }>
+    jobContent: string // 工作内容，富文本 HTML
   }>
   isShow: {
     date: boolean
     companyName: boolean
+    department: boolean
     posts: boolean
   }
   [propNams: string]: any
@@ -180,9 +180,7 @@ interface IPROJECTEXPERIENCE {
     date: Array<string> // 项目时间
     projectName: string // 项目名称
     posts: string // 项目职责
-    projectContent: Array<{
-      content: string
-    }>
+    projectContent: string // 项目内容，富文本 HTML
   }>
   isShow: {
     date: boolean

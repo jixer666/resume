@@ -69,7 +69,7 @@ function copyWorksLink(link?: string) {
         }
       }
       &:not(:last-child) {
-        margin-bottom: 15px;
+        margin-bottom: var(--entry-mb, 15px);
       }
     }
   }

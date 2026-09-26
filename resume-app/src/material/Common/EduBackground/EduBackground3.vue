@@ -57,7 +57,7 @@ defineProps<{
       box-sizing: border-box;
       padding: 0;
       padding-bottom: 10px;
-      margin-bottom: 15px;
+      margin-bottom: var(--entry-mb, 15px);
       .date-school-box {
         width: 100%;
         display: flex;

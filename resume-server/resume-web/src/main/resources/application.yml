@@ -18,6 +18,9 @@ system:
     - /dms/doc/info/**
     - /dms/doc/info/s/**
     - /dms/book/docTree/**
+  export:
+    preview-url: ${resume.system.export.preview-url}
+    timeout: ${resume.system.export.timeout}
 
 server:
   port: ${server.port}
@@ -187,5 +190,3 @@ milvus:
 
 crypto:
   enabled: ${resume.crypto.enabled}
-
-

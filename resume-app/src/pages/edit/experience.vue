@@ -10,7 +10,7 @@ import { cleanHtml, plainToHtml } from '@/utils/richText'
  * 字段名对齐 resume-design 的数据模型（`src/interface/model.ts`），与 temp 的 ENTRY 字段不同：
  * 时间区间的 `date` 是 `[开始, 结束]` 数组（荣誉是单个字符串），
  * 经历描述在 WORK / INTERNSHIP 里叫 `jobContent`、PROJECT 里叫 `projectContent`，
- * 两者都是 `Array<{ content }>`（每条一个 bullet），这里统一用表单里的 `detail` 承接。
+ * 两者都是整段富文本 HTML 字符串，这里统一用表单里的 `detail` 承接。
  */
 defineOptions({ name: 'ResumeEditExperience' })
 definePage({
@@ -31,6 +31,7 @@ interface IEntryForm {
   specialized: string
   degree: string
   companyName: string
+  department: string
   posts: string
   campusBriefly: string
   campusDuty: string
@@ -51,6 +52,7 @@ function createForm(): IEntryForm {
     specialized: '',
     degree: '',
     companyName: '',
+    department: '',
     posts: '',
     campusBriefly: '',
     campusDuty: '',
@@ -130,6 +132,7 @@ function fillForm(entry: Record<string, unknown>) {
     specialized: String(entry.specialized || ''),
     degree: String(entry.degree || ''),
     companyName: String(entry.companyName || entry.projectName || ''),
+    department: String(entry.department || ''),
     posts: String(entry.posts || ''),
     campusBriefly: String(entry.campusBriefly || ''),
     campusDuty: String(entry.campusDuty || ''),
@@ -159,9 +162,9 @@ function buildEntry(): Record<string, unknown> {
     case 'WORKS_DISPLAY':
       return { worksName: form.worksName, worksLink: form.worksLink, worksIntroduce: detail }
     case 'PROJECT_EXPERIENCE':
-      return { date, projectName: form.companyName, posts: form.posts, projectContent: detail ? [{ content: detail }] : [] }
+      return { date, projectName: form.companyName, posts: form.posts, projectContent: detail }
     default:
-      return { date, companyName: form.companyName, posts: form.posts, jobContent: detail ? [{ content: detail }] : [] }
+      return { date, companyName: form.companyName, department: form.department, posts: form.posts, jobContent: detail }
   }
 }
 
@@ -278,6 +281,10 @@ function clear() {
       <template v-else>
         <text class="label">{{ orgLabel.label }}</text>
         <input v-model="form.companyName" class="input" :placeholder="orgLabel.placeholder">
+        <template v-if="model === 'INTERNSHIP_EXPERIENCE' || model === 'WORK_EXPERIENCE'">
+          <text class="label">部门</text>
+          <input v-model="form.department" class="input" placeholder="如：技术部">
+        </template>
         <text class="label">{{ model === 'PROJECT_EXPERIENCE' ? '项目职责' : '职位' }}</text>
         <input v-model="form.posts" class="input" :placeholder="model === 'PROJECT_EXPERIENCE' ? '请输入项目职责' : '请输入职位'">
       </template>

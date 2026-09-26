@@ -153,3 +153,154 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* 分组标题下的一句话说明：告诉用户这一组调的是简历里的哪块内容 */
+.sheet-hint {
+  display: block;
+  margin-top: 3px;
+  color: #a3adba;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+/*
+  样式面板（StyleSheet）的分栏与控件：全局样式 / 组件样式两栏共用同一套控件外观。
+  色板、下拉行、滑块行原先各自写在 GlobalStyleSheet / ModuleStyleSheet 里，合并后统一放这里。
+*/
+.sheet-tabs {
+  display: flex;
+  margin-top: 14px;
+  padding: 3px;
+  border-radius: 12px;
+  background-color: #f1f5f9;
+}
+
+.sheet-tab {
+  flex: 1;
+  height: 34px;
+  border-radius: 10px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 34px;
+  text-align: center;
+}
+
+.sheet-tab--on {
+  background-color: #fff;
+  color: #172b4d;
+  font-weight: 600;
+}
+
+.sheet-tab--press {
+  opacity: 0.8;
+}
+
+/* 组件样式栏的模块选择：横向滚动的胶囊，选中项用主题色 */
+.mod-picker {
+  margin-top: 12px;
+  white-space: nowrap;
+}
+
+.mod-chip {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 5px 12px;
+  border-radius: 14px;
+  background-color: #f1f5f9;
+  color: #596273;
+  font-size: 12px;
+}
+
+.mod-chip--on {
+  background-color: var(--wot-color-theme, #0957de);
+  color: #fff;
+}
+
+.mod-chip--press {
+  opacity: 0.85;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.swatch {
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  margin: 0 10px 10px 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 17px;
+}
+
+.swatch--on {
+  box-shadow: 0 0 0 2px var(--wot-color-theme, #0957de);
+}
+
+.opt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* 名称下方挂了示例说明，故高度自适应，不再写死 46px */
+  min-height: 46px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+}
+
+/* 左侧「名称 + 示例」两行：picker / 滑块值靠右对齐 */
+.opt-name {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-right: 10px;
+}
+
+.opt-label {
+  color: #596273;
+  font-size: 13px;
+}
+
+/* 示例文字：如「公司名、学校名、职位」，让用户知道这一项管的是哪块文字 */
+.opt-hint {
+  margin-top: 2px;
+  color: #a3adba;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+.opt-value {
+  display: flex;
+  align-items: center;
+  color: #172b4d;
+  font-size: 13px;
+}
+
+.opt-arrow {
+  margin-left: 6px;
+  color: #c0c9d6;
+  font-size: 16px;
+}
+
+.slider-row {
+  margin-top: 12px;
+}
+
+.slider-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slider-value {
+  color: #172b4d;
+  font-size: 12px;
+}
+
+.slider {
+  margin: 4px 0 0;
+}

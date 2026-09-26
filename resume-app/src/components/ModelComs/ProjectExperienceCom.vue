@@ -24,8 +24,8 @@
         <div class="job-content u-tag-div">
           <div class="content-list u-tag-div">
             <ul class="u-tag-ul">
-              <li v-for="(list, j) in item.projectContent" :key="j" class="u-tag-li">
-                <RichTextView :html="list.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
+              <li v-if="item.projectContent" class="u-tag-li">
+                <RichTextView :html="item.projectContent" :model-style="modelStyle" extra-style="letter-spacing:2px" />
               </li>
             </ul>
           </div>
@@ -74,7 +74,7 @@ const { left } = useGetLineLeft(props.modelStyle)
       display: flex;
       flex-direction: column;
       &:not(:last-child) {
-        margin-bottom: 25px;
+        margin-bottom: var(--entry-mb, 25px);
       }
       .u-tag-ul {
         display: flex;

@@ -56,7 +56,7 @@ defineProps<{
     display: flex;
     width: 100%;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: var(--entry-mb, 20px);
     .u-tag-ul {
       display: flex;
       flex-direction: column;

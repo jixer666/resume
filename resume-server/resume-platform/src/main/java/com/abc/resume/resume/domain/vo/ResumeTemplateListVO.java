@@ -1,5 +1,6 @@
 package com.abc.resume.resume.domain.vo;
 
+import com.abc.resume.resume.domain.entity.template.ResumeTemplateDetail;
 import lombok.Data;
 
 /**
@@ -21,5 +22,13 @@ public class ResumeTemplateListVO {
 
     /** 封面 */
     private String cover;
+
+    /**
+     * 模板明细（含 layout / style / variants）。
+     *
+     * <p>「使用模板」与预览页「更换模板」都只从列表取模板，列表不带明细就会套出一个空样式；
+     * Mapper 的列表查询已经查了 template_detail 列，这里必须接住。</p>
+     */
+    private ResumeTemplateDetail templateDetail;
 
 }

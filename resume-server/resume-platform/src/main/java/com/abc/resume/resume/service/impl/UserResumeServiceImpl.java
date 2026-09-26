@@ -21,6 +21,8 @@ import com.abc.resume.util.ServletUtils;
 import com.abc.resume.util.StringUtils;
 import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -79,12 +81,11 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     }
 
     @Override
-    public byte[] exportPdf(Long id) {
-        // 先鉴权：确认简历存在且属于当前用户，再渲染
-        validAndGetResume(id, SecurityUtils.getUserId());
-        // H5 预览页在全新的浏览器上下文里跑，拿不到登录态，所以把当前请求的 token 带过去
+    public ResponseEntity<byte[]> exportPdf(Long id) {
+        UserResume userResume = validAndGetResume(id, SecurityUtils.getUserId());
         String token = tokenService.getToken(ServletUtils.getRequest());
-        return resumePdfRenderer.render(id, token);
+        byte[] resumeByte = resumePdfRenderer.render(id, token);
+        return download(resumeByte, userResume.getResumeDetail().getName(), MediaType.APPLICATION_PDF);
     }
 
     private UserResumeVO addResume(UserResumeSubmitDTO dto) {

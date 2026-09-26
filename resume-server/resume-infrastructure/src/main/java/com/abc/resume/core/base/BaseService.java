@@ -34,7 +34,7 @@ public class BaseService {
                 .build();
     }
 
-    public ResponseEntity<byte[]> download(byte[] fileData, String filename) {
+    public ResponseEntity<byte[]> download(byte[] fileData, String filename, MediaType mediaType) {
         HttpHeaders headers = new HttpHeaders();
         ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
                 .filename(filename, StandardCharsets.UTF_8)
@@ -43,7 +43,7 @@ public class BaseService {
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(fileData.length)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentType(mediaType)
                 .body(fileData);
     }
 }
