@@ -2,7 +2,6 @@ package com.abc.resume.resume.service;
 
 import com.abc.resume.core.page.PageResult;
 import com.abc.resume.resume.domain.dto.ResumeTemplatePageDTO;
-import com.abc.resume.resume.domain.vo.ResumeTemplateListVO;
 import com.abc.resume.resume.domain.vo.ResumeTemplateVO;
 
 /**

@@ -1,6 +1,5 @@
 package com.abc.resume.resume.domain.vo;
 
-import com.abc.resume.resume.domain.entity.template.ResumeTemplateDetail;
 import lombok.Data;
 
 /**
@@ -23,6 +22,4 @@ public class ResumeTemplateListVO {
     /** 封面 */
     private String cover;
 
-    /** 模板明细 */
-    private ResumeTemplateDetail templateDetail;
 }

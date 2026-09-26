@@ -1,12 +1,14 @@
 package com.abc.resume.resume.domain.entity.resume;
 
 import com.abc.resume.resume.domain.entity.ResumeTemplate;
+import com.abc.resume.resume.domain.entity.template.ResumeTemplateColumn;
 import com.abc.resume.resume.domain.entity.template.ResumeTemplateDetail;
+import com.abc.resume.resume.domain.entity.template.ResumeTemplateStyle;
+import com.abc.resume.resume.domain.entity.template.ResumeTemplateVariant;
 import com.abc.resume.system.domain.entity.config.ResumeModelDataConfig;
 import com.abc.resume.util.IdUtils;
 import com.abc.resume.util.JsonUtils;
 import com.abc.resume.util.StringUtils;
-import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -116,7 +118,7 @@ public class UserResumeDetail {
     /**
      * 把模板样式里非空字段覆盖到全局样式上
      */
-    private static void applyStyle(GlobalStyle target, ResumeTemplateDetail.Style source) {
+    private static void applyStyle(GlobalStyle target, ResumeTemplateStyle source) {
         if (target == null || source == null) {
             return;
         }
@@ -210,7 +212,7 @@ public class UserResumeDetail {
      * 双列布局下模块的左右栏归属
      */
     private static String leftRightLayoutOf(ResumeTemplateDetail templateDetail, String model) {
-        ResumeTemplateDetail.Columns columns = templateDetail.getColumns();
+        ResumeTemplateColumn columns = templateDetail.getColumns();
         if (columns == null) {
             return StringUtils.EMPTY;
         }
@@ -235,7 +237,7 @@ public class UserResumeDetail {
      * 按模块名取模板指定的皮肤名，未配置返回 null
      */
     private static String cptNameOf(ResumeTemplateDetail templateDetail, String model) {
-        ResumeTemplateDetail.Variants variants = templateDetail.getVariants();
+        ResumeTemplateVariant variants = templateDetail.getVariants();
         if (variants == null) {
             return null;
         }

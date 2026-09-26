@@ -3,7 +3,6 @@ package com.abc.resume.api;
 import com.abc.resume.core.page.PageResult;
 import com.abc.resume.core.result.ApiResult;
 import com.abc.resume.resume.domain.dto.ResumeTemplatePageDTO;
-import com.abc.resume.resume.domain.vo.ResumeTemplateListVO;
 import com.abc.resume.resume.domain.vo.ResumeTemplateVO;
 import com.abc.resume.resume.service.ResumeTemplateService;
 import io.swagger.annotations.Api;
