@@ -1,5 +1,7 @@
 import type { IResumeDetail, IResumeListRes, IResumeSaveParams } from './types/resume'
 import { http } from '@/http/http'
+import { useTokenStore } from '@/store/token'
+import { getEnvBaseUrl } from '@/utils'
 
 /**
  * 简历提交动作，取值与后端 UserResumeSubmitDTO 的 act 常量一一对应。
@@ -51,4 +53,32 @@ export function copyResume(id: number) {
  */
 export function deleteResume(id: number) {
   return http.post<void>('/resume/submit', { act: RESUME_ACT.DELETE, id })
+}
+
+/**
+ * 导出简历为 PDF，返回小程序临时文件路径（可直接交给 `uni.openDocument` 打开）。
+ *
+ * 为什么不走 `http`：导出接口返回的是 `application/pdf` 二进制流，而 `http` 是 JSON 通道
+ * （`dataType: 'json'`，还会按业务码解包），二进制流必须用 `uni.downloadFile`。
+ *
+ * 又因为 `interceptor.ts` 只注册了 `request` / `uploadFile` 两个拦截器，`downloadFile`
+ * 不会自动拼 baseUrl、也不会自动带鉴权头，所以这里手动补上这两样。
+ */
+export function exportResumePdf(id: number): Promise<string> {
+  const token = useTokenStore().updateNowTime().validToken
+  return new Promise((resolve, reject) => {
+    uni.downloadFile({
+      url: `${getEnvBaseUrl()}/resume/export/${id}`,
+      header: token ? { Authorization: `Bearer ${token}` } : {},
+      success: (res) => {
+        // 鉴权失败等异常场景下后端会退回 JSON 错误体，此时拿不到文件
+        if (res.statusCode !== 200) {
+          reject(new Error(`导出失败（${res.statusCode}）`))
+          return
+        }
+        resolve(res.tempFilePath)
+      },
+      fail: error => reject(new Error(error.errMsg || '导出失败')),
+    })
+  })
 }

@@ -24,4 +24,9 @@ public interface UserResumeService {
      * 提交简历
      */
     UserResumeVO submitResume(UserResumeSubmitDTO dto);
+
+    /**
+     * 导出简历为 PDF
+     */
+    byte[] exportPdf(Long id);
 }

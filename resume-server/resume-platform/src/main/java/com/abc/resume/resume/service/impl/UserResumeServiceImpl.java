@@ -13,8 +13,11 @@ import com.abc.resume.resume.domain.vo.UserResumeVO;
 import com.abc.resume.resume.mapper.ResumeTemplateMapper;
 import com.abc.resume.resume.mapper.UserResumeMapper;
 import com.abc.resume.resume.service.UserResumeService;
+import com.abc.resume.resume.service.pdf.ResumePdfRenderer;
+import com.abc.resume.system.service.TokenService;
 import com.abc.resume.system.utils.SecurityUtils;
 import com.abc.resume.util.AssertUtils;
+import com.abc.resume.util.ServletUtils;
 import com.abc.resume.util.StringUtils;
 import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,12 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
 
     @Autowired
     private AppConfig appConfig;
+
+    @Autowired
+    private ResumePdfRenderer resumePdfRenderer;
+
+    @Autowired
+    private TokenService tokenService;
 
     @Override
     public PageResult getUserResumePage(UserResumePageDTO dto) {
@@ -62,11 +71,20 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
         } else if (dto.getAct() == UserResumeSubmitDTO.UPDATE) {
             vo = updateResume(dto);
         } else if (dto.getAct() == UserResumeSubmitDTO.DELETE) {
-            vo = copyResume(dto.getId());
-        } else {
             deleteResume(dto.getId());
+        } else {
+            vo = copyResume(dto.getId());
         }
         return vo;
+    }
+
+    @Override
+    public byte[] exportPdf(Long id) {
+        // 先鉴权：确认简历存在且属于当前用户，再渲染
+        validAndGetResume(id, SecurityUtils.getUserId());
+        // H5 预览页在全新的浏览器上下文里跑，拿不到登录态，所以把当前请求的 token 带过去
+        String token = tokenService.getToken(ServletUtils.getRequest());
+        return resumePdfRenderer.render(id, token);
     }
 
     private UserResumeVO addResume(UserResumeSubmitDTO dto) {

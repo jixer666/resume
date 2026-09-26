@@ -61,14 +61,26 @@ const rightColumnStyle = computed(() => ({
 </template>
 
 <style scoped lang="scss">
+/*
+ * 内容不足一张 A4 时也要撑满整张纸（1123px），否则左栏主题色底色只铺到内容高度，
+ * 纸面底部会露出大片白底。这里用 flex 纵向撑开，把余量分给主区 / 两列区。
+ */
 .rs-page {
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   width: 100%;
+  min-height: 1123px;
   background-color: #fff;
+}
+
+.rs-page__main {
+  flex: none;
 }
 
 .rs-page__columns {
   display: flex;
+  flex: 1;
   align-items: stretch;
   box-sizing: border-box;
   width: 100%;
