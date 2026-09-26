@@ -427,6 +427,40 @@ export const useResumeStore = defineStore(
       return current.value?.COMPONENTS.find((item: IMATERIALITEM) => item.model === model)
     }
 
+    /**
+     * 更换模板：把新模板的版式与样式套到当前简历上，已填内容原样保留。
+     *
+     * 只动四类字段 —— LAYOUT、GLOBAL_STYLE、模块栏位 layout、模块皮肤（cptName / cptTitle / style）；
+     * 模块顺序、显隐状态、业务数据 data 一律不动，换模板不该丢用户填过的东西。
+     *
+     * @returns 模板不存在或没有当前简历时返回 false
+     */
+    function applyTemplate(templateId: string): boolean {
+      const json = current.value
+      const template = templateId ? useTemplateStore().get(templateId) : undefined
+      if (!json || !template)
+        return false
+      json.LAYOUT = template.layout
+      json.GLOBAL_STYLE = { ...json.GLOBAL_STYLE, ...template.style }
+      // 模板样式是全局样式的预设值，必须无条件扇出（传 keys），否则「刚好等于出厂默认」的那几项不会生效
+      const keys = Object.keys(template.style) as (keyof IGlobalStyle)[]
+      const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
+      json.COMPONENTS.forEach((item: IMATERIALITEM) => {
+        item.layout = layoutOf(item.model, template)
+        const cptName = template.variants?.[item.model]
+        const variant = cptName ? materialGroupOf(item.model).find(one => one.cptName === cptName) : undefined
+        if (variant) {
+          item.cptName = variant.cptName
+          item.cptTitle = variant.cptTitle
+          item.style = clone(variant.style)
+        }
+        applyGlobalStyleToItem(item, globalStyle, keys)
+      })
+      // 还没落库的草稿靠模板编码新建，这里同步上，否则换的模板不会被后端采用
+      currentTemplateCode.value = templateId
+      return true
+    }
+
     return {
       list,
       current,
@@ -449,6 +483,7 @@ export const useResumeStore = defineStore(
       updateGlobalStyle,
       updateModuleTitle,
       changeVariant,
+      applyTemplate,
       variantsOf: materialGroupOf,
       findModule,
       findModuleByKey,
