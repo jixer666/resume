@@ -5,10 +5,10 @@ export default defineUniPages({
   globalStyle: {
     navigationStyle: 'default',
     navigationBarTitleText: '简历盒子',
-    // 蓝底白字导航栏与首页/我的简历的渐变头部衔接（对标 resume-app-temp）
-    navigationBarBackgroundColor: '#2563eb',
-    navigationBarTextStyle: 'white',
-    backgroundColor: '#FFFFFF',
+    // 极简白底黑字导航栏：三页不再有渐变头部，蓝色只留给按钮与选中态
+    navigationBarBackgroundColor: '#FFFFFF',
+    navigationBarTextStyle: 'black',
+    backgroundColor: '#F5F6F8',
   },
   easycom: {
     autoscan: true,

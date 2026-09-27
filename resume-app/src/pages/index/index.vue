@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import type { IResumeTemplate } from '@/schema/templates'
-import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templates'
+import { templateSideColor, templateTheme } from '@/schema/templates'
 import { useTemplateStore } from '@/store/template'
 
 /**
@@ -12,14 +11,27 @@ import { useTemplateStore } from '@/store/template'
  *
  * 模板数据全部来自后端 `/resume/template/page`：首次进入走骨架屏，
  * 下滑到底部自动翻页，失败给重试入口。
+ *
+ * 排版走极简：白底筛选栏 + 浅灰衬底的双列封面卡，去掉渐变头部与装饰元素。
+ * 版式筛选是前端行为（后端分页接口不支持按 layout 过滤），选中筛选时
+ * 自动把剩余分页拉完，避免「双栏」只剩当前页里的一两条。
  */
 defineOptions({ name: 'Home' })
 definePage({
   type: 'home',
   style: {
+    navigationBarTitleText: '简历模板',
     enablePullDownRefresh: true,
   },
 })
+
+/** 版式筛选：全部 / 单栏 / 双栏（双栏 = 后端 layout 为 leftRight） */
+type LayoutFilter = 'all' | 'single' | 'double'
+const FILTERS: { label: string, value: LayoutFilter }[] = [
+  { label: '全部', value: 'all' },
+  { label: '单栏', value: 'single' },
+  { label: '双栏', value: 'double' },
+]
 
 const templateStore = useTemplateStore()
 const templates = computed(() => templateStore.list)
@@ -27,6 +39,7 @@ const loading = computed(() => templateStore.loading)
 const loadingMore = computed(() => templateStore.loadingMore)
 const hasMore = computed(() => templateStore.hasMore)
 const error = computed(() => templateStore.error)
+const filter = ref<LayoutFilter>('all')
 /**
  * 骨架屏 =「正在加载 且 还没有数据」。
  *
@@ -34,8 +47,15 @@ const error = computed(() => templateStore.error)
  * loading 结束前不可能出现空态；刷新时因已有数据，自动只走顶部进度条。
  */
 const showSkeleton = computed(() => loading.value && !templates.value.length)
-/** 头部角标：首次加载显示「加载中」，否则显示后端返回的模板数量 */
-const badgeText = computed(() => (showSkeleton.value ? '加载中' : `${templates.value.length} 款`))
+/** 筛选后的列表：「全部」不过滤，其余按版式过滤 */
+const visibleTemplates = computed(() => {
+  if (filter.value === 'all')
+    return templates.value
+  const twoColumn = filter.value === 'double'
+  return templates.value.filter(item => (item.layout === 'leftRight') === twoColumn)
+})
+/** 右上角数量：跟可见列表走，筛选时不会把别的版式算进来 */
+const countText = computed(() => (showSkeleton.value ? '加载中' : `共 ${visibleTemplates.value.length} 款`))
 
 // 进入页面立即拉第一页：fetchList 是同步先把 loading 置 true 的，
 // 所以首帧渲染就是骨架屏，不会先闪一下空态
@@ -58,9 +78,20 @@ onPullDownRefresh(async () => {
   uni.stopPullDownRefresh()
 })
 
-/** 封面衬底：主题色兑白的极浅渐变，让白纸封面在卡片里不显得空 */
-function coverBg(item: IResumeTemplate): string {
-  return coverBackdrop(templateTheme(item))
+/** 切换版式筛选：先切高亮，再把剩余分页补拉完，保证筛选结果完整 */
+async function switchFilter(value: LayoutFilter) {
+  filter.value = value
+  if (value === 'all')
+    return
+  // 后端分页接口不支持按 layout 过滤，只能把剩余分页拉完再筛；
+  // 最多补拉 20 页，接口异常时也不会在这里空转
+  for (let i = 0; i < 20 && templateStore.hasMore && !templateStore.loading; i++)
+    await templateStore.fetchMore()
+}
+
+/** 版式文案：双列模板存的是 leftRight，其余都是单栏 */
+function layoutText(layout: string): string {
+  return layout === 'leftRight' ? '双栏' : '单栏'
 }
 
 function openTemplate(code: string) {
@@ -74,45 +105,43 @@ function reload() {
 
 <template>
   <view class="page">
-    <view class="hero">
-      <view class="glow glow-a" />
-      <view class="glow glow-b" />
-      <view class="hero-top">
-        <text class="hero-title">模板库</text>
-        <view class="hero-badge">
-          {{ badgeText }}
+    <!-- 版式筛选：白底吸顶，右侧跟可见数量 -->
+    <view class="toolbar">
+      <view class="tabs">
+        <view
+          v-for="tab in FILTERS"
+          :key="tab.value"
+          class="tab"
+          :class="{ 'tab--on': filter === tab.value }"
+          @click="switchFilter(tab.value)"
+        >
+          {{ tab.label }}
+          <view v-if="filter === tab.value" class="tab-line" />
         </view>
       </view>
-      <text class="hero-sub">选一个版式开始，内容结构已为你铺好</text>
-      <!-- 顶部进度条：刷新（已有数据）时提示还在拉取 -->
-      <view v-if="loading && templates.length" class="loading-track">
-        <view class="loading-thumb" />
+      <text class="count">
+        {{ countText }}
+      </text>
+      <!-- 刷新（已有数据）时，用一条细进度条提示还在拉取 -->
+      <view v-if="loading && templates.length" class="refresh-track">
+        <view class="refresh-thumb" />
       </view>
     </view>
 
     <!-- 首次加载：骨架屏 -->
     <view v-if="showSkeleton" class="grid">
-      <view v-for="n in 4" :key="n" class="template-card">
+      <view v-for="n in 4" :key="n" class="card">
         <view class="cover-wrap">
-          <view class="cover-box">
-            <view class="skeleton skeleton-cover">
-              <view class="skeleton-shine" />
-            </view>
-          </view>
+          <view class="skeleton skeleton--cover" />
         </view>
         <view class="card-body">
-          <view class="skeleton skeleton-line">
-            <view class="skeleton-shine" />
-          </view>
+          <view class="skeleton skeleton--name" />
         </view>
       </view>
     </view>
 
     <!-- 加载失败：给重试入口，不回退写死数据 -->
     <view v-else-if="error && !templates.length" class="state">
-      <view class="state-icon">
-        !
-      </view>
       <text class="state-title">模板加载失败</text>
       <text class="state-desc">{{ error }}</text>
       <view class="retry" hover-class="retry-press" @click="reload">
@@ -129,13 +158,13 @@ function reload() {
     <template v-else>
       <view class="grid">
         <view
-          v-for="item in templates"
+          v-for="item in visibleTemplates"
           :key="item.code"
-          class="template-card"
+          class="card"
           hover-class="card-press"
           @click="openTemplate(item.code)"
         >
-          <view class="cover-wrap" :style="{ background: coverBg(item) }">
+          <view class="cover-wrap">
             <view class="cover-box">
               <resume-cover
                 :layout="item.layout"
@@ -145,25 +174,25 @@ function reload() {
             </view>
           </view>
           <view class="card-body">
-            <view class="name-row">
-              <view class="name">
-                {{ item.name }}
-              </view>
-              <text class="arrow">›</text>
-            </view>
+            <text class="name">{{ item.name }}</text>
+            <text class="badge">{{ layoutText(item.layout) }}</text>
           </view>
         </view>
+      </view>
+
+      <!-- 筛选结果为空 -->
+      <view v-if="!visibleTemplates.length" class="state">
+        <text class="state-title">暂无该版式模板</text>
+        <text class="state-desc">换个筛选条件看看</text>
       </view>
 
       <!-- 翻页状态 -->
       <view class="list-footer">
         <view v-if="loadingMore" class="footer-loading">
           <view class="footer-spinner" />
-          <text class="footer-text">加载中...</text>
+          <text class="footer-text">加载中…</text>
         </view>
-        <text v-else-if="!hasMore" class="footer-text">
-          没有更多了
-        </text>
+        <text v-else-if="!hasMore" class="footer-text">没有更多了</text>
       </view>
     </template>
   </view>
@@ -175,189 +204,170 @@ function reload() {
      模板少时正好一屏不出现滚动条，模板多了内容撑开才滚动 */
   min-height: calc(100vh - 50px - env(safe-area-inset-bottom));
   /* 滚到底时最后一张卡片与固定 tabbar 之间的呼吸空隙 */
-  padding-bottom: 24px;
-  background-color: #f4f4f4;
+  padding-bottom: 20px;
+  background-color: #f5f6f8;
 }
 
-.hero {
-  position: relative;
-  overflow: hidden;
-  padding: 24px 18px 26px;
-  border-radius: 0 0 24px 24px;
-  background: linear-gradient(160deg, #2563eb 0%, #5b8ff7 100%);
+/* -------- 版式筛选栏 -------- */
+.toolbar {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #eef0f3;
+  background-color: #fff;
 }
 
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  background-color: rgb(255 255 255 / 14%);
-}
-
-.glow-a {
-  top: -76px;
-  right: -46px;
-  width: 180px;
-  height: 180px;
-}
-
-.glow-b {
-  bottom: -62px;
-  left: -30px;
-  width: 130px;
-  height: 130px;
-}
-
-.hero-top {
-  position: relative;
+.tabs {
   display: flex;
   align-items: center;
 }
 
-.hero-title {
-  color: #fff;
-  font-size: 23px;
-  font-weight: 700;
-}
-
-.hero-badge {
-  margin-left: 10px;
-  padding: 3px 10px;
-  border-radius: 11px;
-  background-color: rgb(255 255 255 / 22%);
-  color: #fff;
-  font-size: 11px;
-}
-
-.hero-sub {
+.tab {
   position: relative;
-  display: block;
-  margin-top: 9px;
-  color: rgb(255 255 255 / 82%);
-  font-size: 13px;
+  margin-right: 24px;
+  color: #646a73;
+  font-size: 14px;
+  line-height: 44px;
+}
+
+.tab--on {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.tab-line {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 20px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: #2563eb;
+  transform: translateX(-50%);
+}
+
+.count {
+  color: #8f959e;
+  font-size: 12px;
 }
 
 /* 顶部不定长进度条 */
-.loading-track {
+.refresh-track {
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
   overflow: hidden;
-  height: 3px;
-  background-color: rgb(255 255 255 / 22%);
+  height: 2px;
+  background-color: #e8eefc;
 }
 
-.loading-thumb {
-  width: 38%;
+.refresh-thumb {
+  width: 36%;
   height: 100%;
-  border-radius: 2px;
-  background-color: #fff;
-  animation: loading-slide 1.1s ease-in-out infinite;
+  background-color: #2563eb;
+  animation: refresh-slide 1.1s ease-in-out infinite;
 }
 
-@keyframes loading-slide {
+@keyframes refresh-slide {
   0% {
     transform: translateX(-110%);
   }
 
   100% {
-    transform: translateX(375%);
+    transform: translateX(390%);
   }
 }
 
+/* -------- 模板卡片 -------- */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 16px 14px 0;
+  gap: 10px;
+  padding: 12px 12px 0;
 }
 
-.template-card {
+.card {
   overflow: hidden;
   border-radius: 8px;
   background-color: #fff;
 }
 
 .card-press {
-  opacity: 0.88;
+  background-color: #f2f3f5;
 }
 
+/* 封面衬底：中性浅灰，把白纸封面托出来 */
 .cover-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 190px;
-  padding: 10px;
+  height: 176px;
+  padding: 12px 0;
+  background-color: #f7f8fa;
 }
 
-/* ResumeCover 按 A4 比例自撑高度，给定宽度即锁定 170px 高的内容区 */
+/* ResumeCover 按 A4 比例自撑高度，给定宽度即锁定 150px 高的内容区 */
 .cover-box {
-  width: 120px;
+  width: 106px;
 }
 
 .card-body {
-  padding: 10px;
-}
-
-.name-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
 }
 
 .name {
   min-width: 0;
   flex: 1;
   overflow: hidden;
-  color: #172b4d;
-  font-size: 15px;
-  font-weight: 700;
+  color: #1f2329;
+  font-size: 13px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.arrow {
-  color: #c0c9d6;
-  font-size: 16px;
-  line-height: 1;
+.badge {
+  flex: none;
+  margin-left: 8px;
+  color: #8f959e;
+  font-size: 11px;
 }
 
 /* -------- 骨架屏 -------- */
 .skeleton {
-  position: relative;
-  overflow: hidden;
+  background-color: #e9ebee;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.skeleton--cover {
+  width: 106px;
+  height: 150px;
   border-radius: 6px;
-  background-color: #e4e9f0;
 }
 
-.skeleton-cover {
-  width: 100%;
-  height: 170px;
-  border-radius: 8px;
-}
-
-.skeleton-line {
-  width: 62%;
-  height: 14px;
-}
-
-/* 高光扫过：用 transform 位移，小程序端比 background-position 动画稳 */
-.skeleton-shine {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+.skeleton--name {
   width: 60%;
-  background: linear-gradient(90deg, rgb(255 255 255 / 0%) 0%, rgb(255 255 255 / 92%) 50%, rgb(255 255 255 / 0%) 100%);
-  animation: skeleton-shine 1.2s ease-in-out infinite;
+  height: 13px;
+  border-radius: 4px;
 }
 
-@keyframes skeleton-shine {
-  0% {
-    transform: translateX(-130%);
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
 
-  100% {
-    transform: translateX(230%);
+  50% {
+    opacity: 0.45;
   }
 }
 
@@ -366,7 +376,7 @@ function reload() {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+  height: 48px;
 }
 
 .footer-loading {
@@ -378,7 +388,7 @@ function reload() {
   width: 14px;
   height: 14px;
   margin-right: 6px;
-  border: 2px solid #d7dee9;
+  border: 2px solid #dfe3e8;
   border-top-color: #2563eb;
   border-radius: 50%;
   animation: footer-spin 0.7s linear infinite;
@@ -391,7 +401,7 @@ function reload() {
 }
 
 .footer-text {
-  color: #9aa7b8;
+  color: #8f959e;
   font-size: 12px;
 }
 
@@ -400,47 +410,32 @@ function reload() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 72px 32px 0;
-}
-
-.state-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #e6ecf5;
-  color: #8b9bb4;
-  font-size: 22px;
-  font-weight: 700;
+  padding: 96px 32px 0;
 }
 
 .state-title {
-  margin-top: 16px;
-  color: #172b4d;
-  font-size: 16px;
-  font-weight: 600;
+  color: #1f2329;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .state-desc {
   margin-top: 8px;
-  color: #94a3b8;
+  color: #8f959e;
   font-size: 13px;
   text-align: center;
 }
 
 .retry {
   margin-top: 20px;
-  padding: 9px 26px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #2563eb 0%, #5b8ff7 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 8px 24px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  color: #2563eb;
+  font-size: 13px;
 }
 
 .retry-press {
-  opacity: 0.86;
+  background-color: #f0f5ff;
 }
 </style>

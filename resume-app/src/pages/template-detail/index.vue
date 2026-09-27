@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { lightenColor, templateSideColor, templateTheme } from '@/schema/templates'
+import { templateSideColor, templateTheme } from '@/schema/templates'
 import { useTemplateStore } from '@/store/template'
 import { useTokenStore } from '@/store/token'
 import { toLoginPage } from '@/utils/toLoginPage'
@@ -8,28 +8,27 @@ import { toLoginPage } from '@/utils/toLoginPage'
  * 模板详情：先看版式再决定用不用。
  *
  * 首页卡片直接生成简历的话，用户挨个点一遍就会攒出一堆空简历，所以中间加一层确认页。
- * 排版对标 resume-app-temp 的同名页面：主题色渐变头部 + 白色相框预览 + 信息卡/参数卡 +
- * 底栏「使用模板」。整页按一屏设计：`height: 100vh` 的 flex 列，主体吃掉剩余高度，
- * 底栏在文档流末尾常驻，页面恒等于一屏，不出现滚动条。
+ *
+ * 排版走极简：浅灰底的 A4 预览 + 白底信息卡与参数行 + 底部「使用模板」按钮，
+ * 去掉渐变头部、光晕与主题色相框；详情接口没回来之前铺骨架屏。
  */
 defineOptions({ name: 'TemplateDetail' })
-definePage({})
+definePage({
+  style: {
+    navigationBarTitleText: '模板详情',
+  },
+})
 
 const tokenStore = useTokenStore()
 const templateStore = useTemplateStore()
 /** 当前模板，id 非法时为 null（据此渲染兜底态） */
 const tpl = computed(() => templateStore.current)
-
+/** 列表里已有这份模板时直接渲染内容，只有「还没有数据」才铺骨架屏 */
+const showSkeleton = computed(() => templateStore.detailLoading && !tpl.value)
 const theme = computed(() => (tpl.value ? templateTheme(tpl.value) : '#2563eb'))
 const side = computed(() => (tpl.value ? templateSideColor(tpl.value) : '#eef4ff'))
-/** 提亮一档：做渐变的收尾色，比纯主题色更有层次 */
-const themeLight = computed(() => lightenColor(theme.value, 0.35))
-/** 主题色兑到极浅：角标与提示卡的衬底 */
-const themeSoft = computed(() => lightenColor(theme.value, 0.9))
-const heroBg = computed(() => `linear-gradient(160deg, ${theme.value} 0%, ${themeLight.value} 100%)`)
-const buttonBg = computed(() => `linear-gradient(135deg, ${theme.value} 0%, ${themeLight.value} 100%)`)
 
-/** 参数卡：固定四项，窄屏也不会换行错位 */
+/** 参数行：固定四项，窄屏也不会换行错位 */
 const metaList = computed(() => {
   const style = tpl.value?.style || {}
   return [
@@ -43,24 +42,9 @@ const metaList = computed(() => {
 onLoad(async (query) => {
   const id = query?.id ? String(query.id) : ''
   await templateStore.fetchDetail(id)
-  syncNavigationBar()
+  if (tpl.value)
+    uni.setNavigationBarTitle({ title: tpl.value.name })
 })
-
-/** 导航栏跟着模板主题色走，滚到顶部时和 hero 连成一片 */
-onReady(() => {
-  syncNavigationBar()
-})
-
-/** 详情拿到后同步导航栏；fetch 与 onReady 谁先谁后都由它兜住 */
-function syncNavigationBar() {
-  if (!tpl.value)
-    return
-  uni.setNavigationBarColor({
-    frontColor: '#ffffff',
-    backgroundColor: theme.value,
-  })
-  uni.setNavigationBarTitle({ title: tpl.value.name })
-}
 
 /** 套用该模板：未登录先去登录，回来后仍停在详情页，再点一次即可 */
 function useTemplate() {
@@ -72,59 +56,79 @@ function useTemplate() {
   }
   uni.navigateTo({ url: `/pages/edit/index?new=1&template=${tpl.value.code}` })
 }
+
+/** 兜底态回模板库（tab 页只能 switchTab） */
+function backToLibrary() {
+  uni.switchTab({ url: '/pages/index/index' })
+}
 </script>
 
 <template>
   <view class="page">
-    <view class="hero" :style="{ background: heroBg }">
-      <view class="glow glow-lg" />
-      <view class="glow glow-sm" />
-      <view class="preview-frame">
-        <view class="preview" :style="{ backgroundColor: themeSoft }">
-          <resume-cover
-            v-if="tpl"
-            :layout="tpl.layout"
-            :theme-color="theme"
-            :side-color="side"
-            size="md"
-          />
-        </view>
-      </view>
+    <!-- 详情接口在后台刷新（列表里已有这份模板）时，用细进度条提示 -->
+    <view v-if="templateStore.detailLoading && tpl" class="refresh-track">
+      <view class="refresh-thumb" />
     </view>
 
-    <view v-if="tpl" class="body">
-      <view class="info-card">
-        <view class="head-row">
-          <text class="tag" :style="{ backgroundColor: themeSoft, color: theme }">精选模板</text>
-          <view class="theme-chip">
-            <view class="theme-dot" :style="{ backgroundColor: theme }" />
-            <text class="theme-text">主题配色</text>
+    <view class="body">
+      <!-- 加载中（列表里没有这份模板）：骨架屏 -->
+      <template v-if="showSkeleton">
+        <view class="preview-area">
+          <view class="skeleton skeleton--preview" />
+        </view>
+        <view class="info-card">
+          <view class="skeleton skeleton--title" />
+          <view class="skeleton skeleton--line" />
+          <view class="skeleton skeleton--line skeleton--line-short" />
+        </view>
+        <view class="meta-card">
+          <view v-for="n in 4" :key="n" class="meta-row">
+            <view class="skeleton skeleton--label" />
+            <view class="skeleton skeleton--value" />
           </view>
         </view>
-        <text class="title">{{ tpl.name }}</text>
-        <text class="desc">{{ tpl.description }}</text>
-      </view>
+      </template>
 
-      <view class="meta-card">
-        <view v-for="meta in metaList" :key="meta.label" class="meta-item">
-          <text class="meta-value">{{ meta.value }}</text>
-          <text class="meta-label">{{ meta.label }}</text>
+      <template v-else-if="tpl">
+        <!-- A4 预览：浅灰底衬白纸 -->
+        <view class="preview-area">
+          <view class="preview-frame">
+            <view class="preview">
+              <resume-cover
+                :layout="tpl.layout"
+                :theme-color="theme"
+                :side-color="side"
+                size="md"
+              />
+            </view>
+          </view>
+        </view>
+
+        <view class="info-card">
+          <text class="title">{{ tpl.name }}</text>
+          <text class="desc">{{ tpl.description }}</text>
+        </view>
+
+        <view class="meta-card">
+          <view v-for="meta in metaList" :key="meta.label" class="meta-row">
+            <text class="meta-label">{{ meta.label }}</text>
+            <text class="meta-value">{{ meta.value }}</text>
+          </view>
+        </view>
+      </template>
+
+      <!-- 模板不存在 -->
+      <view v-else class="state">
+        <text class="state-title">模板不存在</text>
+        <text class="state-desc">链接可能已失效，回模板库重新选一个吧</text>
+        <view class="ghost" hover-class="ghost-press" @click="backToLibrary">
+          回模板库
         </view>
       </view>
-    </view>
-
-    <view v-else class="empty">
-      <text class="empty-title">模板不存在</text>
-      <text class="empty-desc">链接可能已失效，回模板库重新选一个吧</text>
     </view>
 
     <view v-if="tpl" class="bottom">
-      <button
-        class="primary"
-        :style="{ background: buttonBg }"
-        hover-class="primary-press"
-        @click="useTemplate"
-      >
+      <button class="primary" hover-class="primary-press" @click="useTemplate">
         使用模板
       </button>
     </view>
@@ -133,190 +137,216 @@ function useTemplate() {
 
 <style lang="scss" scoped>
 .page {
-  /* 一屏定高：hero + 自适应主体 + 文档流底栏，三块加起来恒等于视口高度，页面不产生滚动条 */
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: #f4f4f4;
+  /* 底部按钮固定在文档流之外，页面预留出按钮栏的高度 */
+  min-height: 100vh;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  background-color: #f5f6f8;
 }
 
-.hero {
-  /* glow 是绝对定位，hero 必须定位，否则会以页面为参照溢出到屏幕外（横向滚动条的来源） */
-  position: relative;
-  display: flex;
-  flex: none;
+/* 后台刷新详情时的顶部细进度条 */
+.refresh-track {
+  position: sticky;
+  z-index: 10;
+  top: 0;
   overflow: hidden;
+  height: 2px;
+  background-color: #e8eefc;
+}
+
+.refresh-thumb {
+  width: 36%;
+  height: 100%;
+  background-color: #2563eb;
+  animation: refresh-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes refresh-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(390%);
+  }
+}
+
+/* -------- A4 预览 -------- */
+.preview-area {
+  display: flex;
   justify-content: center;
-  /* 20 + 60 收紧上下留白，配 190px 相框保证小屏（iPhone 8 级别）也一屏放下 */
-  padding: 20px 0 60px;
-  border-radius: 0 0 28px 28px;
-}
-
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  background-color: rgb(255 255 255 / 14%);
-}
-
-.glow-lg {
-  top: -70px;
-  right: -50px;
-  width: 190px;
-  height: 190px;
-}
-.glow-sm {
-  bottom: -56px;
-  left: -36px;
-  width: 140px;
-  height: 140px;
+  padding: 20px 0 24px;
 }
 
 .preview-frame {
-  position: relative;
-  width: 190px;
+  width: 180px;
   padding: 8px;
-  border-radius: 16px;
-  background-color: rgb(255 255 255 / 94%);
-  box-shadow: 0 16px 34px rgb(23 43 77 / 22%);
+  border-radius: 6px;
+  background-color: #fff;
+  box-shadow: 0 4px 16px rgb(31 35 41 / 8%);
 }
 
 .preview {
   overflow: hidden;
   width: 100%;
-  border-radius: 9px;
+  border-radius: 3px;
 }
 
-.body {
-  /* 撑满 hero 与底栏之间的剩余高度：屏幕富余时补足空白，屏幕不够时先压缩自身 */
-  min-height: 0;
-  flex: 1;
-  margin-top: -50px;
-  padding: 0 16px;
-}
-
+/* -------- 信息与参数 -------- */
 .info-card {
-  /* hero 是定位元素、层级更高，卡片必须同为定位元素才能压在渐变头部之上（-50px 叠压关系） */
-  position: relative;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 16px;
   background-color: #fff;
-}
-
-.head-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.tag {
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.theme-chip {
-  display: flex;
-  align-items: center;
-}
-
-.theme-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.theme-text {
-  margin-left: 7px;
-  color: #8290a5;
-  font-size: 11px;
 }
 
 .title {
   display: block;
-  margin-top: 14px;
-  color: #172b4d;
-  font-size: 24px;
-  font-weight: 700;
+  color: #1f2329;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .desc {
   display: block;
   margin-top: 8px;
-  color: #64748b;
+  color: #646a73;
   font-size: 13px;
-  line-height: 21px;
+  line-height: 20px;
 }
 
 .meta-card {
-  display: flex;
-  margin-top: 12px;
-  padding: 16px 4px;
-  border-radius: 8px;
+  margin-top: 10px;
+  padding: 0 16px;
   background-color: #fff;
 }
 
-.meta-item {
-  flex: 1;
-  text-align: center;
+.meta-row {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  justify-content: space-between;
+  border-bottom: 1px solid #f2f3f5;
 }
 
-.meta-item + .meta-item {
-  border-left: 1px solid #eef2f8;
-}
-
-.meta-value {
-  display: block;
-  color: #172b4d;
-  font-size: 15px;
-  font-weight: 700;
+.meta-row:last-child {
+  border-bottom: none;
 }
 
 .meta-label {
-  display: block;
-  margin-top: 5px;
-  color: #94a3b8;
-  font-size: 11px;
-}
-
-.empty {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 96px;
-}
-
-.empty-title {
-  color: #172b4d;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.empty-desc {
-  margin-top: 10px;
-  color: #94a3b8;
+  color: #8f959e;
   font-size: 13px;
 }
 
+.meta-value {
+  color: #1f2329;
+  font-size: 13px;
+}
+
+/* -------- 骨架屏 -------- */
+.skeleton {
+  background-color: #e9ebee;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.skeleton--preview {
+  width: 196px;
+  height: 277px;
+  border-radius: 6px;
+}
+
+.skeleton--title {
+  width: 42%;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.skeleton--line {
+  width: 100%;
+  height: 13px;
+  margin-top: 12px;
+  border-radius: 4px;
+}
+
+.skeleton--line-short {
+  width: 64%;
+}
+
+.skeleton--label {
+  width: 56px;
+  height: 13px;
+  border-radius: 4px;
+}
+
+.skeleton--value {
+  width: 72px;
+  height: 13px;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* -------- 兜底态 -------- */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 96px 32px 0;
+}
+
+.state-title {
+  color: #1f2329;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.state-desc {
+  margin-top: 8px;
+  color: #8f959e;
+  font-size: 13px;
+  text-align: center;
+}
+
+.ghost {
+  margin-top: 20px;
+  padding: 8px 24px;
+  border: 1px solid #dcdfe4;
+  border-radius: 6px;
+  color: #646a73;
+  font-size: 13px;
+}
+
+.ghost-press {
+  background-color: #f2f3f5;
+}
+
+/* -------- 底部操作 -------- */
 .bottom {
-  /* 参与文档流的底栏（不再 fixed）：高度由 flex 布局直接算进 100vh，不会与页面高度重复累加 */
-  box-sizing: border-box;
-  flex: none;
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid #eef0f3;
   background-color: #fff;
-  box-shadow: 0 -6px 18px rgb(23 43 77 / 8%);
 }
 
 .primary {
-  height: 48px;
+  height: 44px;
   border: none;
+  border-radius: 6px;
+  background-color: #2563eb;
   color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 48px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 44px;
 
   &::after {
     border: none;
@@ -324,6 +354,6 @@ function useTemplate() {
 }
 
 .primary-press {
-  opacity: 0.86;
+  opacity: 0.85;
 }
 </style>

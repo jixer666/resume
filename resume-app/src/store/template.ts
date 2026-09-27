@@ -18,6 +18,8 @@ export const useTemplateStore = defineStore('template', () => {
   const current = ref<IResumeTemplate | null>(null)
   /** 首屏 / 重新加载中（页面据此铺骨架屏） */
   const loading = ref(false)
+  /** 详情加载中：列表里没有这份模板时，页面据此铺骨架屏 */
+  const detailLoading = ref(false)
   /** 上拉加载下一页中 */
   const loadingMore = ref(false)
   /** 是否已成功加载过第一页 */
@@ -90,6 +92,7 @@ export const useTemplateStore = defineStore('template', () => {
   /** 拉取模板详情：先用列表 / 已载入的当前模板兜底，详情接口回来再覆盖 */
   async function fetchDetail(code: string): Promise<IResumeTemplate | null> {
     current.value = get(code) || null
+    detailLoading.value = true
     try {
       const res = await getTemplateDetail(code)
       if (res)
@@ -100,6 +103,9 @@ export const useTemplateStore = defineStore('template', () => {
       if (!current.value)
         current.value = (await fetchList()).find(item => item.code === code) || null
     }
+    finally {
+      detailLoading.value = false
+    }
     return current.value
   }
 
@@ -107,6 +113,7 @@ export const useTemplateStore = defineStore('template', () => {
     list,
     current,
     loading,
+    detailLoading,
     loadingMore,
     loaded,
     error,

@@ -1,43 +1,42 @@
 <script lang="ts" setup>
 import type { IResumeBrief } from '@/api/types/resume'
 import dayjs from 'dayjs'
-import { alphaColor, coverBackdrop } from '@/schema/templates'
-import RESUME_JSON from '@/schema/resume'
 import { useResumeStore } from '@/store/resume'
 import { useTokenStore } from '@/store/token'
 import { toLoginPage } from '@/utils/toLoginPage'
 
 /**
- * 「我的」页 ≡ 我的简历列表，排版对标 resume-app-temp 的 pages/me/me.vue：
- * 主题渐变头部（份数角标 + 最近更新时间）+ 卡片列表（缩略图 + 名称 + 版式角标 + 底部操作）
- * + 圆形图标空态。
+ * 「我的」页 ≡ 我的简历列表。
  *
- * 首页已改成模板库，这里只留「已经存在的简历」；新建走首页挑模板那条路。
+ * 排版走极简：白底标题栏（份数 + 新建入口）+ 白底列表行（缩略图 + 名称 + 更新时间 + 箭头），
+ * 去掉渐变头部与卡片底部的操作按钮 —— 整行可点即进编辑。
+ *
+ * 首页是模板库，这里只留「已经存在的简历」；新建走首页挑模板那条路。
+ * 列表来自后端 `/resume/page`：首次加载铺骨架屏，下拉可刷新。
  * tab 页底部被自定义 tabbar 占着（固定条 z-index 比页面高），所以不做固定底栏。
  */
 defineOptions({ name: 'Me' })
-definePage({})
+definePage({
+  style: {
+    navigationBarTitleText: '我的简历',
+    enablePullDownRefresh: true,
+  },
+})
 
 const resumeStore = useResumeStore()
 const tokenStore = useTokenStore()
 
-/** 列表接口不返回主题色，卡片统一按出厂主题色上色 */
-const themeColor = RESUME_JSON.GLOBAL_STYLE.themeColor
-/** 角标浅底与缩略图衬底：主题色的极浅渐变，让白纸缩略图在卡片里不显空 */
-const themeSoft = alphaColor(themeColor, 0.1)
-const thumbBg = coverBackdrop(themeColor)
-
 const loading = ref(false)
+/** 首次是否已经拉过：区分「正在加载」与「登录后确实没有简历」 */
+const loaded = ref(false)
 /** 登录态是「一次拉取」的快照，放在 onShow 里刷新，避免在 computed 里写 store */
 const loggedIn = ref(false)
 
 const list = computed(() => resumeStore.list)
-const heroSub = computed(() => {
-  if (!loggedIn.value)
-    return '登录后简历存在云端，换设备也不会丢'
-  const latest = list.value[0]
-  return latest ? `最近更新于 ${displayTime(latest.updateTime)}` : '从模板开始，创建你的第一份简历'
-})
+/** 骨架屏 = 已登录、正在加载、且还没有任何数据 */
+const showSkeleton = computed(() => loggedIn.value && loading.value && !list.value.length)
+/** 空态 = 已登录、拉取结束、列表为空 */
+const showEmpty = computed(() => loggedIn.value && loaded.value && !loading.value && !list.value.length)
 
 onShow(() => {
   loggedIn.value = tokenStore.updateNowTime().hasLogin
@@ -58,8 +57,22 @@ async function loadList() {
   }
   finally {
     loading.value = false
+    loaded.value = true
   }
 }
+
+/** 下拉刷新：重新拉一遍列表 */
+async function refresh() {
+  await loadList()
+  uni.stopPullDownRefresh()
+}
+
+onPullDownRefresh(() => {
+  if (loggedIn.value)
+    refresh()
+  else
+    uni.stopPullDownRefresh()
+})
 
 /** 后端时间（yyyy-MM-dd HH:mm:ss）转相对时间，超过一周直接给日期 */
 function displayTime(text: string): string {
@@ -82,11 +95,6 @@ function displayTime(text: string): string {
   return time.format('YYYY-MM-DD')
 }
 
-/** 版式角标：双列模板存的是 leftRight，其余都是单栏 */
-function badgeText(layout: string): string {
-  return layout === 'leftRight' ? '双栏' : '单栏'
-}
-
 /** 打开一份已保存的简历继续编辑 */
 function openResume(item: IResumeBrief) {
   uni.navigateTo({ url: `/pages/edit/index?id=${item.id}` })
@@ -104,37 +112,45 @@ function goLogin() {
 
 <template>
   <view class="page">
-    <view class="hero">
-      <view class="glow glow-a" />
-      <view class="glow glow-b" />
-      <view class="hero-top">
-        <text class="hero-title">我的简历</text>
-        <view v-if="loggedIn" class="hero-badge">
-          {{ list.length }} 份
-        </view>
+    <!-- 标题栏：左侧份数，右侧新建入口 -->
+    <view class="bar">
+      <text class="bar-count">
+        {{ loggedIn ? `共 ${list.length} 份` : '登录后同步简历' }}
+      </text>
+      <view v-if="loggedIn" class="bar-new" hover-class="bar-new-press" @click="goTemplates">
+        ＋ 新建简历
       </view>
-      <text class="hero-sub">{{ heroSub }}</text>
+      <!-- 重新拉取（已有数据）时，用一条细进度条提示还在请求 -->
+      <view v-if="loading && list.length" class="refresh-track">
+        <view class="refresh-thumb" />
+      </view>
     </view>
 
-    <view v-if="!loggedIn" class="empty">
-      <text class="empty-title">登录后同步简历</text>
-      <text class="empty-sub">微信一键登录，简历存在云端，换设备也不会丢</text>
-      <view class="create" hover-class="create-press" @click="goLogin">
+    <!-- 未登录 -->
+    <view v-if="!loggedIn" class="state">
+      <text class="state-title">登录后同步简历</text>
+      <text class="state-desc">微信一键登录，简历存在云端，换设备也不会丢</text>
+      <view class="primary" hover-class="primary-press" @click="goLogin">
         微信一键登录
       </view>
     </view>
 
-    <view v-else-if="loading && !list.length" class="empty">
-      <text class="empty-sub">正在加载…</text>
+    <!-- 首次加载：骨架屏 -->
+    <view v-else-if="showSkeleton" class="list">
+      <view v-for="n in 3" :key="n" class="row">
+        <view class="skeleton skeleton--thumb" />
+        <view class="skeleton-info">
+          <view class="skeleton skeleton--name" />
+          <view class="skeleton skeleton--time" />
+        </view>
+      </view>
     </view>
 
-    <view v-else-if="!list.length" class="empty">
-      <view class="empty-icon">
-        ＋
-      </view>
-      <text class="empty-title">还没有简历</text>
-      <text class="empty-sub">从模板开始，创建你的第一份简历</text>
-      <view class="create" hover-class="create-press" @click="goTemplates">
+    <!-- 还没有简历 -->
+    <view v-else-if="showEmpty" class="state">
+      <text class="state-title">还没有简历</text>
+      <text class="state-desc">从模板开始，创建你的第一份简历</text>
+      <view class="primary" hover-class="primary-press" @click="goTemplates">
         去模板库挑一个
       </view>
     </view>
@@ -143,26 +159,20 @@ function goLogin() {
       <view
         v-for="item in list"
         :key="item.id"
-        class="card"
-        hover-class="card-press"
+        class="row"
+        hover-class="row-press"
         @click="openResume(item)"
       >
-        <view class="card-main">
-          <view class="thumb" :style="{ background: thumbBg }">
-            <view class="thumb-img">
-              <resume-cover :layout="item.layout" size="xs" />
-            </view>
-          </view>
-          <view class="info">
-            <text class="name">{{ item.name || '未命名简历' }}</text>
+        <view class="thumb">
+          <view class="thumb-img">
+            <resume-cover :layout="item.layout" size="xs" />
           </view>
         </view>
-        <view class="card-foot">
+        <view class="info">
+          <text class="name">{{ item.name || '未命名简历' }}</text>
           <text class="time">更新于 {{ displayTime(item.updateTime) }}</text>
-          <view class="action" hover-class="action-press" @click.stop="openResume(item)">
-            编辑
-          </view>
         </view>
+        <text class="arrow">›</text>
       </view>
     </view>
   </view>
@@ -171,95 +181,100 @@ function goLogin() {
 <style lang="scss" scoped>
 .page {
   /* 自定义 tabbar 在文档流里占 50px + 底部安全区，页面按剩余高度铺满，
-     内容少时正好一屏不出现滚动条，简历多了内容撑开才滚动 */
+     简历少时正好一屏不出现滚动条，简历多了内容撑开才滚动 */
   min-height: calc(100vh - 50px - env(safe-area-inset-bottom));
-  /* 滚到底时最后一张卡片与固定 tabbar 之间的呼吸空隙 */
-  padding-bottom: 24px;
-  background-color: #f4f4f4;
+  /* 滚到底时最后一行与固定 tabbar 之间的呼吸空隙 */
+  padding-bottom: 20px;
+  background-color: #f5f6f8;
 }
 
-.hero {
-  position: relative;
-  overflow: hidden;
-  padding: 24px 18px 26px;
-  border-radius: 0 0 24px 24px;
-  background: linear-gradient(160deg, #2563eb 0%, #5b8ff7 100%);
-}
-
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  background-color: rgb(255 255 255 / 14%);
-}
-.glow-a {
-  top: -76px;
-  right: -46px;
-  width: 180px;
-  height: 180px;
-}
-.glow-b {
-  bottom: -62px;
-  left: -30px;
-  width: 130px;
-  height: 130px;
-}
-.hero-top {
+/* -------- 标题栏 -------- */
+.bar {
   position: relative;
   display: flex;
   align-items: center;
+  height: 48px;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #eef0f3;
+  background-color: #fff;
 }
-.hero-title {
-  color: #fff;
-  font-size: 23px;
-  font-weight: 700;
+
+/* 顶部不定长进度条 */
+.refresh-track {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  height: 2px;
+  background-color: #e8eefc;
 }
-.hero-badge {
-  margin-left: 10px;
-  padding: 3px 10px;
-  border-radius: 11px;
-  background-color: rgb(255 255 255 / 22%);
-  color: #fff;
-  font-size: 11px;
+
+.refresh-thumb {
+  width: 36%;
+  height: 100%;
+  background-color: #2563eb;
+  animation: refresh-slide 1.1s ease-in-out infinite;
 }
-.hero-sub {
-  position: relative;
-  display: block;
-  margin-top: 9px;
-  color: rgb(255 255 255 / 82%);
+
+@keyframes refresh-slide {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(390%);
+  }
+}
+
+.bar-count {
+  color: #646a73;
   font-size: 13px;
 }
 
-.list {
-  padding: 16px 16px 0;
+.bar-new {
+  color: #2563eb;
+  font-size: 13px;
 }
 
-.card {
-  margin-bottom: 12px;
-  padding: 14px;
+.bar-new-press {
+  opacity: 0.6;
+}
+
+/* -------- 简历列表 -------- */
+.list {
+  padding: 12px 12px 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 12px 14px;
   border-radius: 8px;
   background-color: #fff;
 }
-.card-press {
-  opacity: 0.88;
+
+.row-press {
+  background-color: #f2f3f5;
 }
 
-.card-main {
-  display: flex;
-  align-items: center;
-}
 .thumb {
   display: flex;
-  width: 52px;
-  height: 68px;
+  width: 46px;
+  height: 60px;
   flex: none;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-radius: 10px;
+  border-radius: 6px;
+  background-color: #f7f8fa;
 }
-/* ResumeCover 按 A4 比例自撑高度，42px 宽 ≈ 60px 高，正好填满衬底内容区 */
+
+/* ResumeCover 按 A4 比例自撑高度，38px 宽 ≈ 54px 高，正好填满衬底内容区 */
 .thumb-img {
-  width: 42px;
+  width: 38px;
 }
 
 .info {
@@ -267,102 +282,107 @@ function goLogin() {
   flex: 1;
   margin-left: 12px;
 }
-.name-row {
-  display: flex;
-  align-items: center;
-}
+
 .name {
-  min-width: 0;
-  flex: 1;
+  display: block;
   overflow: hidden;
-  color: #172b4d;
-  font-size: 16px;
-  font-weight: 700;
+  color: #1f2329;
+  font-size: 15px;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.tag {
+
+.time {
+  display: block;
+  margin-top: 6px;
+  color: #8f959e;
+  font-size: 12px;
+}
+
+.arrow {
   flex: none;
   margin-left: 8px;
-  padding: 3px 9px;
-  border-radius: 10px;
-  font-size: 10px;
+  color: #c9ced6;
+  font-size: 16px;
+  line-height: 1;
 }
 
-.sub {
-  display: block;
-  margin-top: 8px;
-  overflow: hidden;
-  color: #8290a5;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* -------- 骨架屏 -------- */
+.skeleton {
+  background-color: #e9ebee;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
 }
 
-.card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f1f5f9;
-}
-.time {
-  color: #94a3b8;
-  font-size: 11px;
-}
-.action {
-  padding: 5px 14px;
-  border-radius: 13px;
-  background-color: #eff6ff;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 600;
-}
-.action-press {
-  background-color: #dbeafe;
+.skeleton--thumb {
+  width: 46px;
+  height: 60px;
+  flex: none;
+  border-radius: 6px;
 }
 
-.empty {
+.skeleton-info {
+  min-width: 0;
+  flex: 1;
+  margin-left: 12px;
+}
+
+.skeleton--name {
+  width: 55%;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.skeleton--time {
+  width: 35%;
+  height: 11px;
+  margin-top: 9px;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* -------- 未登录 / 空态 -------- */
+.state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 96px;
+  padding: 100px 32px 0;
 }
-.empty-icon {
-  display: flex;
-  width: 72px;
-  height: 72px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(160deg, #dbeafe 0%, #eff6ff 100%);
-  color: #2563eb;
-  font-size: 38px;
-  font-weight: 200;
-}
-.empty-title {
-  margin-top: 18px;
-  color: #172b4d;
-  font-size: 18px;
-  font-weight: 700;
-}
-.empty-sub {
-  margin-top: 8px;
-  color: #94a3b8;
-  font-size: 13px;
-}
-.create {
-  margin-top: 24px;
-  padding: 13px 46px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #2563eb 0%, #5b8ff7 100%);
-  box-shadow: 0 6px 16px rgb(37 99 235 / 26%);
-  color: #fff;
+
+.state-title {
+  color: #1f2329;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
 }
-.create-press {
-  opacity: 0.86;
+
+.state-desc {
+  margin-top: 8px;
+  color: #8f959e;
+  font-size: 13px;
+  text-align: center;
+}
+
+.primary {
+  margin-top: 24px;
+  padding: 10px 32px;
+  border-radius: 6px;
+  background-color: #2563eb;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.primary-press {
+  opacity: 0.85;
 }
 </style>
