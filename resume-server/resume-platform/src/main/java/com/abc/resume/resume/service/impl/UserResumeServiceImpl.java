@@ -14,6 +14,7 @@ import com.abc.resume.resume.mapper.ResumeTemplateMapper;
 import com.abc.resume.resume.mapper.UserResumeMapper;
 import com.abc.resume.resume.service.UserResumeService;
 import com.abc.resume.resume.service.pdf.ResumePdfRenderer;
+import com.abc.resume.system.domain.entity.config.UserResumeConfig;
 import com.abc.resume.system.service.TokenService;
 import com.abc.resume.system.utils.SecurityUtils;
 import com.abc.resume.util.AssertUtils;
@@ -90,11 +91,18 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
 
     private UserResumeVO addResume(UserResumeSubmitDTO dto) {
         AssertUtils.isNotEmpty(dto.getTemplateCode(), ExceptionEnum.PARAM_EXCEPTION.getCode(), "请选择简历模板");
+        validAddResume(SecurityUtils.getUserId());
         UserResumeDetail detail = buildResumeDetail(dto.getTemplateCode());
         UserResume resume = buildUserResume(dto, detail);
         int row = userResumeMapper.insertUserResume(resume);
         AssertUtils.isTrue(row > 0, ExceptionEnum.BIZ_EXCEPTION);
         return buildUserResumeVO(resume, true);
+    }
+
+    private void validAddResume(String uid) {
+        UserResumeConfig userResumeConfig = appConfig.getUserResumeConfig();
+        int resumeCount = userResumeMapper.selectUserResumeCountByUid(uid);
+        AssertUtils.isTrue(resumeCount < userResumeConfig.getMaxResumeCount(), ExceptionEnum.BIZ_EXCEPTION.getCode(), String.format("超过创建简历最大限制，最多为%s个", userResumeConfig.getMaxResumeCount()));
     }
 
     private UserResume buildUserResume(UserResumeSubmitDTO dto, UserResumeDetail detail) {

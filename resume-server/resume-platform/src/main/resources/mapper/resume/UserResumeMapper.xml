@@ -55,4 +55,9 @@
         where id = #{id} and is_delete != id
     </update>
 
+    <select id="selectUserResumeCountByUid" resultType="java.lang.Integer">
+        select count(*) from user_resume
+        where uid = #{uid} and is_delete != id
+    </select>
+
 </mapper>

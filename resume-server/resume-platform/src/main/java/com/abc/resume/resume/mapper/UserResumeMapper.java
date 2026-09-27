@@ -20,4 +20,5 @@ public interface UserResumeMapper {
 
     int deleteUserResume(@Param("id") Long id);
 
+    int selectUserResumeCountByUid(String uid);
 }
