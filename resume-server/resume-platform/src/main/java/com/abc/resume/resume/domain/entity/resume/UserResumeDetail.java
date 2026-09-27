@@ -5,7 +5,7 @@ import com.abc.resume.resume.domain.entity.template.ResumeTemplateColumn;
 import com.abc.resume.resume.domain.entity.template.ResumeTemplateDetail;
 import com.abc.resume.resume.domain.entity.template.ResumeTemplateStyle;
 import com.abc.resume.resume.domain.entity.template.ResumeTemplateVariant;
-import com.abc.resume.system.domain.entity.config.ResumeModelDataConfig;
+import com.abc.resume.system.domain.entity.config.ResumeTemplateConfig;
 import com.abc.resume.util.IdUtils;
 import com.abc.resume.util.JsonUtils;
 import com.abc.resume.util.StringUtils;
@@ -74,10 +74,10 @@ public class UserResumeDetail {
     /**
      * 按模板构造一份简历骨架，模块 data 的默认值取自配置中心的模块默认数据
      */
-    public static UserResumeDetail fromTemplate(ResumeTemplate template, ResumeModelDataConfig modelDataConfig) {
+    public static UserResumeDetail fromTemplate(ResumeTemplate template, ResumeTemplateConfig modelDataConfig) {
         UserResumeDetail detail = new UserResumeDetail();
         detail.setName(DEFAULT_RESUME_NAME);
-        detail.setGlobalStyle(buildDefaultGlobalStyle());
+        detail.setGlobalStyle(buildDefaultGlobalStyle(modelDataConfig));
         if (Objects.isNull(template)) {
             return detail;
         }
@@ -91,9 +91,19 @@ public class UserResumeDetail {
     }
 
     /**
-     * 出厂默认全局样式
+     * 出厂默认全局样式：优先取配置中心下发的 globalStyle，未配置时回退到内置默认值
      */
-    private static GlobalStyle buildDefaultGlobalStyle() {
+    private static GlobalStyle buildDefaultGlobalStyle(ResumeTemplateConfig modelDataConfig) {
+        if (Objects.isNull(modelDataConfig) || Objects.isNull(modelDataConfig.getGlobalStyle()) || modelDataConfig.getGlobalStyle().isEmpty()) {
+            return buildBuiltinGlobalStyle();
+        }
+        return JsonUtils.toBean(JsonUtils.parseObj(modelDataConfig.getGlobalStyle()), GlobalStyle.class);
+    }
+
+    /**
+     * 内置兜底全局样式（配置中心未下发 globalStyle 时使用）
+     */
+    private static GlobalStyle buildBuiltinGlobalStyle() {
         GlobalStyle style = new GlobalStyle();
         style.setThemeColor("#079cfa");
         style.setFirstTitleFontSize("20px");
@@ -107,7 +117,7 @@ public class UserResumeDetail {
         style.setPBottom("0px");
         style.setPLeftRight(StringUtils.EMPTY);
         style.setModelMarginTop("0px");
-        style.setModelMarginBottom("45px");
+        style.setModelMarginBottom("0px");
         style.setLeftWidth(StringUtils.EMPTY);
         style.setRightWidth(StringUtils.EMPTY);
         style.setLeftThemeColor(StringUtils.EMPTY);
@@ -183,12 +193,13 @@ public class UserResumeDetail {
      * 构造单个模块描述：栏位与显隐取自模板，皮肤取模板指定值（未指定交由前端取首套），
      * 业务数据取配置中心的模块默认值
      */
-    private static ResumeComponent buildResumeComponent(String model, ResumeTemplateDetail templateDetail, ResumeModelDataConfig modelDataConfig) {
+    private static ResumeComponent buildResumeComponent(String model, ResumeTemplateDetail templateDetail, ResumeTemplateConfig modelDataConfig) {
         ResumeComponent component = new ResumeComponent();
         component.setKeyId(IdUtils.getIdStr());
         component.setModel(model);
         component.setShow(true);
         component.setData(copyConfigModelData(modelDataConfig, model));
+        component.setStyle(copyConfigModelStyle(modelDataConfig, model));
         if (templateDetail == null) {
             return component;
         }
@@ -201,7 +212,7 @@ public class UserResumeDetail {
     /**
      * 深拷贝一份模块默认数据，避免多份简历共享同一个配置对象
      */
-    private static Map<String, Object> copyConfigModelData(ResumeModelDataConfig modelDataConfig, String model) {
+    private static Map<String, Object> copyConfigModelData(ResumeTemplateConfig modelDataConfig, String model) {
         if (Objects.isNull(modelDataConfig) || Objects.isNull(modelDataConfig.getModelData())) {
             return null;
         }
@@ -210,6 +221,20 @@ public class UserResumeDetail {
             return null;
         }
         return JsonUtils.parseObj(data);
+    }
+
+    /**
+     * 深拷贝一份模块默认样式，避免多份简历共享同一个配置对象
+     */
+    private static Map<String, Object> copyConfigModelStyle(ResumeTemplateConfig modelDataConfig, String model) {
+        if (Objects.isNull(modelDataConfig) || Objects.isNull(modelDataConfig.getModelStyle())) {
+            return null;
+        }
+        Object style = modelDataConfig.getModelStyle().get(model);
+        if (Objects.isNull(style)) {
+            return null;
+        }
+        return JsonUtils.parseObj(style);
     }
 
     /**

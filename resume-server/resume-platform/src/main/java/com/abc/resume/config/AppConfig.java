@@ -3,7 +3,7 @@ package com.abc.resume.config;
 import com.abc.resume.constants.ConfigConstants;
 import com.abc.resume.core.config.annoation.ConfigAttribute;
 import com.abc.resume.core.config.annoation.ConfigComponent;
-import com.abc.resume.system.domain.entity.config.ResumeModelDataConfig;
+import com.abc.resume.system.domain.entity.config.ResumeTemplateConfig;
 import com.abc.resume.system.domain.entity.config.UserResumeConfig;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @ConfigComponent(value = "com.abc.resume.config.AppConfig")
 public class AppConfig {
 
-    @ConfigAttribute(ConfigConstants.RESUME_MODEL_DATA_CONFIG)
-    private ResumeModelDataConfig resumeModelDataConfig;
+    @ConfigAttribute(ConfigConstants.RESUME_TEMPLATE_CONFIG)
+    private ResumeTemplateConfig resumeTemplateConfig;
 
     @ConfigAttribute(ConfigConstants.USER_RESUME_CONFIG)
     private UserResumeConfig userResumeConfig;

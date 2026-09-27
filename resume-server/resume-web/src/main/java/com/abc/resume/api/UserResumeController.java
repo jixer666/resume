@@ -4,6 +4,7 @@ import com.abc.resume.core.page.PageResult;
 import com.abc.resume.core.result.ApiResult;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
+import com.abc.resume.resume.domain.vo.ResumeConfigVO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 import com.abc.resume.resume.service.UserResumeService;
 import io.swagger.annotations.Api;
@@ -37,6 +38,12 @@ public class UserResumeController {
     public ApiResult<UserResumeVO> getUserResumeDetail(@PathVariable("id") Long id) {
         UserResumeVO resumeVO = userResumeService.getUserResumeDetail(id);
         return ApiResult.success(resumeVO);
+    }
+
+    @ApiOperation("查询简历前端配置")
+    @GetMapping("/config")
+    public ApiResult<ResumeConfigVO> getResumeConfig() {
+        return ApiResult.success(userResumeService.getResumeConfig());
     }
 
     @ApiOperation("提交简历")

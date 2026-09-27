@@ -9,6 +9,7 @@ import { deleteResume, getResumeDetail, getResumeList, saveResume } from '@/api/
 import { MATERIAL_JSON } from '@/schema/materialList'
 import MODEL_DATA_JSON from '@/schema/modelData'
 import RESUME_JSON from '@/schema/resume'
+import { useConfigStore } from '@/store/config'
 import { useTemplateStore } from '@/store/template'
 import { getUuid, pxTonumber } from '@/utils/common'
 import { FONT_SIZES } from '@/utils/styleOptions'
@@ -53,7 +54,7 @@ function materialGroupOf(model: string): IMATERIALITEM[] {
 
 /**
  * 造一个模块实例：皮肤优先取模板指定的 `cptName`，没指定（或清单里找不到）时回退该模块首套皮肤；
- * 样式沿用皮肤默认值，数据取该模块的默认数据。
+ * 样式取后端下发的模块默认样式（缺失时回退皮肤自带的 style），数据取该模块的默认数据。
  */
 function createMaterialItem(model: string, layout = '', cptName?: string): IMATERIALITEM | null {
   const group = materialGroupOf(model)
@@ -65,6 +66,7 @@ function createMaterialItem(model: string, layout = '', cptName?: string): IMATE
     keyId: getUuid(),
     layout,
     show: true,
+    style: clone(modelStyleOf(model, variant.style)),
     data: clone(MODEL_DATA_JSON[model] ?? {}),
   }
 }
@@ -117,8 +119,28 @@ const GLOBAL_STYLE_MAP: [keyof IGlobalStyle, keyof IMODELSTYLE][] = [
   ['modelMarginBottom', 'mBottom'],
 ]
 
-/** 出厂默认全局样式：用来判断用户到底改过哪几项 */
-const GLOBAL_STYLE_DEFAULTS = RESUME_JSON.GLOBAL_STYLE as unknown as Record<string, unknown>
+/**
+ * 出厂默认全局样式：优先后端下发的配置，缺失时回退本地 RESUME_JSON。
+ * 用来新建简历时铺底，也用来判断用户到底改过哪几项。
+ */
+function globalStyleDefaults(): Record<string, unknown> {
+  const fromConfig = useConfigStore().globalStyle
+  if (fromConfig && Object.keys(fromConfig).length)
+    return fromConfig as unknown as Record<string, unknown>
+  return RESUME_JSON.GLOBAL_STYLE as unknown as Record<string, unknown>
+}
+
+/**
+ * 某个模块的默认样式：后端配置优先，缺失的字段回退皮肤自带 style。
+ *
+ * 回退到皮肤默认值，是为了后端还没配到某个模块（或配置拉取失败）时行为与旧版一致。
+ */
+function modelStyleOf(model: string, fallback: IMODELSTYLE): IMODELSTYLE {
+  const fromConfig = useConfigStore().modelStyle[model]
+  if (fromConfig && Object.keys(fromConfig).length)
+    return { ...fallback, ...fromConfig }
+  return fallback
+}
 
 /**
  * 用户在本会话里手动改过的样式字段 —— 换模板时要把这些值盖回模板预设之上。
@@ -175,6 +197,7 @@ function applyGlobalStyleToItem(
 ): void {
   if (!globalStyle)
     return
+  const defaults = globalStyleDefaults()
   const style = item.style as Record<string, unknown>
   GLOBAL_STYLE_MAP.forEach(([globalKey, styleKey]) => {
     if (keys && !keys.includes(globalKey))
@@ -182,7 +205,7 @@ function applyGlobalStyleToItem(
     const value = globalStyle[globalKey]
     if (value === undefined || value === null || value === '')
       return
-    if (!keys && value === GLOBAL_STYLE_DEFAULTS[globalKey])
+    if (!keys && value === defaults[globalKey])
       return
     style[styleKey] = value
   })
@@ -294,6 +317,8 @@ export const useResumeStore = defineStore(
       const json = clone(RESUME_JSON) as IRESUMEJSON
       json.ID = ''
       json.NAME = DEFAULT_RESUME_NAME
+      // 全局样式以后端下发的出厂配置为基线（取不到时 globalStyleDefaults 内部回退本地 RESUME_JSON）
+      json.GLOBAL_STYLE = clone(globalStyleDefaults()) as unknown as IGlobalStyle
       if (template) {
         json.LAYOUT = template.layout
         json.GLOBAL_STYLE = { ...json.GLOBAL_STYLE, ...template.style }
@@ -329,7 +354,11 @@ export const useResumeStore = defineStore(
 
     /** 载入一份已保存的简历，没有内容返回 null */
     async function loadResume(id: string): Promise<IRESUMEJSON | null> {
-      const detail = await getResumeDetail(Number(id))
+      // 与详情并行拉取出厂样式配置：hydrateComponents 与后续新增模块都要用到
+      const [detail] = await Promise.all([
+        getResumeDetail(Number(id)),
+        useConfigStore().ensureLoaded(),
+      ])
       const json = detail?.resumeJson as IRESUMEJSON | null
       if (!json) {
         current.value = null
@@ -576,7 +605,7 @@ export const useResumeStore = defineStore(
       const json = current.value
       if (!json)
         return
-      const defaults = clone(GLOBAL_STYLE_DEFAULTS) as Record<string, unknown>
+      const defaults = clone(globalStyleDefaults()) as Record<string, unknown>
       json.GLOBAL_STYLE = defaults as unknown as IGlobalStyle
       const keys = Object.keys(defaults) as (keyof IGlobalStyle)[]
       keys.forEach(key => editedGlobalKeys.delete(key as string))
@@ -595,7 +624,7 @@ export const useResumeStore = defineStore(
       const variant = materialGroupOf(item.model).find(one => one.cptName === item.cptName)
       if (!variant)
         return
-      item.style = clone(variant.style)
+      item.style = clone(modelStyleOf(item.model, variant.style))
       editedModuleKeys.delete(keyId)
     }
 
@@ -614,7 +643,7 @@ export const useResumeStore = defineStore(
         return
       item.cptName = variant.cptName
       item.cptTitle = variant.cptTitle
-      item.style = clone(variant.style)
+      item.style = clone(modelStyleOf(item.model, variant.style))
       applyGlobalStyleToItem(item, current.value?.GLOBAL_STYLE as unknown as Record<string, unknown>)
     }
 

@@ -6,8 +6,8 @@ package com.abc.resume.constants;
  */
 public class ConfigConstants {
 
-    public static final String RESUME_MODEL_DATA_CONFIG = "resume_model_data_config";
+    public static final String RESUME_TEMPLATE_CONFIG = "resumeTemplateConfig";
 
-    public static final String USER_RESUME_CONFIG = "user_resume_config";
+    public static final String USER_RESUME_CONFIG = "userResumeConfig";
 
 }

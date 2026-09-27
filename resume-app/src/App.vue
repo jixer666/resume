@@ -2,6 +2,7 @@
 import { onHide, onLaunch, onShow } from '@dcloudio/uni-app'
 import { getCurrentInstance, onMounted, onUnmounted } from 'vue'
 import { navigateToInterceptor } from '@/router/interceptor'
+import { useConfigStore } from '@/store/config'
 import { tabbarStore } from '@/tabbar/store'
 import { permission } from '@/router/permission'
 
@@ -12,6 +13,8 @@ router && permission.install(router)
 
 onLaunch((options) => {
   console.log('App.vue onLaunch', options)
+  // 一进小程序就预拉出厂样式配置：不阻塞启动，后续新建简历 / 新增模块直接命中缓存
+  useConfigStore().ensureLoaded()
 })
 onShow((options) => {
   console.log('App.vue onShow', options)

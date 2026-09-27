@@ -9,11 +9,13 @@ import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
 import com.abc.resume.resume.domain.entity.ResumeTemplate;
 import com.abc.resume.resume.domain.entity.UserResume;
 import com.abc.resume.resume.domain.entity.resume.UserResumeDetail;
+import com.abc.resume.resume.domain.vo.ResumeConfigVO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 import com.abc.resume.resume.mapper.ResumeTemplateMapper;
 import com.abc.resume.resume.mapper.UserResumeMapper;
 import com.abc.resume.resume.service.UserResumeService;
 import com.abc.resume.resume.service.pdf.ResumePdfRenderer;
+import com.abc.resume.system.domain.entity.config.ResumeTemplateConfig;
 import com.abc.resume.system.domain.entity.config.UserResumeConfig;
 import com.abc.resume.system.service.TokenService;
 import com.abc.resume.system.utils.SecurityUtils;
@@ -65,6 +67,17 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     }
 
     @Override
+    public ResumeConfigVO getResumeConfig() {
+        ResumeConfigVO vo = new ResumeConfigVO();
+        ResumeTemplateConfig config = appConfig.getResumeTemplateConfig();
+        if (Objects.nonNull(config)) {
+            vo.setGlobalStyle(config.getGlobalStyle());
+            vo.setModelStyle(config.getModelStyle());
+        }
+        return vo;
+    }
+
+    @Override
     public UserResumeVO submitResume(UserResumeSubmitDTO dto) {
         AssertUtils.isNotEmpty(dto, ExceptionEnum.PARAM_EXCEPTION);
         AssertUtils.isTrue(dto.getAct() >= UserResumeSubmitDTO.ADD && dto.getAct() <= UserResumeSubmitDTO.COPY, ExceptionEnum.PARAM_EXCEPTION.getCode(), "未知操作");
@@ -102,7 +115,7 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     private void validAddResume(String uid) {
         UserResumeConfig userResumeConfig = appConfig.getUserResumeConfig();
         int resumeCount = userResumeMapper.selectUserResumeCountByUid(uid);
-        AssertUtils.isTrue((Objects.isNull(userResumeConfig) && resumeCount < 100) || (Objects.nonNull(userResumeConfig) && resumeCount < userResumeConfig.getMaxResumeCount()), ExceptionEnum.BIZ_EXCEPTION.getCode(), "超过创建简历最大限制");
+        AssertUtils.isTrue( resumeCount < userResumeConfig.getMaxResumeCount(), ExceptionEnum.BIZ_EXCEPTION.getCode(), "超过创建简历最大限制");
     }
 
     private UserResume buildUserResume(UserResumeSubmitDTO dto, UserResumeDetail detail) {
@@ -118,7 +131,7 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     private UserResumeDetail buildResumeDetail(String templateCode) {
         ResumeTemplate template = resumeTemplateMapper.selectResumeTemplateByCode(templateCode);
         AssertUtils.isNotEmpty(template, ExceptionEnum.BIZ_EXCEPTION.getCode(), "模板不存在");
-        return UserResumeDetail.fromTemplate(template, appConfig.getResumeModelDataConfig());
+        return UserResumeDetail.fromTemplate(template, appConfig.getResumeTemplateConfig());
     }
 
     private UserResumeVO updateResume(UserResumeSubmitDTO dto) {
