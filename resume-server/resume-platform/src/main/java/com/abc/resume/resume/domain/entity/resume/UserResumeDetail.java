@@ -12,10 +12,7 @@ import com.abc.resume.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -74,19 +71,23 @@ public class UserResumeDetail {
     /**
      * 按模板构造一份简历骨架，模块 data 的默认值取自配置中心的模块默认数据
      */
-    public static UserResumeDetail fromTemplate(ResumeTemplate template, ResumeTemplateConfig modelDataConfig) {
+    public static UserResumeDetail fromTemplate(ResumeTemplate template, ResumeTemplateConfig templateConfig) {
         UserResumeDetail detail = new UserResumeDetail();
         detail.setName(DEFAULT_RESUME_NAME);
-        detail.setGlobalStyle(buildDefaultGlobalStyle(modelDataConfig));
+        detail.setGlobalStyle(buildDefaultGlobalStyle(templateConfig));
         if (Objects.isNull(template)) {
             return detail;
         }
         ResumeTemplateDetail templateDetail = template.getTemplateDetail();
         detail.setLayout(templateDetail.getLayout());
         applyStyle(detail.getGlobalStyle(), templateDetail.getStyle());
-        List<ResumeComponent> components = DEFAULT_MODELS.stream()
-                .map(item -> buildResumeComponent(item, templateDetail, modelDataConfig)).collect(Collectors.toList());
-        detail.setComponents(components);
+        ResumeTemplateVariant variants = template.getTemplateDetail().getVariants();
+        if (Objects.nonNull(variants)) {
+            List<ResumeComponent> components = variants.getValidFieldList().stream()
+                    .map(item -> buildResumeComponent(item, templateDetail, templateConfig)).collect(Collectors.toList());
+            detail.setComponents(components);
+        }
+
         return detail;
     }
 
@@ -191,7 +192,7 @@ public class UserResumeDetail {
 
     /**
      * 构造单个模块描述：栏位与显隐取自模板，皮肤取模板指定值（未指定交由前端取首套），
-     * 业务数据取配置中心的模块默认值
+     * 业务数据取配置中心的模块默认值，样式取模板预设、未声明时回退配置中心的模块默认样式
      */
     private static ResumeComponent buildResumeComponent(String model, ResumeTemplateDetail templateDetail, ResumeTemplateConfig modelDataConfig) {
         ResumeComponent component = new ResumeComponent();

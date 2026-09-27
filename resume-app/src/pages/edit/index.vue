@@ -557,10 +557,6 @@ function confirmDelete() {
           <mp-icon name="ui-pen" color="#2563eb" size="30px" />
           <text class="sheet-text">编辑名称</text>
         </view>
-        <view class="sheet-item" hover-class="sheet-item--press" @click="openGlobalStyle">
-          <mp-icon name="ui-palette" color="#2563eb" size="30px" />
-          <text class="sheet-text">全局样式</text>
-        </view>
         <view class="sheet-item sheet-item--danger" hover-class="sheet-item--press" @click="confirmDelete">
           <mp-icon name="ui-trash" color="#ef4444" size="30px" />
           <text class="sheet-text">删除简历</text>

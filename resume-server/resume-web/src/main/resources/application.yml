@@ -2,22 +2,11 @@ system:
   name: Resume
   whitelist:
     - /system/user/login
-    - /system/user/register
-    - /system/email/send
     - /system/logout
     - /system/oss/download/**
-    - /system/white/routes
-    - /system/captcha
-    - /system/sendForgetPwdEmail
-    - /system/resetPwd
-    - /system/tenant/info
-    - /system/spm/track
-    - /system/publicKey
     - /resume/template/**
-    - /dms/index/book/button/**
-    - /dms/doc/info/**
-    - /dms/doc/info/s/**
-    - /dms/book/docTree/**
+    - /resume/config
+
   export:
     preview-url: ${resume.system.export.preview-url}
     timeout: ${resume.system.export.timeout}
