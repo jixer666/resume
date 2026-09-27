@@ -10,6 +10,10 @@ import CompatRenderer from './generated/CompatRenderer.vue'
  * CSS 变量 `--entry-mb`，由各皮肤用 `var(--entry-mb, 原值)` 消费 —— 没设过就不下发变量，
  * 皮肤的兜底值原样生效，默认外观零变化。
  *
+ * 这一层还是模块级绝对定位装饰（如左侧竖线）的包含块：皮肤用 `&::before` 画竖线时只写
+ * `position: absolute`，不给根节点 `position: relative`，一旦外层没有定位祖先，竖线会以整页为参照
+ * 拉满全篇。放在这里一次兜住，省得每套皮肤各写一遍。
+ *
  * 编辑态的锚点、点选、高亮也挂在这一层（P3 接入）。
  */
 const props = defineProps<{
@@ -34,5 +38,6 @@ const itemStyle = computed<Record<string, string>>(() => {
 <style scoped lang="scss">
 .rs-item {
   box-sizing: border-box;
+  position: relative;
 }
 </style>

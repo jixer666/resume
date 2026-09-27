@@ -153,7 +153,7 @@ watch(() => props.modelValue, (value) => {
 
     &--active {
       background-color: #e8f0fe;
-      color: var(--wot-color-theme, #0957de);
+      color: var(--wot-color-theme, #2563eb);
     }
 
     &--italic {

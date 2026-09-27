@@ -1,0 +1,48 @@
+### BaseInfo/BaseInfo1.vue
+TPL: <div class="base-info-common-1-box u-tag-div"> <!-- 基本信息 --> <div class="user-info u-tag-div"> <div class="top u-tag-div"> <!-- 头像 --> <avatar1 :model-data="modelData" :model-style="modelStyle" /> <!-- 个人信息 --> <user-info1-vue :model-data="modelData" :model-style="modelStyle" /> </div> </div> </div>
+CSS: padding-top=v-bind('modelStyle.pTop') | padding-left=v-bind('modelStyle.pLeftRight') | flex-direction=column
+
+### BaseInfo/BaseInfo10.vue
+TPL: <div class="base-info-common-10-box u-tag-div"> <div class="banner u-tag-div"> <div class="head u-tag-div"> <h1 class="banner-name u-tag-h1"> {{ modelData.name }} </h1> <div v-show="isShow.age || isShow.address || isShow.workService" class="banner-meta u-tag-div"> <span v-show="isShow.age" class="u-tag-span">{{ modelData.age }}岁</span> <span v-show="isShow.address" class="u-tag-span">{{ modelData.address }}</span> <span v-show="isShow.workService" class="u-tag-span">{{ modelData.workService }}年经验</span> </div> </div> <div v-show="isShow.phoneNumber || isShow.email" class="banner-contact u-tag-div"> <span v-show="isShow.phoneNumber" class="u-tag-span">{{ modelData.phoneNumber }}</span> <span 
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | border-bottom=3px solid v-bind('modelStyle.themeColor') | background-color=#1f2937 | font-weight=700 | color=#fff | color=rgb(255 255 255 / 0.78) | color=rgb(255 255 255 / 0.78) | color=v-bind('modelStyle.themeColor')
+
+### BaseInfo/BaseInfo11.vue
+TPL: <div class="base-info-common-11-box u-tag-div"> <div class="card u-tag-div"> <div class="info u-tag-div"> <span class="name u-tag-span">{{ modelData.name }}</span> <div class="meta u-tag-div"> <span v-show="isShow.age" class="meta-item u-tag-span">{{ modelData.age }}岁</span> <span v-show="isShow.address" class="meta-item u-tag-span">{{ modelData.address }}</span> <span v-show="isShow.workService" class="meta-item u-tag-span">{{ modelData.workService }}年经验</span> </div> <div class="meta u-tag-div"> <span v-show="isShow.phoneNumber" class="meta-item u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" class="meta-item u-tag-span">{{ modelData.email }}</span> </div> </div>
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | border-radius=8px | background-color=v-bind('cardColor') | font-weight=700 | color=v-bind('modelStyle.themeColor') | color=v-bind('modelStyle.textColor')
+
+### BaseInfo/BaseInfo12.vue
+TPL: <div class="base-info-common-12-box u-tag-div"> <div class="card u-tag-div"> <div class="left u-tag-div"> <span class="name u-tag-span">{{ modelData.name }}</span> <span v-show="isShow.abstract" class="abstract u-tag-span">{{ modelData.abstract }}</span> </div> <div class="right u-tag-div"> <square-avatar v-show="isShow.avatar" :model-data="modelData" width="72px" height="72px" /> <div class="contact u-tag-div"> <span v-show="isShow.phoneNumber" class="contact-line u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" class="contact-line u-tag-span">{{ modelData.email }}</span> </div> </div> </div> </div>
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | border-radius=6px | flex-direction=column | background-color=v-bind('modelStyle.themeColor') | font-weight=700 | color=#fff | color=rgb(255 255 255 / 0.85) | flex-direction=column | color=v-bind('modelStyle.textColor')
+
+### BaseInfo/BaseInfo2.vue
+TPL: <div class="base-info-common-2-box u-tag-div"> <!-- 个人头像 --> <div class="avatar-wrapper u-tag-div"> <avatar1 :model-data="modelData" :model-style="modelStyle" /> </div> <!-- 个人信息 --> <user-info2-vue :model-data="modelData" :model-style="modelStyle" /> </div>
+CSS: flex-direction=column | padding-top=v-bind('modelStyle.pTop') | padding-left=v-bind('modelStyle.pLeftRight')
+
+### BaseInfo/BaseInfo3.vue
+TPL: <div class="base-info-common-2-box u-tag-div"> <!-- 个人信息 --> <user-info3-vue :model-data="modelData" :model-style="modelStyle" /> <!-- 头像 --> <avatar1 :model-data="modelData" :model-style="modelStyle" /> </div>
+CSS: border-bottom=1px dashed #cfcfcf | padding-left=30px | padding-top=v-bind('modelStyle.pTop') | padding-left=v-bind('modelStyle.pLeftRight')
+
+### BaseInfo/BaseInfo4.vue
+TPL: <div class="base-info-common-4-box u-tag-div"> <!-- 标题 --> <model-title :title="modelData.title" :iconfont="modelData.iconfont" :model-style="modelStyle" /> <!-- 个人信息 --> <user-info4-vue :model-data="modelData" :model-style="modelStyle" /> </div>
+CSS: flex-direction=column | padding-top=v-bind('modelStyle.pTop') | padding-left=v-bind('modelStyle.pLeftRight')
+
+### BaseInfo/BaseInfo5.vue
+TPL: <div class="base-info-common-5-box u-tag-div"> <div class="banner u-tag-div"> <h1 class="banner-name u-tag-h1"> {{ modelData.name }} </h1> <div v-show="isShow.phoneNumber || isShow.email" class="banner-contact u-tag-div"> <span v-show="isShow.phoneNumber" class="u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.phoneNumber && isShow.email" class="contact-sep u-tag-span">|</span> <span v-show="isShow.email" class="u-tag-span">{{ modelData.email }}</span> </div> </div> </div>
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | background-color=v-bind('modelStyle.themeColor') | font-weight=700 | color=#fff | color=#fff | color=rgb(255 255 255 / 0.6)
+
+### BaseInfo/BaseInfo6.vue
+TPL: <div class="base-info-common-6-box u-tag-div"> <div class="row u-tag-div"> <div class="left u-tag-div"> <span class="name u-tag-span">{{ modelData.name }}</span> <span v-show="isShow.abstract" class="abstract u-tag-span">{{ modelData.abstract }}</span> </div> <div class="right u-tag-div"> <span v-show="isShow.phoneNumber" class="contact u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" class="contact u-tag-span">{{ modelData.email }}</span> </div> </div> </div>
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | border-bottom=2px solid v-bind('modelStyle.themeColor') | flex-direction=column | font-weight=700 | color=v-bind('modelStyle.titleColor') | color=v-bind('modelStyle.textColor') | flex-direction=column | color=v-bind('modelStyle.textColor')
+
+### BaseInfo/BaseInfo7.vue
+TPL: <div class="base-info-common-7-box u-tag-div"> <div class="row u-tag-div"> <square-avatar :model-data="modelData" width="84px" height="84px" /> <div class="info u-tag-div"> <span class="name u-tag-span">{{ modelData.name }}</span> <div class="meta u-tag-div"> <span v-show="isShow.age" class="meta-item u-tag-span">{{ modelData.age }}岁</span> <span v-show="isShow.address" class="meta-item u-tag-span">{{ modelData.address }}</span> <span v-show="isShow.workService" class="meta-item u-tag-span">{{ modelData.workService }}年经验</span> </div> <div class="meta u-tag-div"> <span v-show="isShow.phoneNumber" class="meta-item u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" clas
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | padding-left=12px | border-left=4px solid v-bind('modelStyle.themeColor') | font-weight=700 | color=v-bind('modelStyle.titleColor') | color=v-bind('modelStyle.textColor')
+
+### BaseInfo/BaseInfo8.vue
+TPL: <div class="base-info-common-8-box u-tag-div"> <h1 class="name u-tag-h1"> {{ modelData.name }} </h1> <div class="name-line u-tag-div" /> <div class="meta u-tag-div"> <span v-show="isShow.age" class="meta-item u-tag-span">{{ modelData.age }}岁</span> <span v-show="isShow.address" class="meta-item u-tag-span">{{ modelData.address }}</span> <span v-show="isShow.workService" class="meta-item u-tag-span">{{ modelData.workService }}年经验</span> <span v-show="isShow.phoneNumber" class="meta-item u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" class="meta-item u-tag-span">{{ modelData.email }}</span> </div> </div>
+CSS: flex-direction=column | padding-left=v-bind('modelStyle.pLeftRight') | font-weight=700 | color=v-bind('modelStyle.titleColor') | border-radius=2px | background-color=v-bind('modelStyle.themeColor') | color=v-bind('modelStyle.textColor')
+
+### BaseInfo/BaseInfo9.vue
+TPL: <div class="base-info-common-9-box u-tag-div"> <div class="row u-tag-div"> <div class="info u-tag-div"> <span class="name u-tag-span">{{ modelData.name }}</span> <div class="meta u-tag-div"> <span v-show="isShow.age" class="meta-item u-tag-span">{{ modelData.age }}岁</span> <span v-show="isShow.address" class="meta-item u-tag-span">{{ modelData.address }}</span> <span v-show="isShow.workService" class="meta-item u-tag-span">{{ modelData.workService }}年经验</span> </div> <div class="meta u-tag-div"> <span v-show="isShow.phoneNumber" class="meta-item u-tag-span">{{ modelData.phoneNumber }}</span> <span v-show="isShow.email" class="meta-item u-tag-span">{{ modelData.email }}</span> </div> </div> <
+CSS: padding-left=v-bind('modelStyle.pLeftRight') | border-bottom=2px solid v-bind('modelStyle.themeColor') | font-weight=700 | color=v-bind('modelStyle.titleColor') | color=v-bind('modelStyle.textColor')
+

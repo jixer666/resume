@@ -1,0 +1,864 @@
+{
+  "note": "模板市场扩充：新增 30 套模板的设计预设（family 决定皮肤编号，baseInfo 可覆盖基本资料皮肤）。generator 展开成 resume_template.template_json。",
+  "templates": [
+    {
+      "code": "fresh",
+      "name": "应届生通用",
+      "description": "蓝色圆点章节标题配细分隔线，模块紧凑，应届生投递不会出错",
+      "layout": "classical",
+      "family": "12",
+      "baseInfo": "BASE_INFO_12",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "WORK_EXPERIENCE"
+      ],
+      "style": {
+        "themeColor": "#2563eb",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "intern",
+      "name": "实习生专用",
+      "description": "章节标题左置、正文右排的双栏版式，实习与在校项目都铺得开",
+      "layout": "classical",
+      "family": "14",
+      "baseInfo": "BASE_INFO_14",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "WORK_EXPERIENCE",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#0f9d8f",
+        "firstTitleFontSize": "17px",
+        "secondTitleFontSize": "13.5px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55636f",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "22px",
+        "pBottom": "0px",
+        "pLeftRight": "44px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "26px"
+      }
+    },
+    {
+      "code": "campus",
+      "name": "校园招聘",
+      "description": "整行浅蓝底纹章节条配左侧竖线，校招信息层次分明",
+      "layout": "classical",
+      "family": "13",
+      "baseInfo": "BASE_INFO_13",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#1a56db",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#556070",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "28px"
+      }
+    },
+    {
+      "code": "graduate",
+      "name": "保研考研",
+      "description": "学术式章节标题线，教育背景与科研经历一目了然，保研考研适用",
+      "layout": "classical",
+      "family": "1",
+      "baseInfo": "BASE_INFO_1",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES",
+        "WORK_EXPERIENCE"
+      ],
+      "style": {
+        "themeColor": "#166534",
+        "firstTitleFontSize": "19px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#23304a",
+        "textFontColor": "#4a5a6a",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "24px",
+        "pBottom": "0px",
+        "pLeftRight": "52px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "34px"
+      }
+    },
+    {
+      "code": "cadre",
+      "name": "学生干部",
+      "description": "主题色实心章节块，校园经历与组织活动一眼可见",
+      "layout": "classical",
+      "family": "5",
+      "baseInfo": "BASE_INFO_5",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "WORK_EXPERIENCE"
+      ],
+      "style": {
+        "themeColor": "#ea580c",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "english",
+      "name": "英文简历",
+      "description": "藏青细线标题，版式舒展留白充足，英文简历与留学申请都合适",
+      "layout": "classical",
+      "family": "17",
+      "baseInfo": "BASE_INFO_17",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#16324f",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#4b5563",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "22px",
+        "pBottom": "0px",
+        "pLeftRight": "50px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "32px"
+      }
+    },
+    {
+      "code": "developer",
+      "name": "软件工程师",
+      "description": "深藏青斜切章节块，技术岗投递稳重不出错",
+      "layout": "classical",
+      "family": "16",
+      "baseInfo": "BASE_INFO_16",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#1f3a5f",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#23304a",
+        "textFontColor": "#4a4a4a",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "0px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "java",
+      "name": "Java 开发工程师",
+      "description": "图标与标题同色，项目与技术栈排布规整，Java 岗首选",
+      "layout": "classical",
+      "family": "8",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#2b5fd9",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "14px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "28px"
+      }
+    },
+    {
+      "code": "frontend",
+      "name": "前端工程师",
+      "description": "紫色圆点标题，作品链接与项目经历都能展示",
+      "layout": "classical",
+      "family": "4",
+      "baseInfo": "BASE_INFO_12",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#7c3aed",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#5b6b82",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "algorithm",
+      "name": "算法工程师",
+      "description": "细线学术标题，论文与竞赛奖项排布清晰，算法岗适用",
+      "layout": "classical",
+      "family": "9",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#0e7490",
+        "firstTitleFontSize": "19px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#23304a",
+        "textFontColor": "#4a5a6a",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "20px",
+        "pBottom": "0px",
+        "pLeftRight": "50px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "32px"
+      }
+    },
+    {
+      "code": "data",
+      "name": "数据分析师",
+      "description": "浅色底纹章节条，数据成果与项目产出重点突出",
+      "layout": "classical",
+      "family": "15",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#0b70bd",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "test",
+      "name": "测试运维工程师",
+      "description": "灰蓝图标标题，流程与工具链描述整洁，测试运维岗适用",
+      "layout": "classical",
+      "family": "11",
+      "baseInfo": "BASE_INFO_16",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#475569",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "28px"
+      }
+    },
+    {
+      "code": "product",
+      "name": "产品经理",
+      "description": "标题配小装饰，需求与项目成果层次分明，产品岗适用",
+      "layout": "classical",
+      "family": "2",
+      "baseInfo": "BASE_INFO_13",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#4f46e5",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "operation",
+      "name": "运营新媒体",
+      "description": "玫红标题点缀，数据成果与内容作品都能展示",
+      "layout": "classical",
+      "family": "6",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#e11d48",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "marketing",
+      "name": "市场营销",
+      "description": "正红实心章节块，业绩与渠道成果一眼可见",
+      "layout": "classical",
+      "family": "13",
+      "baseInfo": "BASE_INFO_12",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#d92b2b",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "sales",
+      "name": "销售客户经理",
+      "description": "琥珀色章节块，销售业绩与客户资源重点突出",
+      "layout": "classical",
+      "family": "16",
+      "baseInfo": "BASE_INFO_13",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#b45309",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "designer",
+      "name": "设计师 UI",
+      "description": "粉色标题点缀，作品集与设计项目完整呈现",
+      "layout": "classical",
+      "family": "14",
+      "baseInfo": "BASE_INFO_14",
+      "hidden": [
+        "RESUME_TITLE"
+      ],
+      "style": {
+        "themeColor": "#db2777",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#5b6b82",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "consulting",
+      "name": "咨询战略",
+      "description": "深青图标标题，案例与项目成果条理清晰",
+      "layout": "classical",
+      "family": "7",
+      "baseInfo": "BASE_INFO_17",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#0f766e",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "20px",
+        "pBottom": "0px",
+        "pLeftRight": "50px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "32px"
+      }
+    },
+    {
+      "code": "finance",
+      "name": "金融银行",
+      "description": "藏青配暗金斜切章节块，金融投递正式得体",
+      "layout": "classical",
+      "family": "3",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#a67c00",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#23304a",
+        "textFontColor": "#4a4a4a",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "0px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "accounting",
+      "name": "财务会计",
+      "description": "墨绿圆点标题，证书与财务项目经历清晰",
+      "layout": "classical",
+      "family": "15",
+      "baseInfo": "BASE_INFO_16",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#15803d",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "legal",
+      "name": "法律法务",
+      "description": "深灰标题左置，案例与法务经历排布工整",
+      "layout": "classical",
+      "family": "17",
+      "baseInfo": "BASE_INFO_13",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#1f2937",
+        "firstTitleFontSize": "17px",
+        "secondTitleFontSize": "13.5px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55636f",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "22px",
+        "pBottom": "0px",
+        "pLeftRight": "44px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "26px"
+      }
+    },
+    {
+      "code": "medical",
+      "name": "医疗护理",
+      "description": "青蓝底纹章节条，规培与临床经历一目了然",
+      "layout": "classical",
+      "family": "8",
+      "baseInfo": "BASE_INFO_14",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#0891b2",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "teacher",
+      "name": "教师教育",
+      "description": "绿色标题点缀，教学与教研经历清晰",
+      "layout": "classical",
+      "family": "12",
+      "baseInfo": "BASE_INFO_15",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#16a34a",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "architect",
+      "name": "建筑土木",
+      "description": "石灰底纹章节条，工程与项目经历条理清楚",
+      "layout": "classical",
+      "family": "16",
+      "baseInfo": "BASE_INFO_16",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#57534e",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "46px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "28px"
+      }
+    },
+    {
+      "code": "state",
+      "name": "国企公务员",
+      "description": "正红斜切章节块，国企与公考投递稳重",
+      "layout": "classical",
+      "family": "13",
+      "baseInfo": "BASE_INFO_12",
+      "hidden": [
+        "RESUME_TITLE",
+        "HOBBIES",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#b91c1c",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#23304a",
+        "textFontColor": "#4a4a4a",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "0px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "social",
+      "name": "社招跳槽",
+      "description": "深蓝标题左置，工作经历与项目成果独占版面",
+      "layout": "classical",
+      "family": "12",
+      "baseInfo": "BASE_INFO_16",
+      "hidden": [
+        "RESUME_TITLE",
+        "CAMPUS_EXPERIENCE",
+        "INTERNSHIP_EXPERIENCE",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#1e40af",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#4b5563",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "22px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "32px"
+      }
+    },
+    {
+      "code": "ink",
+      "name": "水墨国风",
+      "description": "水墨笔触章节标题配山水名片底纹，中文简历与文化岗适用",
+      "layout": "classical",
+      "family": "9",
+      "baseInfo": "BASE_INFO_12",
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#f5f5f4",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13.5px",
+        "secondTitleColor": "#1c1917",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "48px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "30px"
+      }
+    },
+    {
+      "code": "sidebar-blue",
+      "name": "蓝调侧栏",
+      "description": "深蓝侧栏压白字姓名与联系方式，右栏蓝色章节线通排，版面干净",
+      "layout": "leftRight",
+      "family": "11",
+      "leftWidth": "30%",
+      "rightWidth": "70%",
+      "leftThemeColor": "#1d4ed8",
+      "rightThemeColor": "#ffffff",
+      "leftModels": [
+        "BASE_INFO_11",
+        "JOB_INTENTION_11"
+      ],
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#2563eb",
+        "firstTitleFontSize": "17px",
+        "secondTitleFontSize": "13.5px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "24px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "26px"
+      },
+      "baseInfo": "BASE_INFO_11"
+    },
+    {
+      "code": "sidebar-navy",
+      "name": "藏青侧栏",
+      "description": "藏青整栏侧边栏，白字联系方式压深色，右栏圆点标题清爽",
+      "layout": "leftRight",
+      "family": "11",
+      "leftWidth": "30%",
+      "rightWidth": "70%",
+      "leftThemeColor": "#16324f",
+      "rightThemeColor": "#ffffff",
+      "leftModels": [
+        "BASE_INFO_11",
+        "JOB_INTENTION_11"
+      ],
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY",
+        "HOBBIES"
+      ],
+      "style": {
+        "themeColor": "#16324f",
+        "firstTitleFontSize": "18px",
+        "secondTitleFontSize": "14px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "16px",
+        "pBottom": "0px",
+        "pLeftRight": "24px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "28px"
+      },
+      "baseInfo": "BASE_INFO_11"
+    },
+    {
+      "code": "sidebar-warm",
+      "name": "暖棕侧栏",
+      "description": "深棕侧栏压白字姓名与联系方式，右栏棕调章节线通排，适合传统行业",
+      "layout": "leftRight",
+      "family": "11",
+      "leftWidth": "32%",
+      "rightWidth": "68%",
+      "leftThemeColor": "#7c2d12",
+      "rightThemeColor": "#ffffff",
+      "leftModels": [
+        "BASE_INFO_11",
+        "JOB_INTENTION_11"
+      ],
+      "hidden": [
+        "RESUME_TITLE",
+        "WORKS_DISPLAY"
+      ],
+      "style": {
+        "themeColor": "#92400e",
+        "firstTitleFontSize": "17px",
+        "secondTitleFontSize": "13.5px",
+        "textFontSize": "13px",
+        "secondTitleColor": "#1f2937",
+        "textFontColor": "#55606e",
+        "secondTitleWeight": 600,
+        "textFontWeight": 400,
+        "pTop": "18px",
+        "pBottom": "0px",
+        "pLeftRight": "24px",
+        "modelMarginTop": "0px",
+        "modelMarginBottom": "26px"
+      },
+      "baseInfo": "BASE_INFO_11"
+    }
+  ]
+}

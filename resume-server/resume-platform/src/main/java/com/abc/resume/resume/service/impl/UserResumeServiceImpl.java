@@ -102,7 +102,7 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
     private void validAddResume(String uid) {
         UserResumeConfig userResumeConfig = appConfig.getUserResumeConfig();
         int resumeCount = userResumeMapper.selectUserResumeCountByUid(uid);
-        AssertUtils.isTrue(resumeCount < userResumeConfig.getMaxResumeCount(), ExceptionEnum.BIZ_EXCEPTION.getCode(), String.format("超过创建简历最大限制，最多为%s个", userResumeConfig.getMaxResumeCount()));
+        AssertUtils.isTrue((Objects.isNull(userResumeConfig) && resumeCount < 100) || (Objects.nonNull(userResumeConfig) && resumeCount < userResumeConfig.getMaxResumeCount()), ExceptionEnum.BIZ_EXCEPTION.getCode(), "超过创建简历最大限制");
     }
 
     private UserResume buildUserResume(UserResumeSubmitDTO dto, UserResumeDetail detail) {
@@ -177,6 +177,7 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
         vo.setName(detail.getName());
         vo.setLayout(detail.getLayout());
         vo.setThumbnail(resume.getThumbnail());
+        vo.setTemplateCode(resume.getTemplateCode());
         vo.setUpdateTime(resume.getUpdateTime());
         if (withDetail) {
             vo.setResumeJson(detail);

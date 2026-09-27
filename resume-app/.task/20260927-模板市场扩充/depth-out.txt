@@ -1,0 +1,260 @@
+    1 d 0-> 0 | import type { IMSTERIALLISTJSON } from '@/interface/material'
+    2 d 0-> 0 | 
+    3 d 0-> 0 | // 组件列表
+    4 d 0-> 1 | export const MATERIAL_JSON: IMSTERIALLISTJSON = {
+    5 d 1-> 1 |   RESUME_TITLE: [
+    6 d 1-> 2 |     {
+    7 d 2-> 2 |       keyId: '', // 组件id
+    8 d 2-> 2 |       model: 'RESUME_TITLE', // 模块
+    9 d 2-> 2 |       cptName: 'RESUME_TITLE_1', // 组件名
+   10 d 2-> 2 |       cptOptionsName: 'RESUME_TITLE_OPTIONS',
+   11 d 2-> 2 |       cptTitle: '简历标题', // 组件名
+   12 d 2-> 2 |       cptX: 0, // 组件x坐标
+   13 d 2-> 2 |       cptY: 0, // 组件y坐标
+   14 d 2-> 2 |       cptZ: 0, // 组件z坐标
+   15 d 2-> 2 |       cptHeight: '100px', // 组件高度
+   16 d 2-> 2 |       cptWidth: '100%', // 组件宽度
+   17 d 2-> 2 |       layout: 'center', // 布局在左侧还是右侧
+   18 d 2-> 2 |       show: true, // 组件是否显示
+   19 d 2-> 3 |       style: {
+   20 d 3-> 3 |         themeColor: '#000',
+   21 d 3-> 3 |         firstTitleFontSize: '20px',
+   22 d 3-> 3 |         titleColor: '#121c26',
+   23 d 3-> 3 |         titleFontSize: '30px',
+   24 d 3-> 3 |         titleFontWeight: 500,
+   25 d 3-> 3 |         textColor: '#fff',
+   26 d 3-> 3 |         textFontSize: '16px',
+   27 d 3-> 3 |         textFontWeight: 600,
+   28 d 3-> 3 |         backgroundColor: '#000',
+   29 d 3-> 3 |         mBottom: '35px',
+   30 d 3-> 3 |         mTop: '15px',
+   31 d 3-> 3 |         pTop: '0',
+   32 d 3-> 3 |         pBottom: '0px',
+   33 d 3-> 3 |         pLeftRight: '0',
+   34 d 3-> 2 |       }, // 组件样式
+   35 d 2-> 2 |       data: {}, // 组件数据
+   36 d 2-> 1 |     },
+   37 d 1-> 2 |     {
+   38 d 2-> 2 |       keyId: '', // 组件id
+   39 d 2-> 2 |       model: 'RESUME_TITLE', // 模块
+   40 d 2-> 2 |       cptName: 'RESUME_TITLE_2', // 组件名
+   41 d 2-> 2 |       cptOptionsName: 'RESUME_TITLE_OPTIONS',
+   42 d 2-> 2 |       cptTitle: '简历标题', // 组件名
+   43 d 2-> 2 |       cptX: 0, // 组件x坐标
+   44 d 2-> 2 |       cptY: 0, // 组件y坐标
+   45 d 2-> 2 |       cptZ: 0, // 组件z坐标
+   46 d 2-> 2 |       cptHeight: '100px', // 组件高度
+   47 d 2-> 2 |       cptWidth: '100%', // 组件宽度
+   48 d 2-> 2 |       layout: 'center', // 布局在左侧还是右侧
+   49 d 2-> 2 |       show: true, // 组件是否显示
+   50 d 2-> 3 |       style: {
+   51 d 3-> 3 |         themeColor: '#0b70bd',
+   52 d 3-> 3 |         firstTitleFontSize: '20px',
+   53 d 3-> 3 |         titleColor: '#121c26',
+   54 d 3-> 3 |         titleFontSize: '30px',
+   55 d 3-> 3 |         titleFontWeight: 500,
+   56 d 3-> 3 |         textColor: '#fff',
+   57 d 3-> 3 |         textFontSize: '16px',
+   58 d 3-> 3 |         textFontWeight: 600,
+   59 d 3-> 3 |         backgroundColor: '#000',
+   60 d 3-> 3 |         mBottom: '35px',
+   61 d 3-> 3 |         mTop: '0px',
+   62 d 3-> 3 |         pTop: '0',
+   63 d 3-> 3 |         pBottom: '0px',
+   64 d 3-> 3 |         pLeftRight: '0',
+   65 d 3-> 2 |       }, // 组件样式
+   66 d 2-> 2 |       data: {}, // 组件数据
+   67 d 2-> 1 |     },
+   68 d 1-> 1 |   ],
+   69 d 1-> 1 |  
+   70 d 1-> 2 |     {
+   71 d 2-> 2 |       keyId: '', // 组件id
+   72 d 2-> 2 |       model: 'BASE_INFO', // 模块
+   73 d 2-> 2 |       cptName: 'BASE_INFO_12', // 组件名
+   74 d 2-> 2 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+   75 d 2-> 2 |       cptTitle: '基础资料', // 组件名
+   76 d 2-> 2 |       cptX: 0, // 组件x坐标
+   77 d 2-> 2 |       cptY: 0, // 组件y坐标
+   78 d 2-> 2 |       cptZ: 0, // 组件z坐标
+   79 d 2-> 2 |       cptHeight: '100px', // 组件高度
+   80 d 2-> 2 |       cptWidth: '100%', // 组件宽度
+   81 d 2-> 2 |       layout: 'center', // 布局在左侧还是右侧
+   82 d 2-> 2 |       show: true, // 组件是否显示
+   83 d 2-> 3 |       style: {
+   84 d 3-> 3 |         themeColor: '#000',
+   85 d 3-> 3 |         firstTitleFontSize: '20px',
+   86 d 3-> 3 |         titleColor: '#121c26',
+   87 d 3-> 3 |         titleFontSize: '30px',
+   88 d 3-> 3 |         textFontSize: '14px',
+   89 d 3-> 3 |         titleFontWeight: 500,
+   90 d 3-> 3 |         textFontWeight: 500,
+   91 d 3-> 3 |         textColor: '#7c7b7b',
+   92 d 3-> 3 |         backgroundColor: '',
+   93 d 3-> 3 |         mBottom: '0px',
+   94 d 3-> 3 |         mTop: '0px',
+   95 d 3-> 3 |         pTop: '0',
+   96 d 3-> 3 |         pBottom: '30px',
+   97 d 3-> 3 |         pLeftRight: '40px',
+   98 d 3-> 2 |       },
+   99 d 2-> 3 |     {
+  100 d 3-> 3 |       keyId: '', // 组件id
+  101 d 3-> 3 |       model: 'BASE_INFO', // 模块
+  102 d 3-> 3 |       cptName: 'BASE_INFO_13', // 组件名
+  103 d 3-> 3 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  104 d 3-> 3 |       cptTitle: '基础资料', // 组件名
+  105 d 3-> 3 |       cptX: 0, // 组件x坐标
+  106 d 3-> 3 |       cptY: 0, // 组件y坐标
+  107 d 3-> 3 |       cptZ: 0, // 组件z坐标
+  108 d 3-> 3 |       cptHeight: '100px', // 组件高度
+  109 d 3-> 3 |       cptWidth: '100%', // 组件宽度
+  110 d 3-> 3 |       layout: 'center', // 布局在左侧还是右侧
+  111 d 3-> 3 |       show: true, // 组件是否显示
+  112 d 3-> 4 |       style: {
+  113 d 4-> 4 |         themeColor: '#000',
+  114 d 4-> 4 |         firstTitleFontSize: '20px',
+  115 d 4-> 4 |         titleColor: '#121c26',
+  116 d 4-> 4 |         titleFontSize: '30px',
+  117 d 4-> 4 |         textFontSize: '14px',
+  118 d 4-> 4 |         titleFontWeight: 500,
+  119 d 4-> 4 |         textFontWeight: 500,
+  120 d 4-> 4 |         textColor: '#7c7b7b',
+  121 d 4-> 4 |         backgroundColor: '',
+  122 d 4-> 4 |         mBottom: '0px',
+  123 d 4-> 4 |         mTop: '0px',
+  124 d 4-> 4 |         pTop: '0',
+  125 d 4-> 4 |         pBottom: '30px',
+  126 d 4-> 4 |         pLeftRight: '40px',
+  127 d 4-> 3 |       },
+  128 d 3-> 4 |     {
+  129 d 4-> 4 |       keyId: '', // 组件id
+  130 d 4-> 4 |       model: 'BASE_INFO', // 模块
+  131 d 4-> 4 |       cptName: 'BASE_INFO_14', // 组件名
+  132 d 4-> 4 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  133 d 4-> 4 |       cptTitle: '基础资料', // 组件名
+  134 d 4-> 4 |       cptX: 0, // 组件x坐标
+  135 d 4-> 4 |       cptY: 0, // 组件y坐标
+  136 d 4-> 4 |       cptZ: 0, // 组件z坐标
+  137 d 4-> 4 |       cptHeight: '100px', // 组件高度
+  138 d 4-> 4 |       cptWidth: '100%', // 组件宽度
+  139 d 4-> 4 |       layout: 'center', // 布局在左侧还是右侧
+  140 d 4-> 4 |       show: true, // 组件是否显示
+  141 d 4-> 5 |       style: {
+  142 d 5-> 5 |         themeColor: '#000',
+  143 d 5-> 5 |         firstTitleFontSize: '20px',
+  144 d 5-> 5 |         titleColor: '#121c26',
+  145 d 5-> 5 |         titleFontSize: '30px',
+  146 d 5-> 5 |         textFontSize: '14px',
+  147 d 5-> 5 |         titleFontWeight: 500,
+  148 d 5-> 5 |         textFontWeight: 500,
+  149 d 5-> 5 |         textColor: '#7c7b7b',
+  150 d 5-> 5 |         backgroundColor: '',
+  151 d 5-> 5 |         mBottom: '0px',
+  152 d 5-> 5 |         mTop: '0px',
+  153 d 5-> 5 |         pTop: '0',
+  154 d 5-> 5 |         pBottom: '30px',
+  155 d 5-> 5 |         pLeftRight: '40px',
+  156 d 5-> 4 |       },
+  157 d 4-> 5 |     {
+  158 d 5-> 5 |       keyId: '', // 组件id
+  159 d 5-> 5 |       model: 'BASE_INFO', // 模块
+  160 d 5-> 5 |       cptName: 'BASE_INFO_15', // 组件名
+  161 d 5-> 5 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  162 d 5-> 5 |       cptTitle: '基础资料', // 组件名
+  163 d 5-> 5 |       cptX: 0, // 组件x坐标
+  164 d 5-> 5 |       cptY: 0, // 组件y坐标
+  165 d 5-> 5 |       cptZ: 0, // 组件z坐标
+  166 d 5-> 5 |       cptHeight: '100px', // 组件高度
+  167 d 5-> 5 |       cptWidth: '100%', // 组件宽度
+  168 d 5-> 5 |       layout: 'center', // 布局在左侧还是右侧
+  169 d 5-> 5 |       show: true, // 组件是否显示
+  170 d 5-> 6 |       style: {
+  171 d 6-> 6 |         themeColor: '#000',
+  172 d 6-> 6 |         firstTitleFontSize: '20px',
+  173 d 6-> 6 |         titleColor: '#121c26',
+  174 d 6-> 6 |         titleFontSize: '30px',
+  175 d 6-> 6 |         textFontSize: '14px',
+  176 d 6-> 6 |         titleFontWeight: 500,
+  177 d 6-> 6 |         textFontWeight: 500,
+  178 d 6-> 6 |         textColor: '#7c7b7b',
+  179 d 6-> 6 |         backgroundColor: '',
+  180 d 6-> 6 |         mBottom: '0px',
+  181 d 6-> 6 |         mTop: '0px',
+  182 d 6-> 6 |         pTop: '0',
+  183 d 6-> 6 |         pBottom: '30px',
+  184 d 6-> 6 |         pLeftRight: '40px',
+  185 d 6-> 5 |       },
+  186 d 5-> 6 |     {
+  187 d 6-> 6 |       keyId: '', // 组件id
+  188 d 6-> 6 |       model: 'BASE_INFO', // 模块
+  189 d 6-> 6 |       cptName: 'BASE_INFO_16', // 组件名
+  190 d 6-> 6 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  191 d 6-> 6 |       cptTitle: '基础资料', // 组件名
+  192 d 6-> 6 |       cptX: 0, // 组件x坐标
+  193 d 6-> 6 |       cptY: 0, // 组件y坐标
+  194 d 6-> 6 |       cptZ: 0, // 组件z坐标
+  195 d 6-> 6 |       cptHeight: '100px', // 组件高度
+  196 d 6-> 6 |       cptWidth: '100%', // 组件宽度
+  197 d 6-> 6 |       layout: 'center', // 布局在左侧还是右侧
+  198 d 6-> 6 |       show: true, // 组件是否显示
+  199 d 6-> 7 |       style: {
+  200 d 7-> 7 |         themeColor: '#000',
+  201 d 7-> 7 |         firstTitleFontSize: '20px',
+  202 d 7-> 7 |         titleColor: '#121c26',
+  203 d 7-> 7 |         titleFontSize: '30px',
+  204 d 7-> 7 |         textFontSize: '14px',
+  205 d 7-> 7 |         titleFontWeight: 500,
+  206 d 7-> 7 |         textFontWeight: 500,
+  207 d 7-> 7 |         textColor: '#7c7b7b',
+  208 d 7-> 7 |         backgroundColor: '',
+  209 d 7-> 7 |         mBottom: '0px',
+  210 d 7-> 7 |         mTop: '0px',
+  211 d 7-> 7 |         pTop: '0',
+  212 d 7-> 7 |         pBottom: '30px',
+  213 d 7-> 7 |         pLeftRight: '40px',
+  214 d 7-> 6 |       },
+  215 d 6-> 7 |     {
+  216 d 7-> 7 |       keyId: '', // 组件id
+  217 d 7-> 7 |       model: 'BASE_INFO', // 模块
+  218 d 7-> 7 |       cptName: 'BASE_INFO_17', // 组件名
+  219 d 7-> 7 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  220 d 7-> 7 |       cptTitle: '基础资料', // 组件名
+  221 d 7-> 7 |       cptX: 0, // 组件x坐标
+  222 d 7-> 7 |       cptY: 0, // 组件y坐标
+  223 d 7-> 7 |       cptZ: 0, // 组件z坐标
+  224 d 7-> 7 |       cptHeight: '100px', // 组件高度
+  225 d 7-> 7 |       cptWidth: '100%', // 组件宽度
+  226 d 7-> 7 |       layout: 'center', // 布局在左侧还是右侧
+  227 d 7-> 7 |       show: true, // 组件是否显示
+  228 d 7-> 8 |       style: {
+  229 d 8-> 8 |         themeColor: '#000',
+  230 d 8-> 8 |         firstTitleFontSize: '20px',
+  231 d 8-> 8 |         titleColor: '#121c26',
+  232 d 8-> 8 |         titleFontSize: '30px',
+  233 d 8-> 8 |         textFontSize: '14px',
+  234 d 8-> 8 |         titleFontWeight: 500,
+  235 d 8-> 8 |         textFontWeight: 500,
+  236 d 8-> 8 |         textColor: '#7c7b7b',
+  237 d 8-> 8 |         backgroundColor: '',
+  238 d 8-> 8 |         mBottom: '0px',
+  239 d 8-> 8 |         mTop: '0px',
+  240 d 8-> 8 |         pTop: '0',
+  241 d 8-> 8 |         pBottom: '30px',
+  242 d 8-> 8 |         pLeftRight: '40px',
+  243 d 8-> 7 |       },
+  244 d 7-> 7 |     ],
+  245 d 7-> 7 |     BASE_INFO: [
+  246 d 7-> 8 |     {
+  247 d 8-> 8 |       keyId: '', // 组件id
+  248 d 8-> 8 |       model: 'BASE_INFO', // 模块
+  249 d 8-> 8 |       cptName: 'BASE_INFO_1', // 组件名
+  250 d 8-> 8 |       cptOptionsName: 'BASE_INFO_OPTIONS',
+  251 d 8-> 8 |       cptTitle: '基础资料', // 组件名
+  252 d 8-> 8 |       cptX: 0, // 组件x坐标
+  253 d 8-> 8 |       cptY: 0, // 组件y坐标
+  254 d 8-> 8 |       cptZ: 0, // 组件z坐标
+  255 d 8-> 8 |       cptHeight: '100px', // 组件高度
+  256 d 8-> 8 |       cptWidth: '100%', // 组件宽度
+  257 d 8-> 8 |       layout: 'center', // 布局在左侧还是右侧
+  258 d 8-> 8 |       show: true, // 组件是否显示
+  259 d 8-> 9 |       style: {
+  260 d 9-> 9 |         themeColor: '#000',

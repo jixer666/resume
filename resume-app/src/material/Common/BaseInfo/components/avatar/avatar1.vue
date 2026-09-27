@@ -1,17 +1,11 @@
 <template>
-  <view
-    v-show="isShow.avatar"
-    :class="modelData.avatarShape ? 'avatar-shape-box' : 'avatar-box'"
-    :style="avatarStyle"
-  >
+  <view v-show="isShow.avatar" class="avatar-box" :style="avatarStyle">
     <AvatarShape v-if="modelData.avatarShape" :model-data="modelData" />
     <image
       v-else
-      class="avatar-img"
+      class="avatar-box__img"
       :src="modelData.avatar"
       mode="aspectFill"
-      style="width: 115px; height: 145px"
-      :style="avatarStyle"
     />
   </view>
 </template>
@@ -27,26 +21,23 @@ const props = defineProps<{
 }>()
 const isShow = reactive(props.modelData.isShow)
 
-const avatarStyle = computed(() => {
-  const style: Record<string, string> = {}
-  if (props.modelStyle?.avatarWidth)
-    style.width = props.modelStyle.avatarWidth
-  if (props.modelStyle?.avatarHeight)
-    style.height = props.modelStyle.avatarHeight
-  return style
-})
+/** 头像尺寸：默认 100 x 120，可在样式面板里改 avatarWidth / avatarHeight */
+const avatarStyle = computed<Record<string, string>>(() => ({
+  width: props.modelStyle?.avatarWidth || '100px',
+  height: props.modelStyle?.avatarHeight || '120px',
+}))
 </script>
 
 <style lang="scss" scoped>
-  .avatar-box {
-  width: 118px;
-  height: 150px;
-  overflow: hidden;
-  background-color: #eee;
+.avatar-box {
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
-  border: 4px solid #eee;
-  margin-right: 50px;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

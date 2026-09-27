@@ -50,21 +50,32 @@ export function getUuid(): string {
 const isValidYmd = /^\d{4}-\d{1,2}$/
 
 /**
+ * 单个时间值格式化：只有 `YYYY-M` 才走 dayjs，其余（`至今`、`2021年`、空串）原样返回。
+ *
+ * 不能直接丢给 dayjs —— `dayjs('至今').format()` 会输出字符串 `Invalid Date`，
+ * 而「至今」开关在没选开始时间时正好会写出这种值（见 experience.vue 的 buildEntry）。
+ */
+function formatDateValue(value: unknown): string {
+  const text = String(value || '').trim()
+  if (!text)
+    return ''
+  return isValidYmd.test(text) ? dayjs(text).format('YYYY.MM') : text
+}
+
+/**
  * 时间区间格式化：`['2015-5', '2019-6']` → `2015.05-2019.06`
  *
- * 结束时间为「至今」这类非 `YYYY-M` 文案时原样输出；
- * 单值入参直接格式化为 `YYYY.MM`。
+ * 开始 / 结束分开兜底：结束时间为「至今」这类非 `YYYY-M` 文案时原样输出，
+ * 只有一端有值时只输出那一端；单值入参直接格式化。
  */
 export function formatDate(date: string | string[] | undefined): string {
   if (Array.isArray(date)) {
     const [start, end] = date
-    const startText = start ? dayjs(start).format('YYYY.MM') : ''
-    if (!end)
+    const startText = formatDateValue(start)
+    const endText = formatDateValue(end)
+    if (!endText)
       return startText
-    const endText = isValidYmd.test(end) ? dayjs(end).format('YYYY.MM') : end
-    return `${startText}-${endText}`
+    return startText ? `${startText}-${endText}` : endText
   }
-  if (!date)
-    return ''
-  return dayjs(date).format('YYYY.MM')
+  return formatDateValue(date)
 }

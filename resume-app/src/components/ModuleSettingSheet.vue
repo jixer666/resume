@@ -130,7 +130,7 @@ function close() {
   text-align: center;
 
   &--on {
-    border-color: var(--wot-color-theme, #0957de);
+    border-color: var(--wot-color-theme, #2563eb);
     background-color: #eef4ff;
   }
 

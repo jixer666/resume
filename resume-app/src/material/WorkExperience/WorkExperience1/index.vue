@@ -1,49 +1,38 @@
-<!-- 工作经验 -->
+<!-- 工作经历：公司 / 时间一行，职位 / 部门一行，正文富文本 -->
 <template>
-  <div class="work-experience u-tag-div">
-    <!-- 标题 -->
+  <view class="work-experience u-tag-div">
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 校园经历 -->
-    <div class="work-experience-list u-tag-div">
-      <div v-for="(item, index) in modelData.LIST" :key="index" class="list u-tag-div">
-        <ul class="u-tag-ul">
-          <!-- 经历时间 -->
-          <li v-if="modelData.isShow.date" class="list-title u-tag-li">
-            {{ formatDate(item.date) }}
-          </li>
-          <!-- 公司名称 -->
-          <li v-if="modelData.isShow.companyName" class="list-title u-tag-li">
+    <view class="work-experience__list u-tag-div">
+      <view v-for="(item, index) in modelData.LIST" :key="index" class="work-experience__item">
+        <view class="work-experience__head">
+          <text v-if="modelData.isShow.companyName" class="work-experience__name">
             {{ item.companyName }}
-          </li>
-          <!-- 主要职责 -->
-          <li v-if="modelData.isShow.posts" class="list-title u-tag-li">
+          </text>
+          <text v-if="modelData.isShow.date" class="work-experience__date">
+            {{ formatDate(item.date) }}
+          </text>
+        </view>
+        <view v-if="modelData.isShow.posts || modelData.isShow.department" class="work-experience__meta">
+          <text v-if="modelData.isShow.posts" class="work-experience__posts">
             {{ item.posts }}
-          </li>
-          <!-- 部门 -->
-          <li v-if="modelData.isShow.department" class="list-title u-tag-li">
+          </text>
+          <text v-if="modelData.isShow.department" class="work-experience__department">
             {{ item.department }}
-          </li>
-        </ul>
-        <!-- 简述 -->
-        <div class="job-content u-tag-div">
-          <div class="content-list u-tag-div">
-            <ul class="u-tag-ul">
-              <li v-if="item.jobContent" class="u-tag-li">
-                <RichTextView :html="item.jobContent" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+          </text>
+        </view>
+        <view v-if="item.jobContent" class="work-experience__content">
+          <RichTextView :html="item.jobContent" :model-style="modelStyle" />
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
 import type { IWORKEXPERIENCE } from '@/interface/model'
-import ModelTitle from '../../ModelTitle/ModelTitle1/ModelTitle1.vue'
-import { formatDate } from '@/utils/common'
 import type IMODELSTYLE from '@/interface/modelStyle'
+import { formatDate } from '@/utils/common'
+import ModelTitle from '../../ModelTitle/ModelTitle1/ModelTitle1.vue'
 
 defineProps<{
   modelData: IWORKEXPERIENCE
@@ -52,65 +41,64 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-  .work-experience {
+.work-experience {
+  box-sizing: border-box;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  box-sizing: border-box;
-  margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
-  .work-experience-list {
-    margin-top: 25px;
-    .list {
-      display: flex;
-      flex-direction: column;
-      &:not(:last-child) {
-        margin-bottom: var(--entry-mb, 25px);
-      }
-      .u-tag-ul {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        & :first-child {
-          min-width: 165px;
-        }
-        .list-title {
-          list-style: none;
-          font-size: v-bind('modelStyle.titleFontSize');
-          color: v-bind('modelStyle.titleColor');
-          font-weight: v-bind('modelStyle.titleFontWeight');
-          letter-spacing: 2px;
-        }
-      }
-      .job-content {
-        display: flex;
-        .left {
-          width: 20%;
-          letter-spacing: 2px;
-          font-size: v-bind('modelStyle.titleFontSize');
-          color: v-bind('modelStyle.titleColor');
-          font-weight: v-bind('modelStyle.titleFontWeight');
-        }
-        .content-list {
-          flex: 1;
-          .u-tag-ul {
-            display: flex;
-            flex-direction: column;
-            .u-tag-li {
-              letter-spacing: 2px;
-              font-size: v-bind('modelStyle.textFontSize');
-              color: v-bind('modelStyle.textColor');
-              font-weight: v-bind('modelStyle.textFontWeight');
-              line-height: 1.5;
-              &:not(:last-child) {
-                margin-bottom: 6px;
-              }
-            }
-          }
-        }
-      }
+  margin-bottom: v-bind('modelStyle.mBottom');
+
+  &__list {
+    margin-top: 18px;
+  }
+
+  &__item {
+    &:not(:last-child) {
+      margin-bottom: var(--entry-mb, 24px);
     }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: v-bind('modelStyle.titleFontSize');
+    font-weight: v-bind('modelStyle.titleFontWeight');
+    color: v-bind('modelStyle.titleColor');
+  }
+
+  &__date {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  &__posts {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__department {
+    margin-left: 8px;
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__content {
+    margin-top: 10px;
   }
 }
 </style>

@@ -17,5 +17,6 @@ interface IGlobalStyle {
   leftThemeColor: string // 左侧布局时左侧背景色
   rightThemeColor: string // 右侧布局时右侧背景色
   fontFamily: string // 字体
+  resumeBackgroundCom: string // 整页背景预设名（空串为纯白）
 }
 export default IGlobalStyle

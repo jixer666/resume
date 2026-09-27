@@ -1,36 +1,35 @@
+<!-- 教育背景：学校 / 时间一行，专业 / 学历一行 -->
 <template>
-  <div class="edu-background u-tag-div">
-    <!-- 标题 -->
+  <view class="edu-background u-tag-div">
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 教育背景 -->
-    <div class="edu-list u-tag-div">
-      <ul v-for="(item, index) in modelData.LIST" :key="index" class="u-tag-ul list-item">
-        <!-- 学历日期 -->
-        <li v-if="modelData.isShow.date" class="u-tag-li">
-          {{ formatDate(item.date) }}
-        </li>
-        <!-- 学校名称 -->
-        <li v-if="modelData.isShow.schoolName" class="u-tag-li">
-          {{ item.schoolName }}
-        </li>
-        <!-- 专业 -->
-        <li v-if="modelData.isShow.specialized" class="u-tag-li">
-          {{ item.specialized }}
-        </li>
-        <!-- 学历 -->
-        <li v-if="modelData.isShow.degree" class="u-tag-li">
-          {{ item.degree }}
-        </li>
-      </ul>
-    </div>
-  </div>
+    <view class="edu-background__list u-tag-div">
+      <view v-for="(item, index) in modelData.LIST" :key="index" class="edu-background__item">
+        <view class="edu-background__head">
+          <text v-if="modelData.isShow.schoolName" class="edu-background__name">
+            {{ item.schoolName }}
+          </text>
+          <text v-if="modelData.isShow.date" class="edu-background__date">
+            {{ formatDate(item.date) }}
+          </text>
+        </view>
+        <view class="edu-background__meta">
+          <text v-if="modelData.isShow.specialized" class="edu-background__specialized">
+            {{ item.specialized }}
+          </text>
+          <text v-if="modelData.isShow.degree" class="edu-background__degree">
+            {{ item.degree }}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
 import type { IEDUBACKGROUND } from '@/interface/model'
-import ModelTitle from '../../ModelTitle/ModelTitle1/ModelTitle1.vue'
-import { formatDate } from '@/utils/common'
 import type IMODELSTYLE from '@/interface/modelStyle'
+import { formatDate } from '@/utils/common'
+import ModelTitle from '../../ModelTitle/ModelTitle1/ModelTitle1.vue'
 
 defineProps<{
   modelData: IEDUBACKGROUND
@@ -39,38 +38,60 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-  .edu-background {
+.edu-background {
+  box-sizing: border-box;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
-  box-sizing: border-box;
-  .edu-list {
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    margin-top: 25px;
+  margin-bottom: v-bind('modelStyle.mBottom');
 
-    .list-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      & :first-child {
-        min-width: 165px;
-      }
-      .u-tag-li {
-        list-style: none;
-        font-size: v-bind('modelStyle.titleFontSize');
-        color: v-bind('modelStyle.titleColor');
-        font-weight: v-bind('modelStyle.titleFontWeight');
-        letter-spacing: 2px;
-      }
-      &:not(:last-child) {
-        margin-bottom: var(--entry-mb, 20px);
-      }
+  &__list {
+    margin-top: 18px;
+  }
+
+  &__item {
+    &:not(:last-child) {
+      margin-bottom: var(--entry-mb, 18px);
     }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: v-bind('modelStyle.titleFontSize');
+    font-weight: v-bind('modelStyle.titleFontWeight');
+    color: v-bind('modelStyle.titleColor');
+  }
+
+  &__date {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  &__specialized {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__degree {
+    margin-left: 8px;
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
   }
 }
 </style>

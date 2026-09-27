@@ -11,6 +11,8 @@ export default uniHelper({
     '**/nativeplugins/',
     // 忽略 AI Skill 自带的示例代码（第三方 vendored 内容，不参与本项目质量门禁）
     '**/.agents/',
+    // 忽略任务过程产物（任务文档、生成模板数据的脚本与 JSON），它们不是产品代码
+    '**/.task/',
     'dist',
     // unplugin-auto-import 生成的类型文件，每次提交都改变，所以加入这里吧，与 .gitignore 配合使用
     'auto-import.d.ts',
@@ -23,6 +25,8 @@ export default uniHelper({
     'src/service/**',
     // 物料派发组件由 scripts/gen-material-renderer.js 生成，勿手改
     'src/components/ResumeRender/generated/**',
+    // 开发期版式核对页的数据由 .task/20260927-模板市场扩充/gen-templates.mjs 生成，勿手改
+    'src/pages/dev-templates/templates.data.ts',
   ],
   // https://eslint-config.antfu.me/rules
   rules: {

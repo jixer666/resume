@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { templateSideColor, templateTheme } from '@/schema/templates'
+import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 import { useTokenStore } from '@/store/token'
 import { toLoginPage } from '@/utils/toLoginPage'
@@ -21,8 +22,11 @@ definePage({
 
 const tokenStore = useTokenStore()
 const templateStore = useTemplateStore()
+const resumeStore = useResumeStore()
 /** 当前模板，id 非法时为 null（据此渲染兜底态） */
 const tpl = computed(() => templateStore.current)
+/** 正在按模板创建简历：期间锁住按钮，避免连点建出多份 */
+const creating = ref(false)
 /** 列表里已有这份模板时直接渲染内容，只有「还没有数据」才铺骨架屏 */
 const showSkeleton = computed(() => templateStore.detailLoading && !tpl.value)
 const theme = computed(() => (tpl.value ? templateTheme(tpl.value) : '#2563eb'))
@@ -46,15 +50,32 @@ onLoad(async (query) => {
     uni.setNavigationBarTitle({ title: tpl.value.name })
 })
 
-/** 套用该模板：未登录先去登录，回来后仍停在详情页，再点一次即可 */
-function useTemplate() {
-  if (!tpl.value)
+/**
+ * 套用该模板：未登录先去登录（回来后仍停在详情页，再点一次即可）；
+ * 已登录则先在后端创建简历，拿到主键再进编辑页。
+ *
+ * 创建必须发生在跳转之前 —— 失败（超出简历数上限 / 网络错误）时用户还留在本页，
+ * 不会像旧流程那样先跳进编辑页、留下一份没有主键的草稿反复重试落库。
+ */
+async function useTemplate() {
+  if (!tpl.value || creating.value)
     return
   if (!tokenStore.updateNowTime().hasLogin) {
     toLoginPage()
     return
   }
-  uni.navigateTo({ url: `/pages/edit/index?new=1&template=${tpl.value.code}` })
+  creating.value = true
+  try {
+    const brief = await resumeStore.createFromTemplate(tpl.value.code)
+    uni.navigateTo({ url: `/pages/edit/index?id=${brief.id}` })
+  }
+  catch (error) {
+    // 错误提示由 http 层统一 toast，这里只记日志
+    console.error('使用模板创建简历失败:', error)
+  }
+  finally {
+    creating.value = false
+  }
 }
 
 /** 兜底态回模板库（tab 页只能 switchTab） */
@@ -128,8 +149,14 @@ function backToLibrary() {
     </view>
 
     <view v-if="tpl" class="bottom">
-      <button class="primary" hover-class="primary-press" @click="useTemplate">
-        使用模板
+      <button
+        class="primary"
+        :class="{ 'primary--busy': creating }"
+        :disabled="creating"
+        hover-class="primary-press"
+        @click="useTemplate"
+      >
+        {{ creating ? '正在创建…' : '使用模板' }}
       </button>
     </view>
   </view>
@@ -355,5 +382,10 @@ function backToLibrary() {
 
 .primary-press {
   opacity: 0.85;
+}
+
+/* 创建中：按钮整体降透明度，配合文案「正在创建…」表示请求还在路上 */
+.primary--busy {
+  opacity: 0.6;
 }
 </style>

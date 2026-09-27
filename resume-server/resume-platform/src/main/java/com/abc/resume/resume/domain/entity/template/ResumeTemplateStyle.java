@@ -1,5 +1,6 @@
 package com.abc.resume.resume.domain.entity.template;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -13,14 +14,17 @@ public class ResumeTemplateStyle {
     /**
      * 上边距
      */
+    @JsonProperty("pTop")
     private String pTop;
     /**
      * 下边距
      */
+    @JsonProperty("pBottom")
     private String pBottom;
     /**
      * 左右边距（左右布局）
      */
+    @JsonProperty("pLeftRight")
     private String pLeftRight;
     /**
      * 主题色
@@ -78,4 +82,8 @@ public class ResumeTemplateStyle {
      * 左右布局时右侧背景色
      */
     private String rightThemeColor;
+    /**
+     * 整页背景预设名：空串纯白，其余由前端按预设渲染
+     */
+    private String resumeBackgroundCom;
 }

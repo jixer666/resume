@@ -1,26 +1,15 @@
+<!-- 基础资料文字块：姓名 / 联系方式 / 简介整块居中（经典模板样式） -->
 <template>
   <view class="user-info-1-box">
-    <text class="user-name">{{ modelData.name }}</text>
-    <text v-show="isShow.abstract" class="user-abstract">{{ modelData.abstract }}</text>
-    <view class="bottom">
-      <view class="meta-list">
-        <view v-show="isShow.age" class="meta-item li-border">
-          {{ modelData.age }}岁
-        </view>
-        <view v-show="isShow.address" class="meta-item li-border">
-          {{ modelData.address }}
-        </view>
-        <view v-show="isShow.workService" class="meta-item li-border">
-          {{ modelData.workService }}年经验
-        </view>
-        <view v-show="isShow.phoneNumber" class="meta-item li-border">
-          {{ modelData.phoneNumber }}
-        </view>
-        <view v-show="isShow.email" class="meta-item">
-          {{ modelData.email }}
-        </view>
-      </view>
-    </view>
+    <text class="user-info-1-box__name">
+      {{ modelData.name }}
+    </text>
+    <text v-if="metaText" class="user-info-1-box__meta">
+      {{ metaText }}
+    </text>
+    <text v-if="isShow.abstract" class="user-info-1-box__abstract">
+      {{ modelData.abstract }}
+    </text>
   </view>
 </template>
 
@@ -33,43 +22,52 @@ const props = defineProps<{
   modelStyle: IMODELSTYLE // 模块样式
 }>()
 const isShow = reactive(props.modelData.isShow)
+
+/** 联系方式行：只拼接打开的项，用竖线分隔（与版式图一致：电话 | 邮箱） */
+const metaText = computed(() => {
+  const data = props.modelData
+  const show = data.isShow || ({} as IBASEINFO['isShow'])
+  const parts: string[] = []
+  if (show.phoneNumber && data.phoneNumber)
+    parts.push(String(data.phoneNumber))
+  if (show.email && data.email)
+    parts.push(String(data.email))
+  if (show.age && data.age)
+    parts.push(`${data.age}岁`)
+  if (show.address && data.address)
+    parts.push(String(data.address))
+  if (show.workService && data.workService)
+    parts.push(`${data.workService}年经验`)
+  return parts.join(' | ')
+})
 </script>
 
 <style lang="scss" scoped>
-  .user-info-1-box {
-  .user-name {
-    display: block;
-    font-size: v-bind('modelStyle.titleFontSize');
+.user-info-1-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+
+  /* 姓名字号是本套皮肤的固定值（版式图约 26px），不跟随正文 / 小标题档位 */
+  &__name {
+    font-size: 26px;
+    font-weight: 700;
     color: v-bind('modelStyle.titleColor');
-    font-weight: v-bind('modelStyle.titleFontWeight');
   }
-  .user-abstract {
-    display: block;
-    color: v-bind('modelStyle.textColor');
+
+  &__meta {
+    margin-top: 10px;
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
   }
-  .bottom {
-    height: 45px;
-    display: flex;
-    align-items: flex-end;
-    .meta-list {
-      display: flex;
-      .meta-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 20px;
-        padding-right: 12px;
-        margin-right: 20px;
-        font-size: v-bind('modelStyle.textFontSize');
-        font-weight: v-bind('modelStyle.textFontWeight');
-        color: v-bind('modelStyle.textColor');
-      }
-      .li-border {
-        border-right: 2px solid #b4b4b4;
-      }
-    }
+
+  &__abstract {
+    margin-top: 6px;
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
   }
 }
 </style>

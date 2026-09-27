@@ -205,6 +205,17 @@ function sizeSliderValue(key: TSizeKey, fallback: number): number {
   return pxTonumber(moduleStyle.value[key]) || fallback
 }
 
+/** 全局样式恢复出厂默认：重置后所有模块一起回到默认外观 */
+function resetGlobal() {
+  store.resetGlobalStyle()
+}
+
+/** 当前模块的样式恢复成它这套皮肤的默认值（皮肤与内容不动） */
+function resetModule() {
+  if (activeKeyId.value)
+    store.resetModuleStyle(activeKeyId.value)
+}
+
 function close() {
   emit('close')
 }
@@ -339,10 +350,14 @@ function close() {
               :max="one.max"
               :step="1"
               :value="pxTonumber(globalStyle[one.key])"
-              active-color="#0957de"
+              active-color="#2563eb"
               :block-size="18"
               @change="onGlobalSpacingChange(one.key, $event)"
             />
+          </view>
+
+          <view class="sheet-reset" hover-class="sheet-reset--press" @click="resetGlobal">
+            恢复默认样式
           </view>
         </template>
 
@@ -437,7 +452,7 @@ function close() {
               :max="one.max"
               :step="1"
               :value="pxTonumber(moduleStyle[one.key]) || 0"
-              active-color="#0957de"
+              active-color="#2563eb"
               :block-size="18"
               @change="onModuleSpacingChange(one.key, $event)"
             />
@@ -459,7 +474,7 @@ function close() {
                 :max="ENTRY_GAP_ITEM.max"
                 :step="1"
                 :value="sizeSliderValue(ENTRY_GAP_ITEM.key, ENTRY_GAP_ITEM.fallback)"
-                active-color="#0957de"
+                active-color="#2563eb"
                 :block-size="18"
                 @change="onSizeChange(ENTRY_GAP_ITEM.key, $event)"
               />
@@ -482,7 +497,7 @@ function close() {
                 :max="one.max"
                 :step="1"
                 :value="sizeSliderValue(one.key, one.fallback)"
-                active-color="#0957de"
+                active-color="#2563eb"
                 :block-size="18"
                 @change="onSizeChange(one.key, $event)"
               />
@@ -505,12 +520,16 @@ function close() {
                 :max="CONTENT_INDENT_ITEM.max"
                 :step="1"
                 :value="sizeSliderValue(CONTENT_INDENT_ITEM.key, CONTENT_INDENT_ITEM.fallback)"
-                active-color="#0957de"
+                active-color="#2563eb"
                 :block-size="18"
                 @change="onSizeChange(CONTENT_INDENT_ITEM.key, $event)"
               />
             </view>
           </template>
+
+          <view class="sheet-reset" hover-class="sheet-reset--press" @click="resetModule">
+            恢复本模块默认样式
+          </view>
         </template>
 
         <view v-else class="sheet-empty">
@@ -533,6 +552,22 @@ function close() {
   color: #94a3b8;
   font-size: 13px;
   text-align: center;
+}
+
+/* 恢复默认：面板底部的次级操作，用描边弱化，避免与「完成」抢注意力 */
+.sheet-reset {
+  height: 40px;
+  margin-top: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #646a73;
+  font-size: 13px;
+  line-height: 40px;
+  text-align: center;
+}
+
+.sheet-reset--press {
+  background-color: #f2f3f5;
 }
 </style>
 

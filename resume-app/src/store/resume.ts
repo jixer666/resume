@@ -243,6 +243,8 @@ export const useResumeStore = defineStore(
     const savedSnapshot = ref('')
     /** 当前草稿套用的模板编码：新建时提交给后端（更新时用不到） */
     const currentTemplateCode = ref('')
+    /** 最近一次落库状态：编辑页据此显示「保存中 / 已保存 / 保存失败」 */
+    const saveState = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
     /** 在途的落库请求，用来把并发保存串成一条队列 */
     let pendingSave: Promise<IResumeBrief | null> | null = null
 
@@ -313,6 +315,7 @@ export const useResumeStore = defineStore(
       }
       current.value = json
       savedSnapshot.value = ''
+      saveState.value = 'idle'
       resetStyleEdits()
       return json
     }
@@ -337,9 +340,11 @@ export const useResumeStore = defineStore(
       json.ID = String(detail.id)
       // 后端新建时只落骨架，缺的 style / data 由本地物料表补齐
       hydrateComponents(json)
-      currentTemplateCode.value = ''
+      // 后端表里存着这份简历用的是哪个模板：预览页的「更换模板」据此高亮当前项
+      currentTemplateCode.value = String(detail.templateCode || '')
       current.value = json
       savedSnapshot.value = snapshotOf(json)
+      saveState.value = 'idle'
       resetStyleEdits()
       return json
     }
@@ -369,20 +374,39 @@ export const useResumeStore = defineStore(
         return null
       const rawId = Number(json.ID)
       const isNew = !Number.isFinite(rawId) || rawId <= 0
+      saveState.value = 'saving'
       pendingSave = (isNew
         ? saveResume({ templateCode: currentTemplateCode.value || undefined })
-        : saveResume({ id: rawId, resumeDetail: json })).then((brief) => {
-        json.ID = String(brief.id)
-        savedSnapshot.value = snapshotOf(json)
-        upsertBrief(brief)
-        return brief
-      })
+        : saveResume({ id: rawId, templateCode: currentTemplateCode.value || undefined, resumeDetail: json }))
+        .then((brief) => {
+          json.ID = String(brief.id)
+          savedSnapshot.value = snapshotOf(json)
+          upsertBrief(brief)
+          saveState.value = 'saved'
+          return brief
+        })
+        .catch((error) => {
+          saveState.value = 'error'
+          throw error
+        })
       try {
         return await pendingSave
       }
       finally {
         pendingSave = null
       }
+    }
+
+    /**
+     * 按模板新建一份简历：模板详情页「使用模板」的落库入口。
+     *
+     * 先拿到后端主键再跳编辑页 —— 创建失败（超出简历数上限 / 网络错误）时用户还留在详情页，
+     * 不会像旧流程那样先跳进编辑页、留下一份没有主键的草稿反复重试。
+     */
+    async function createFromTemplate(templateCode: string): Promise<IResumeBrief> {
+      const brief = await saveResume({ templateCode })
+      upsertBrief(brief)
+      return brief
     }
 
     /** 列表里按 id 覆盖或插入一条摘要 */
@@ -543,6 +567,39 @@ export const useResumeStore = defineStore(
     }
 
     /**
+     * 全局样式恢复出厂默认：把 GLOBAL_STYLE 整份换回默认值，再无条件扇出到所有模块。
+     *
+     * 同时清掉这些字段的「用户改过」标记 —— 恢复默认后它们不该再被当成个性化值
+     * 在换模板时盖回模板预设（见 applyTemplate）。
+     */
+    function resetGlobalStyle(): void {
+      const json = current.value
+      if (!json)
+        return
+      const defaults = clone(GLOBAL_STYLE_DEFAULTS) as Record<string, unknown>
+      json.GLOBAL_STYLE = defaults as unknown as IGlobalStyle
+      const keys = Object.keys(defaults) as (keyof IGlobalStyle)[]
+      keys.forEach(key => editedGlobalKeys.delete(key as string))
+      json.COMPONENTS.forEach((item: IMATERIALITEM) => applyGlobalStyleToItem(item, defaults, keys))
+    }
+
+    /**
+     * 某个模块的样式恢复成它当前皮肤的默认值（并清掉这个模块的「用户改过」标记）。
+     *
+     * 与「换皮肤」不同：这里 cptName / cptTitle 不动，只重置 style。
+     */
+    function resetModuleStyle(keyId: string): void {
+      const item = findModuleByKey(keyId)
+      if (!item)
+        return
+      const variant = materialGroupOf(item.model).find(one => one.cptName === item.cptName)
+      if (!variant)
+        return
+      item.style = clone(variant.style)
+      editedModuleKeys.delete(keyId)
+    }
+
+    /**
      * 换皮肤：只改 cptName / cptTitle / style，业务数据原样保留。
      *
      * 样式重置成皮肤默认值后，再把用户改过的全局样式补回来——
@@ -623,11 +680,15 @@ export const useResumeStore = defineStore(
     return {
       list,
       current,
+      saveState,
+      /** 当前草稿套用的模板编码：预览页据此高亮「更换模板」里的当前项 */
+      currentTemplateCode,
       components,
       leftComponents,
       rightComponents,
       isTwoColumn,
       createResume,
+      createFromTemplate,
       fetchList,
       loadResume,
       setCurrent,
@@ -643,6 +704,8 @@ export const useResumeStore = defineStore(
       captureFitBase,
       applyFitScale,
       updateModuleTitle,
+      resetGlobalStyle,
+      resetModuleStyle,
       changeVariant,
       applyTemplate,
       variantsOf: materialGroupOf,
@@ -651,6 +714,9 @@ export const useResumeStore = defineStore(
     }
   },
   {
-    persist: true,
+    // saveState 是本会话的落库状态，不进持久化：否则重启后会停在「保存中…」
+    persist: {
+      paths: ['list', 'current', 'savedSnapshot', 'currentTemplateCode'],
+    },
   },
 )

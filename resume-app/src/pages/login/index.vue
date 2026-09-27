@@ -93,7 +93,7 @@ function backAfterLogin() {
   align-items: center;
   justify-content: center;
   border-radius: 20px;
-  background-color: #0957de;
+  background-color: var(--wot-color-theme, #2563eb);
 }
 
 .login__logo-text {
@@ -125,7 +125,7 @@ function backAfterLogin() {
   width: 100%;
   height: 46px;
   border-radius: 23px;
-  background-color: #0957de;
+  background-color: var(--wot-color-theme, #2563eb);
   color: #fff;
   font-size: 16px;
   line-height: 46px;

@@ -1,18 +1,18 @@
-<!-- 作品展示 -->
+<!-- 作品展示：作品名 + 链接（小程序没有 a 标签，点击复制） -->
 <template>
-  <div class="works-display u-tag-div">
-    <!-- 标题 -->
+  <view class="works-display u-tag-div">
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 作品展示 -->
-    <ul class="works-display-list u-tag-ul">
-      <li v-for="(item, index) in modelData.LIST" :key="index" class="u-tag-li">
-        <h1 class="u-tag-h1">
+    <view class="works-display__list u-tag-div">
+      <view v-for="(item, index) in modelData.LIST" :key="index" class="works-display__item">
+        <text class="works-display__name">
           {{ item.worksName }}
-        </h1>
-        <text class="u-tag-a" @click="copyWorksLink(item.worksLink)">{{ item.worksLink }}</text>
-      </li>
-    </ul>
-  </div>
+        </text>
+        <text class="works-display__link" @click="copyWorksLink(item.worksLink)">
+          {{ item.worksLink }}
+        </text>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
@@ -37,41 +37,38 @@ function copyWorksLink(link?: string) {
 </script>
 
 <style lang="scss" scoped>
-  .works-display {
+.works-display {
+  box-sizing: border-box;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  box-sizing: border-box;
-  margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
-  .works-display-list {
-    margin-top: 25px;
+  margin-bottom: v-bind('modelStyle.mBottom');
+
+  &__list {
+    margin-top: 18px;
+  }
+
+  &__item {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    .u-tag-li {
-      display: flex;
-      flex-direction: column;
-      list-style: none;
-      .u-tag-h1 {
-        font-size: v-bind('modelStyle.textFontSize');
-        color: v-bind('modelStyle.textColor');
-        font-weight: v-bind('modelStyle.textFontWeight');
-        letter-spacing: 2px;
-        margin: 0;
-      }
-      .u-tag-a {
-        font-size: 14px;
-        margin-top: 5px;
-        &:hover {
-          color: #00c091;
-        }
-      }
-      &:not(:last-child) {
-        margin-bottom: var(--entry-mb, 15px);
-      }
+
+    &:not(:last-child) {
+      margin-bottom: var(--entry-mb, 14px);
     }
+  }
+
+  &__name {
+    font-size: v-bind('modelStyle.titleFontSize');
+    font-weight: v-bind('modelStyle.titleFontWeight');
+    color: v-bind('modelStyle.titleColor');
+  }
+
+  &__link {
+    margin-top: 6px;
+    font-size: v-bind('modelStyle.textFontSize');
+    color: v-bind('modelStyle.textColor');
   }
 }
 </style>

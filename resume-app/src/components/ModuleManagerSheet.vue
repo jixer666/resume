@@ -84,8 +84,18 @@ function moveModule(from: number, to: number) {
 }
 
 function removeModule(item: IMATERIALITEM) {
-  store.removeModule(item.keyId)
-  emit('change')
+  // 删除模块会连带它的内容一起消失，先确认（与删除简历、删除条目一致）
+  uni.showModal({
+    title: `删除${moduleTitle(item)}`,
+    content: '删除后无法恢复，确定删除这个模块吗？',
+    confirmColor: '#ef4444',
+    success: ({ confirm }) => {
+      if (!confirm)
+        return
+      store.removeModule(item.keyId)
+      emit('change')
+    },
+  })
 }
 
 function addModule(model: string) {
@@ -111,10 +121,20 @@ function addModule(model: string) {
               <text class="module-state">{{ item.show ? '显示中' : '已隐藏' }}</text>
             </view>
             <view class="module-acts">
-              <view class="icon-btn" hover-class="icon-btn--press" @click="moveModule(index, index - 1)">
+              <view
+                class="icon-btn"
+                :class="{ 'icon-btn--disabled': index === 0 }"
+                :hover-class="index === 0 ? 'none' : 'icon-btn--press'"
+                @click="moveModule(index, index - 1)"
+              >
                 <mp-icon name="ui-up" color="#64748b" size="26px" />
               </view>
-              <view class="icon-btn" hover-class="icon-btn--press" @click="moveModule(index, index + 1)">
+              <view
+                class="icon-btn"
+                :class="{ 'icon-btn--disabled': index === components.length - 1 }"
+                :hover-class="index === components.length - 1 ? 'none' : 'icon-btn--press'"
+                @click="moveModule(index, index + 1)"
+              >
                 <mp-icon name="ui-down" color="#64748b" size="26px" />
               </view>
               <view class="icon-btn" hover-class="icon-btn--press" @click="toggleModule(item)">
@@ -209,6 +229,11 @@ function addModule(model: string) {
   &--press {
     background-color: #e2e8f0;
   }
+
+  /* 首 / 末项：上移 / 下移不可用，降透明度并关掉按压反馈 */
+  &--disabled {
+    opacity: 0.35;
+  }
 }
 
 .add-grid {
@@ -222,7 +247,7 @@ function addModule(model: string) {
   padding: 7px 12px;
   border-radius: 15px;
   background-color: #eff6ff;
-  color: var(--wot-color-theme, #0957de);
+  color: var(--wot-color-theme, #2563eb);
   font-size: 12px;
 
   &--press {

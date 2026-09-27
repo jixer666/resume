@@ -63,11 +63,14 @@ export function deleteResume(id: number) {
  *
  * 又因为 `interceptor.ts` 只注册了 `request` / `uploadFile` 两个拦截器，`downloadFile`
  * 不会自动拼 baseUrl、也不会自动带鉴权头，所以这里手动补上这两样。
+ *
+ * @param onProgress 下载进度回调（0~100）。后端要先渲染 PDF 再吐流，前几秒进度会一直是 0，
+ *                   调用方据此显示「正在生成」比只转圈更有信息量。
  */
-export function exportResumePdf(id: number): Promise<string> {
+export function exportResumePdf(id: number, onProgress?: (percent: number) => void): Promise<string> {
   const token = useTokenStore().updateNowTime().validToken
   return new Promise((resolve, reject) => {
-    uni.downloadFile({
+    const task = uni.downloadFile({
       url: `${getEnvBaseUrl()}/resume/export/${id}`,
       header: token ? { Authorization: `Bearer ${token}` } : {},
       success: (res) => {
@@ -80,5 +83,7 @@ export function exportResumePdf(id: number): Promise<string> {
       },
       fail: error => reject(new Error(error.errMsg || '导出失败')),
     })
+    if (onProgress && task && typeof task.onProgressUpdate === 'function')
+      task.onProgressUpdate(res => onProgress(res.progress))
   })
 }

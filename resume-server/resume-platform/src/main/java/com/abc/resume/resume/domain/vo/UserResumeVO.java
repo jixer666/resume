@@ -27,6 +27,9 @@ public class UserResumeVO {
     /** 缩略图地址，未生成时为空串 */
     private String thumbnail;
 
+    /** 当前套用的模板编码，取自简历表 template_code（列表 / 详情都返回，预览页据此高亮当前模板） */
+    private String templateCode;
+
     /** 整份简历详情，列表接口不返回（为 null），详情 / 保存接口返回 */
     private UserResumeDetail resumeJson;
 

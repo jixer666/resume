@@ -21,6 +21,9 @@ definePage({
 const store = useResumeStore()
 const keyId = ref('')
 
+/** 学历快捷选项：绝大多数简历落在这四档里，点一下即可，冷门学历仍走输入框 */
+const DEGREE_OPTIONS = ['大专', '本科', '硕士', '博士']
+
 /** 表单初始值即模块默认数据，避免手写一份可能与 schema 漂移的空对象 */
 function createForm(): IBASEINFO {
   return {
@@ -107,7 +110,7 @@ function clear() {
           <text class="avatar-remove">删除头像</text>
         </view>
         <view v-else class="avatar-empty" @click="chooseAvatar">
-          <mp-icon name="ui-image" color="#0957de" size="30px" />
+          <mp-icon name="ui-image" color="#2563eb" size="30px" />
           <text class="avatar-empty-text">上传头像</text>
         </view>
         <text class="avatar-action" @click="chooseAvatar">
@@ -122,7 +125,19 @@ function clear() {
       <text class="label">工作年限</text>
       <input class="input" type="number" :value="String(form.workService || '')" placeholder="请输入工作年限" @input="form.workService = toNumber($event.detail.value)">
       <text class="label">学历</text>
-      <input v-model="form.degree" class="input" placeholder="如：本科">
+      <input v-model="form.degree" class="input input--degree" placeholder="如：本科">
+      <view class="chips">
+        <view
+          v-for="option in DEGREE_OPTIONS"
+          :key="option"
+          class="chip"
+          :class="{ 'chip--active': form.degree === option }"
+          hover-class="chip--press"
+          @click="form.degree = form.degree === option ? '' : option"
+        >
+          <text>{{ option }}</text>
+        </view>
+      </view>
       <text class="label">所在城市</text>
       <input v-model="form.address" class="input" placeholder="如：上海">
       <text class="label">联系电话</text>
@@ -185,13 +200,46 @@ function clear() {
 
 .avatar-empty-text {
   margin-top: 4px;
-  color: var(--wot-color-theme, #0957de);
+  color: var(--wot-color-theme, #2563eb);
   font-size: 11px;
 }
 
 .avatar-action {
   margin-left: 14px;
-  color: var(--wot-color-theme, #0957de);
+  color: var(--wot-color-theme, #2563eb);
   font-size: 13px;
+}
+
+/* 学历快捷选项：与样式面板的色块一样用 margin 排版，不依赖小程序对 flex gap 的支持 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -4px 0 11px;
+}
+
+.chip {
+  margin: 0 8px 8px 0;
+  padding: 0 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 15px;
+  background-color: #f8fafc;
+  color: #475467;
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.chip--active {
+  border-color: var(--wot-color-theme, #2563eb);
+  background-color: #eef4ff;
+  color: var(--wot-color-theme, #2563eb);
+}
+
+.chip--press {
+  opacity: 0.85;
+}
+
+/* 输入框下面紧跟快捷选项，收窄它自己的下间距，让两者视觉上是一组 */
+.input--degree {
+  margin-bottom: 8px;
 }
 </style>

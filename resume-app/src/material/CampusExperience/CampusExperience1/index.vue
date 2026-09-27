@@ -1,32 +1,28 @@
-<!-- 校园经历 -->
+<!-- 校园经历：社团名 / 时间一行，职务一行，正文富文本 -->
 <template>
-  <div class="campus-experience u-tag-div">
-    <!-- 标题 -->
+  <view class="campus-experience u-tag-div">
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 校园经历 -->
-    <div class="campue-experience-list u-tag-div">
-      <div v-for="(item, index) in modelData.LIST" :key="index" class="list u-tag-div">
-        <ul class="u-tag-ul">
-          <!-- 经历时间 -->
-          <li v-if="modelData.isShow.date" class="u-tag-li">
-            {{ formatDate(item.date) }}
-          </li>
-          <!-- 项目名称 -->
-          <li v-if="modelData.isShow.campusBriefly" class="u-tag-li">
+    <view class="campus-experience__list u-tag-div">
+      <view v-for="(item, index) in modelData.LIST" :key="index" class="campus-experience__item">
+        <view class="campus-experience__head">
+          <text v-if="modelData.isShow.campusBriefly" class="campus-experience__name">
             {{ item.campusBriefly }}
-          </li>
-          <!-- 主要职责 -->
-          <li v-if="modelData.isShow.campusDuty" class="u-tag-li">
+          </text>
+          <text v-if="modelData.isShow.date" class="campus-experience__date">
+            {{ formatDate(item.date) }}
+          </text>
+        </view>
+        <view v-if="modelData.isShow.campusDuty" class="campus-experience__meta">
+          <text class="campus-experience__duty">
             {{ item.campusDuty }}
-          </li>
-        </ul>
-        <!-- 简述 -->
-        <view v-if="modelData.isShow.campusContent" class="u-tag-p">
+          </text>
+        </view>
+        <view v-if="item.campusContent" class="campus-experience__content">
           <RichTextView :html="item.campusContent" :model-style="modelStyle" />
         </view>
-      </div>
-    </div>
-  </div>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script setup lang="ts">
@@ -42,45 +38,57 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-  .campus-experience {
+.campus-experience {
+  box-sizing: border-box;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  box-sizing: border-box;
-  margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
-  .campue-experience-list {
-    margin-top: 25px;
-    .list {
-      display: flex;
-      flex-direction: column;
-      &:not(:last-child) {
-        margin-bottom: var(--entry-mb, 25px);
-      }
-      .u-tag-ul {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        & :first-child {
-          min-width: 165px;
-        }
-        .u-tag-li {
-          list-style: none;
-          font-size: v-bind('modelStyle.titleFontSize');
-          color: v-bind('modelStyle.titleColor');
-          font-weight: v-bind('modelStyle.titleFontWeight');
-          letter-spacing: 2px;
-        }
-      }
-      .u-tag-p {
-        letter-spacing: 2px;
-        font-size: v-bind('modelStyle.textFontSize');
-        color: v-bind('modelStyle.textColor');
-        font-weight: v-bind('modelStyle.textFontWeight');
-        line-height: 1.5;
-      }
+  margin-bottom: v-bind('modelStyle.mBottom');
+
+  &__list {
+    margin-top: 18px;
+  }
+
+  &__item {
+    &:not(:last-child) {
+      margin-bottom: var(--entry-mb, 24px);
     }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: v-bind('modelStyle.titleFontSize');
+    font-weight: v-bind('modelStyle.titleFontWeight');
+    color: v-bind('modelStyle.titleColor');
+  }
+
+  &__date {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  &__duty {
+    font-size: v-bind('modelStyle.textFontSize');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    color: v-bind('modelStyle.textColor');
+  }
+
+  &__content {
+    margin-top: 10px;
   }
 }
 </style>

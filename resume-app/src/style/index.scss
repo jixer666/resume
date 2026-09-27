@@ -11,8 +11,14 @@
 
 :root,
 page {
+  /*
+    全局主题色：编辑页 / 预览页 / 模板库三页统一用它，不再各写各的 fallback。
+    定义在这里而不是各页面里，是为了让 `var(--wot-color-theme, ...)` 的 fallback 永远不生效，
+    换主题只改这一处即可（H5 命中 :root，小程序命中 page）。
+  */
+  --wot-color-theme: #2563eb;
+
   // 修改按主题色
-  // --wot-color-theme: #37c2bc;
 
   // 修改按钮背景色
   // --wot-button-primary-bg-color: green;

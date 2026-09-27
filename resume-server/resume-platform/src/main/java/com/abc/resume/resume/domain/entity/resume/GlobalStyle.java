@@ -68,6 +68,9 @@ public class GlobalStyle {
     /** 字体 */
     private String fontFamily;
 
+    /** 整页背景预设名：空串纯白，其余由前端按预设渲染 */
+    private String resumeBackgroundCom;
+
     /** 未声明的样式字段，原样透传 */
     @JsonIgnore
     private Map<String, Object> extra = new LinkedHashMap<>();

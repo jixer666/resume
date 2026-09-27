@@ -1,15 +1,15 @@
+<!-- 基础资料：姓名 / 联系方式 / 简介居中，头像靠右（经典模板样式） -->
 <template>
-  <div class="base-info-common-1-box u-tag-div">
-    <!-- 基本信息 -->
-    <div class="user-info u-tag-div">
-      <div class="top u-tag-div">
-        <!-- 头像 -->
+  <view class="base-info-common-1-box u-tag-div">
+    <view class="user-info u-tag-div">
+      <view class="user-info__avatar u-tag-div">
         <avatar1 :model-data="modelData" :model-style="modelStyle" />
-        <!-- 个人信息 -->
+      </view>
+      <view class="user-info__main u-tag-div">
         <user-info1-vue :model-data="modelData" :model-style="modelStyle" />
-      </div>
-    </div>
-  </div>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script lang="ts" setup>
@@ -25,26 +25,33 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-  .base-info-common-1-box {
+.base-info-common-1-box {
+  box-sizing: border-box;
   width: 100%;
-  cursor: pointer;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  box-sizing: border-box;
-  margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
+  margin-bottom: v-bind('modelStyle.mBottom');
+
   .user-info {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    .top {
-      display: flex;
-      align-items: flex-end;
-      /* 头像*/
-      :deep(.avatar-shape-box) {
-        margin-right: 50px;
-      }
+    width: 100%;
+
+    /* 头像绝对定位靠右，文字块整宽居中，姓名始终落在纸张中线上 */
+    &__avatar {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    &__main {
+      box-sizing: border-box;
+      width: 100%;
+      padding-right: 130px;
+      padding-left: 130px;
     }
   }
 }

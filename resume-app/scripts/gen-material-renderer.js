@@ -112,7 +112,7 @@ defineProps<{
 </script>
 
 <template>
-${branches.length ? branches.join('\n') : '  <view />'}
+${branches.length ? branches.join('\n') : '  <view v-if="false" />'}
   <view v-else class="compat-fallback">
     <text class="compat-fallback__text">
       {{ item.cptTitle || item.cptName }} 暂未适配小程序

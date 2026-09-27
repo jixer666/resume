@@ -112,6 +112,7 @@ public class UserResumeDetail {
         style.setRightWidth(StringUtils.EMPTY);
         style.setLeftThemeColor(StringUtils.EMPTY);
         style.setRightThemeColor(StringUtils.EMPTY);
+        style.setResumeBackgroundCom(StringUtils.EMPTY);
         return style;
     }
 
@@ -172,6 +173,9 @@ public class UserResumeDetail {
         }
         if (StringUtils.isNotBlank(source.getRightThemeColor())) {
             target.setRightThemeColor(source.getRightThemeColor());
+        }
+        if (StringUtils.isNotBlank(source.getResumeBackgroundCom())) {
+            target.setResumeBackgroundCom(source.getResumeBackgroundCom());
         }
     }
 

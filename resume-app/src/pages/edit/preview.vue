@@ -2,6 +2,7 @@
 import { exportResumePdf } from '@/api/resume'
 import ResumeRender from '@/components/ResumeRender/ResumeRender.vue'
 import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templates'
+import type { IFitBase } from '@/store/resume'
 import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 
@@ -26,6 +27,8 @@ definePage({
 const PAPER_WIDTH = 794
 /** A4 纸高（px）：分页的裁切高度，内容不足一页时也保持整页 */
 const PAPER_HEIGHT = 1123
+/** 页与页之间的间距（px），与 `.slot` 的 margin-bottom 保持一致，算可视页要用 */
+const SLOT_GAP = 12
 
 const store = useResumeStore()
 const templateStore = useTemplateStore()
@@ -49,12 +52,22 @@ const showModuleSheet = ref(false)
 /** 样式弹层：内含「全局样式 / 组件样式」两栏 */
 const showStyleSheet = ref(false)
 const showTemplateSheet = ref(false)
-/** 本次会话内换过的模板编码，用来在列表里标出当前项（后端不返回该字段） */
-const activeTemplateCode = ref('')
+/** 当前模板编码：载入详情与换模板都会同步进 store，列表据此高亮当前项 */
+const activeTemplateCode = computed(() => store.currentTemplateCode)
 /** 导出中：生成 PDF 有耗时，按钮连点会重复请求 */
 const exporting = ref(false)
 /** 一键整理中：逐档压缩要反复测量，期间锁住按钮 */
 const fitting = ref(false)
+/** 「整理成一页」前的样式基准：有值说明已整理过，再点一次是还原（见 restoreFit） */
+const fitBase = ref<IFitBase | null>(null)
+/** 当前可视页：页码胶囊显示用（滚动位置只存在普通变量里，不回写 scroll-top） */
+const visiblePage = ref(1)
+/** 回到顶部的目标 id：用 scroll-into-view 而不是受控 scroll-top，避免与滚动事件互相打架 */
+const scrollTarget = ref('')
+/** 正在量内容高度：量的时候不传 min-height，否则量到的是「页数 × A4 高」，整理永远判成装不下 */
+const measuring = ref(false)
+/** 传给 ResumeRender 的最小高度：撑满已算出的页数，双列模板第 2 页起左栏底色才不会断 */
+const renderMinHeight = computed(() => (measuring.value ? undefined : pageCount.value * PAPER_HEIGHT))
 
 /**
  * 一键整理的压缩档位：从「几乎不动」逐档收紧，取第一个能装进一页的档位。
@@ -97,10 +110,23 @@ function measureHeight(): Promise<number> {
   })
 }
 
-/** 量未缩放的内容高度，据此算页数 */
-async function measurePaper(): Promise<void> {
+/**
+ * 量「内容自然高度」（未缩放，px）：量之前先摘掉 min-height。
+ *
+ * 不摘的话量到的是 min-height（页数 × A4 高），页数越多量出来越高 ——
+ * 「整理成一页」会永远判定为装不下，整理也就永远完不成。
+ */
+async function measureContentHeight(): Promise<number> {
+  measuring.value = true
   await waitRender(60)
   const height = await measureHeight()
+  measuring.value = false
+  return height
+}
+
+/** 量内容高度，据此算页数 */
+async function measurePaper(): Promise<void> {
+  const height = await measureContentHeight()
   if (height)
     contentHeight.value = Math.max(PAPER_HEIGHT, height)
 }
@@ -113,14 +139,24 @@ async function measurePaper(): Promise<void> {
  * 而不是在上一档的结果上继续乘 —— 档位之间互不影响，也不会把皮肤自带的留白抹平。
  *
  * 一路压到底还装不下就还原基准：既然挤不进一页，就别把版式改坏。
+ *
+ * 整理成功后按钮变成「还原样式」：把整理前的基准值原样套回（见 restoreFit）。
  */
 async function fitToOnePage() {
   if (fitting.value || !resume.value)
     return
+  // 已经整理过：这次点击是「还原」，把整理前的基准值原样套回去
+  if (fitBase.value) {
+    await restoreFit()
+    return
+  }
   fitting.value = true
   uni.showLoading({ title: '正在整理', mask: true })
   let message = ''
   try {
+    // 整个测量过程都摘掉 min-height（见 measureContentHeight），量到的才是内容真实高度
+    measuring.value = true
+    await waitRender(60)
     const height = await measureHeight()
     if (!height) {
       message = '暂时量不到简历高度，请稍后重试'
@@ -140,7 +176,9 @@ async function fitToOnePage() {
           break
         }
       }
-      if (!fitted)
+      if (fitted)
+        fitBase.value = base
+      else
         store.applyFitScale(base, 1)
       await measurePaper()
       store.saveCurrent().catch((error) => {
@@ -154,6 +192,7 @@ async function fitToOnePage() {
     message = '整理失败，请重试'
   }
   finally {
+    measuring.value = false
     fitting.value = false
   }
   uni.hideLoading()
@@ -161,10 +200,64 @@ async function fitToOnePage() {
     uni.showToast({ title: message, icon: 'none' })
 }
 
+/** 还原「整理成一页」：基准值乘 1 即无损还原（见 store.applyFitScale），再重新分页并落库 */
+async function restoreFit() {
+  const base = fitBase.value
+  if (!base)
+    return
+  fitting.value = true
+  uni.showLoading({ title: '正在还原', mask: true })
+  try {
+    store.applyFitScale(base, 1)
+    fitBase.value = null
+    await measurePaper()
+    store.saveCurrent().catch((error) => {
+      console.error('保存简历失败:', error)
+    })
+    uni.hideLoading()
+    uni.showToast({ title: '已还原整理前的样式', icon: 'none' })
+  }
+  catch (error) {
+    console.error('还原整理样式失败:', error)
+    uni.hideLoading()
+    uni.showToast({ title: '还原失败，请重试', icon: 'none' })
+  }
+  finally {
+    measuring.value = false
+    fitting.value = false
+  }
+}
+
+/**
+ * 滚动时只更新「当前第几页」。
+ *
+ * 位置刻意存在普通变量里、绝不回写 `scroll-top` —— 受控 scroll-top 与滚动事件互相打架，
+ * 小程序上会表现为页面疯狂抖动（每一帧都被拉回上一次的值）。
+ */
+function onScroll(event: { detail: { scrollTop: number } }) {
+  const top = event.detail.scrollTop || 0
+  const paperHeight = PAPER_HEIGHT * paperScale.value
+  const unit = paperHeight + SLOT_GAP
+  const page = Math.floor((top + paperHeight / 2) / unit) + 1
+  visiblePage.value = Math.min(pageCount.value, Math.max(1, page))
+}
+
+/** 回到顶部：用 scroll-into-view 指到第一页，用完清空，下一次点击才能再次触发 */
+function scrollToTop() {
+  scrollTarget.value = 'pageTop'
+  setTimeout(() => {
+    scrollTarget.value = ''
+  }, 500)
+}
+
 /** 样式 / 模块改动会改变内容高度，关闭弹层时落库并重新分页 */
 function closeSheet() {
+  const styleChanged = showStyleSheet.value
   showModuleSheet.value = false
   showStyleSheet.value = false
+  // 样式面板改过样式后，「整理成一页」的基准值就过期了：留着还原会把用户刚改的样式盖回去
+  if (styleChanged)
+    fitBase.value = null
   store.saveCurrent().catch((error) => {
     console.error('保存简历失败:', error)
   })
@@ -191,7 +284,8 @@ function chooseTemplate(code: string) {
     uni.showToast({ title: '该模板暂不可用', icon: 'none' })
     return
   }
-  activeTemplateCode.value = code
+  // 换模板后模块样式整体重来，整理前的基准值失效
+  fitBase.value = null
   store.saveCurrent().catch((error) => {
     console.error('保存简历失败:', error)
   })
@@ -214,7 +308,14 @@ async function exportPdf() {
     const id = Number(store.current?.ID)
     if (!Number.isFinite(id) || id <= 0)
       throw new Error('简历尚未保存，无法导出')
-    const filePath = await exportResumePdf(id)
+    let lastPercent = 0
+    const filePath = await exportResumePdf(id, (percent) => {
+      // 后端渲染 PDF 期间进度一直是 0，只有真正开始下载才会动，所以 0 不覆盖「正在生成」文案
+      if (percent <= 0 || percent === lastPercent)
+        return
+      lastPercent = percent
+      uni.showLoading({ title: `正在下载 ${percent}%`, mask: true })
+    })
     uni.hideLoading()
     uni.openDocument({
       filePath,
@@ -235,16 +336,29 @@ async function exportPdf() {
 
 <template>
   <view class="page">
-    <scroll-view v-if="resume" scroll-y class="page__scroll">
+    <scroll-view
+      v-if="resume"
+      scroll-y
+      class="page__scroll"
+      :scroll-into-view="scrollTarget"
+      :scroll-with-animation="true"
+      @scroll="onScroll"
+    >
       <view class="stack">
-        <view v-for="index in pageCount" :key="index" class="slot" :style="slotStyle">
+        <view
+          v-for="index in pageCount"
+          :id="index === 1 ? 'pageTop' : undefined"
+          :key="index"
+          class="slot"
+          :style="slotStyle"
+        >
           <view class="paper" :style="paperStyle">
             <view
               :id="index === 1 ? 'resumePaper' : undefined"
               class="paper__inner"
               :style="{ marginTop: `${-(index - 1) * PAPER_HEIGHT}px` }"
             >
-              <ResumeRender :json="resume" />
+              <ResumeRender :json="resume" :min-height="renderMinHeight" />
             </view>
           </view>
         </view>
@@ -256,13 +370,23 @@ async function exportPdf() {
     </view>
 
     <view v-if="resume" class="actions">
-      <view class="action" hover-class="action--press" @click="exportPdf">
+      <view
+        class="action"
+        :class="{ 'action--disabled': exporting }"
+        :hover-class="exporting ? 'none' : 'action--press'"
+        @click="exportPdf"
+      >
         <mp-icon name="ui-download" color="#ffffff" size="24px" />
-        <text class="action-text">导出</text>
+        <text class="action-text">{{ exporting ? '导出中' : '导出' }}</text>
       </view>
-      <view class="action" hover-class="action--press" @click="fitToOnePage">
-        <mp-icon name="ui-compress" color="#ffffff" size="24px" />
-        <text class="action-text">{{ fitting ? '整理中' : '整理成一页' }}</text>
+      <view
+        class="action"
+        :class="{ 'action--disabled': fitting }"
+        :hover-class="fitting ? 'none' : 'action--press'"
+        @click="fitToOnePage"
+      >
+        <mp-icon :name="fitBase ? 'ui-renew' : 'ui-compress'" color="#ffffff" size="24px" />
+        <text class="action-text">{{ fitting ? '处理中' : fitBase ? '还原样式' : '整理成一页' }}</text>
       </view>
       <view class="action" hover-class="action--press" @click="showStyleSheet = true">
         <mp-icon name="ui-palette" color="#ffffff" size="24px" />
@@ -276,6 +400,12 @@ async function exportPdf() {
         <mp-icon name="ui-renew" color="#ffffff" size="24px" />
         <text class="action-text">更换模板</text>
       </view>
+    </view>
+
+    <!-- 页码胶囊：右下悬浮，点一下回到顶部；放在底栏之上，避免遮挡操作 -->
+    <view v-if="resume" class="pager" hover-class="pager--press" @click="scrollToTop">
+      <mp-icon name="ui-up" color="#ffffff" size="12px" />
+      <text class="pager-text">{{ visiblePage }} / {{ pageCount }}</text>
     </view>
 
     <module-manager-sheet :visible="showModuleSheet" @close="closeSheet" @change="closeSheet" />
@@ -350,6 +480,8 @@ async function exportPdf() {
   position: relative;
   margin-bottom: 12px;
   overflow: hidden;
+  /* 虚拟渲染只画可视页附近，未渲染的页保持白纸底色，快速滚动时不会闪出黑底 */
+  background-color: #fff;
 }
 
 .paper {
@@ -401,6 +533,34 @@ async function exportPdf() {
   font-size: 10px;
 }
 
+/* 进行中 / 不可用：整块压暗，配合 hover-class 关闭按压反馈 */
+.action--disabled {
+  opacity: 0.4;
+}
+
+/* 页码胶囊：右下悬浮，点一下回到顶部；高度避开底栏，不挡操作 */
+.pager {
+  position: fixed;
+  right: 12px;
+  bottom: calc(88px + env(safe-area-inset-bottom));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 15px;
+  background-color: rgb(22 24 29 / 82%);
+}
+
+.pager--press {
+  background-color: rgb(22 24 29 / 96%);
+}
+
+.pager-text {
+  margin-left: 4px;
+  color: #fff;
+  font-size: 12px;
+}
+
 /* 换模板卡片：三列铺开，封面复用首页的 ResumeCover 缩略图 */
 .tpl-grid {
   display: grid;
@@ -416,7 +576,7 @@ async function exportPdf() {
   background-color: #fff;
 
   &--active {
-    border-color: var(--wot-color-theme, #0957de);
+    border-color: var(--wot-color-theme, #2563eb);
   }
 
   &--press {
@@ -456,13 +616,15 @@ async function exportPdf() {
 }
 
 .empty {
-  padding-top: 240rpx;
-  text-align: center;
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-text {
-  color: #909399;
-  font-size: 28rpx;
+  color: #8f959e;
+  font-size: 14px;
 }
 </style>
 

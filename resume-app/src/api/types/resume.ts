@@ -20,6 +20,8 @@ export interface IResumeBrief {
  * 简历详情：比列表项多一份完整简历 JSON。
  */
 export interface IResumeDetail extends IResumeBrief {
+  /** 这份简历当前套用的模板编码，后端表字段，新建前的草稿为空串 */
+  templateCode?: string
   /** 整份简历 JSON，后端解析失败时为 null */
   resumeJson: IRESUMEJSON | null
 }
