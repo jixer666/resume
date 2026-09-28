@@ -11,7 +11,7 @@ import { HOME_PAGE } from '@/utils'
 defineOptions({ name: 'Login' })
 definePage({
   style: {
-    navigationBarTitleText: '登录',
+    navigationBarTitleText: '简历盒子',
   },
 })
 
@@ -48,16 +48,15 @@ function backAfterLogin() {
 <template>
   <view class="login">
     <view class="login__brand">
-      <view class="login__logo">
-        <text class="login__logo-text">简</text>
-      </view>
-      <text class="login__title">简历设计</text>
+      <image class="login__logo" src="/static/logo.png" mode="aspectFit" />
+      <text class="login__title">简历盒子</text>
       <text class="login__desc">微信一键登录，简历自动同步到云端</text>
     </view>
 
     <view class="login__action">
       <button
         class="login__btn"
+        hover-class="login__btn--press"
         :loading="loading"
         :disabled="loading"
         @click="handleLogin"
@@ -72,11 +71,13 @@ function backAfterLogin() {
 <style lang="scss" scoped>
 .login {
   display: flex;
-  height: 100vh;
+  /* H5 的页面容器在导航栏下方，需减去导航栏高度（--window-top）；小程序无此变量，回退为 0 */
+  min-height: calc(100vh - var(--window-top, 0px));
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
-  padding: 96px 32px 48px;
+  /* 底部避开 Home 指示条 */
+  padding: 88px 32px calc(40px + env(safe-area-inset-bottom));
   background-color: #fff;
 }
 
@@ -87,23 +88,15 @@ function backAfterLogin() {
 }
 
 .login__logo {
-  display: flex;
-  width: 72px;
-  height: 72px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  background-color: var(--wot-color-theme, #2563eb);
-}
-
-.login__logo-text {
-  color: #fff;
-  font-size: 34px;
-  font-weight: 700;
+  width: 96px;
+  height: 96px;
+  /* 与图片本身的圆角保持一致，让投影贴合圆角轮廓 */
+  border-radius: 22%;
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
 }
 
 .login__title {
-  margin-top: 22px;
+  margin-top: 24px;
   color: #172b4d;
   font-size: 24px;
   font-weight: 700;
@@ -138,6 +131,10 @@ function backAfterLogin() {
     background-color: #7aa2e8;
     color: #fff;
   }
+}
+
+.login__btn--press {
+  opacity: 0.9;
 }
 
 .login__tip {

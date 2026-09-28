@@ -22,17 +22,22 @@ const barBackground = computed(() => lightenColor(String(props.modelStyle?.theme
 </script>
 
 <style lang="scss" scoped>
+/*
+ * 小标题条高度：`--rs-title-h` 由 ResumeRender 按「整理成一页」的压缩比例下发
+ * （默认 30px = 字号 16px + 上下各 15px），条高跟着字号一起收，
+ * 否则字号压小了、条还是 30px，标题就显得又空又大。
+ */
 .model-title {
   display: flex;
   align-items: center;
   box-sizing: border-box;
   width: 100%;
-  min-height: 30px;
+  min-height: var(--rs-title-h, 30px);
   background-color: v-bind('barBackground');
 
   &__bar {
     width: 4px;
-    height: 30px;
+    height: var(--rs-title-h, 30px);
     background-color: v-bind('modelStyle.themeColor');
   }
 

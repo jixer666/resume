@@ -24,14 +24,25 @@ export function http<T>(options: CustomRequestOptions) {
         const responseData = res.data as Partial<IResponse<T>>
         const code = responseData?.code
 
-        // 检查是否是401错误（包括HTTP状态码401或业务码401）
-        const isTokenExpired = res.statusCode === 401 || code === ResultEnum.Unauthorized
+        // 检查是否是登录态失效（HTTP 401、业务码 401 或后端业务码 1002）
+        const isTokenExpired
+          = res.statusCode === 401
+            || code === ResultEnum.Unauthorized
+            || code === ResultEnum.UnauthorizedBackend
 
         if (isTokenExpired) {
           const tokenStore = useTokenStore()
           if (!isDoubleTokenMode) {
-            // 未启用双token策略，清理用户信息，跳转到登录页
-            tokenStore.logout()
+            // 未启用双token策略：清本地登录态，提示后跳转到登录页
+            tokenStore.clearLocalToken()
+            nextTick(() => {
+              // 关闭其他弹窗
+              uni.hideToast()
+              uni.showToast({
+                title: '登录已过期，请重新登录',
+                icon: 'none',
+              })
+            })
             toLoginPage()
             return reject(createHttpError({
               type: HttpErrorType.Auth,
@@ -45,54 +56,67 @@ export function http<T>(options: CustomRequestOptions) {
 
           /* -------- 无感刷新 token ----------- */
           const { refreshToken } = tokenStore.tokenInfo as IDoubleTokenRes || {}
-          // token 失效的，且有刷新 token 的，才放到请求队列里
-          if (refreshToken) {
+
+          if (!refreshToken) {
+            // 双 token 模式下 refreshToken 也没了：只能清本地登录态重新登录
+            tokenStore.clearLocalToken()
+            nextTick(() => {
+              // 关闭其他弹窗
+              uni.hideToast()
+              uni.showToast({
+                title: '登录已过期，请重新登录',
+                icon: 'none',
+              })
+            })
+            toLoginPage()
+          }
+          else {
+            // token 失效的，且有刷新 token 的，才放到请求队列里
             taskQueue.push(() => {
               resolve(http<T>(options))
             })
-          }
 
-          // 如果有 refreshToken 且未在刷新中，发起刷新 token 请求
-          if (refreshToken && !refreshing) {
-            refreshing = true
-            try {
-              // 发起刷新 token 请求（使用 store 的 refreshToken 方法）
-              await tokenStore.refreshToken()
-              // 刷新 token 成功
-              refreshing = false
-              nextTick(() => {
-                // 关闭其他弹窗
-                uni.hideToast()
-                uni.showToast({
-                  title: 'token 刷新成功',
-                  icon: 'none',
+            // 有 refreshToken 且未在刷新中，发起刷新 token 请求
+            if (!refreshing) {
+              refreshing = true
+              try {
+                // 发起刷新 token 请求（使用 store 的 refreshToken 方法）
+                await tokenStore.refreshToken()
+                // 刷新 token 成功
+                refreshing = false
+                nextTick(() => {
+                  // 关闭其他弹窗
+                  uni.hideToast()
+                  uni.showToast({
+                    title: 'token 刷新成功',
+                    icon: 'none',
+                  })
                 })
-              })
-              // 将任务队列的所有任务重新请求
-              taskQueue.forEach(task => task())
-            }
-            catch (refreshErr) {
-              console.error('刷新 token 失败:', refreshErr)
-              refreshing = false
-              // 刷新 token 失败，跳转到登录页
-              nextTick(() => {
-                // 关闭其他弹窗
-                uni.hideToast()
-                uni.showToast({
-                  title: '登录已过期，请重新登录',
-                  icon: 'none',
+                // 将任务队列的所有任务重新请求
+                taskQueue.forEach(task => task())
+              }
+              catch (refreshErr) {
+                console.error('刷新 token 失败:', refreshErr)
+                refreshing = false
+                // 刷新 token 失败，清本地登录态并回到登录页
+                nextTick(() => {
+                  // 关闭其他弹窗
+                  uni.hideToast()
+                  uni.showToast({
+                    title: '登录已过期，请重新登录',
+                    icon: 'none',
+                  })
                 })
-              })
-              // 清除用户信息
-              await tokenStore.logout()
-              // 跳转到登录页
-              setTimeout(() => {
-                toLoginPage()
-              }, 2000)
-            }
-            finally {
-              // 不管刷新 token 成功与否，都清空任务队列
-              taskQueue = []
+                tokenStore.clearLocalToken()
+                // 跳转到登录页
+                setTimeout(() => {
+                  toLoginPage()
+                }, 2000)
+              }
+              finally {
+                // 不管刷新 token 成功与否，都清空任务队列
+                taskQueue = []
+              }
             }
           }
 

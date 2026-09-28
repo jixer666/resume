@@ -3,12 +3,10 @@
   <div class="skill-specialties u-tag-div">
     <!-- 标题 -->
     <model-title :title="modelData.title" :model-style="modelStyle" />
-    <!-- 技能描述：整段富文本 -->
-    <ul class="u-tag-ul">
-      <li class="u-tag-li">
-        <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
-      </li>
-    </ul>
+    <!-- 技能描述：整段富文本；列表符号由 RichTextView 统一处理，外层不再用 ul/li 包裹 -->
+    <view class="skill-content">
+      <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />
+    </view>
   </div>
 </template>
 
@@ -32,30 +30,14 @@ defineProps<{
   box-sizing: border-box;
   margin-top: v-bind('modelStyle.mTop');
   margin-bottom: v-bind('modelStyle.mBottom');
-  .u-tag-ul {
-    display: flex;
-    flex-wrap: wrap;
-    .left,
-    .right {
-      flex: 40%;
-      margin-top: 25px;
-    }
-    .u-tag-li {
-      flex: 100%;
-      margin-top: 25px;
-      list-style: none;
-      letter-spacing: 2px;
-      font-size: v-bind('modelStyle.textFontSize');
-      color: v-bind('modelStyle.textColor');
-      font-weight: v-bind('modelStyle.textFontWeight');
-      line-height: 1.5;
-    }
-    .left {
-      padding: 0 20px;
-    }
-    .right {
-      padding: 0 0 0 10px;
-    }
+  .skill-content {
+    /* 小标题条 → 首个条目：与模块间距同源，条上下留白一致（见 RenderItem） */
+    margin-top: var(--rs-gap-title, 18px);
+    letter-spacing: 2px;
+    font-size: v-bind('modelStyle.textFontSize');
+    color: v-bind('modelStyle.textColor');
+    font-weight: v-bind('modelStyle.textFontWeight');
+    line-height: 1.5;
   }
 }
 </style>

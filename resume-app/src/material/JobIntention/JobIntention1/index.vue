@@ -52,7 +52,8 @@ defineProps<{
   box-sizing: border-box;
   .u-tag-ul {
     display: flex;
-    margin-top: 25px;
+    /* 小标题条 → 首个条目：与模块间距同源，条上下留白一致（见 RenderItem） */
+    margin-top: var(--rs-gap-title, 18px);
     justify-content: space-between;
     .u-tag-li {
       list-style: none;

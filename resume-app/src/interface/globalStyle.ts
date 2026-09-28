@@ -18,5 +18,6 @@ interface IGlobalStyle {
   rightThemeColor: string // 右侧布局时右侧背景色
   fontFamily: string // 字体
   resumeBackgroundCom: string // 整页背景预设名（空串为纯白）
+  fitRatio?: number // 「整理成一页」的整页压缩比例（1 = 未压缩；条目间距 / 标题条高度 / 姓名大小按它算）
 }
 export default IGlobalStyle

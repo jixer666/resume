@@ -34,7 +34,8 @@ defineProps<{
   margin-top: v-bind('modelStyle.mTop');
   .hobbies-content {
     display: flex;
-    margin-top: 25px;
+    /* 小标题条 → 首个条目：与模块间距同源，条上下留白一致（见 RenderItem） */
+    margin-top: var(--rs-gap-title, 18px);
     .u-tag-p {
       letter-spacing: 2px;
       font-size: v-bind('modelStyle.textFontSize');

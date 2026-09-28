@@ -66,7 +66,8 @@ function close() {
 </script>
 
 <template>
-  <view v-if="visible && item" class="mask" @click="close">
+  <view v-if="visible && item" class="mask">
+    <view class="mask__backdrop" @click="close" />
     <view class="sheet" @click.stop>
       <text class="sheet-title">模块设置</text>
       <text class="sheet-sub">{{ moduleName }}</text>

@@ -78,14 +78,16 @@ const contentIndent = computed(() => props.modelStyle?.contentPaddingLeft || '')
 
     /*
      * 富文本内容里若自带 <ul>/<ol>（编辑器的项目符号列表），
-     * 清掉 UA 默认的 40px 左内边距，避免与模块内边距叠加导致「太靠右」。
+     * 清掉 UA 默认的 40px 左内边距（避免与模块内边距叠加导致「太靠右」），
+     * 再按「符号在左、正文对齐到符号右侧」的悬挂缩进排：`outside` 时换行才会
+     * 和首行文字对齐，`inside` 会顶到项目符号下面、越看越歪。
      * 注意：小程序端 rich-text 节点不吃外部样式，仅在 H5 / App 生效。
      */
     :deep(ul),
     :deep(ol) {
-      padding-left: 0;
+      padding-left: 1.4em;
       margin: 0;
-      list-style-position: inside;
+      list-style-position: outside;
     }
   }
 }

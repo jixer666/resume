@@ -51,9 +51,15 @@ const globalStyle = computed<Partial<IGlobalStyle>>(() => (store.current?.GLOBAL
 
 /** 基本资料才有头像尺寸 */
 const isBaseInfo = computed(() => model.value === 'BASE_INFO')
-/** 可添加多条目的模块才有「列表项间距」 */
+/** 有「条目间距」的模块：白名单覆盖现有皮肤，再并上「数据里已经有条目」的模块，新皮肤不会漏配 */
 const LIST_MODELS = ['EDU_BACKGROUND', 'WORK_EXPERIENCE', 'PROJECT_EXPERIENCE', 'INTERNSHIP_EXPERIENCE', 'CAMPUS_EXPERIENCE', 'AWARDS', 'WORKS_DISPLAY']
-const isListModule = computed(() => LIST_MODELS.includes(model.value))
+const isListModule = computed(() => LIST_MODELS.includes(model.value) || entryCount(activeItem.value) > 0)
+
+/** 数据里已有的条目数：只要有条目，面板就给出条目间距 —— 改完立刻能看到效果 */
+function entryCount(item?: IMATERIALITEM): number {
+  const list = (item?.data as { LIST?: unknown } | undefined)?.LIST
+  return Array.isArray(list) ? list.length : 0
+}
 /** 含富文本正文的模块才有「正文左缩进」（对应 RichTextView 的 contentPaddingLeft） */
 const RICH_CONTENT_MODELS = ['BASE_INFO', 'EDU_BACKGROUND', 'SKILL_SPECIALTIES', 'SELF_EVALUATION', 'HOBBIES', 'CAMPUS_EXPERIENCE', 'INTERNSHIP_EXPERIENCE', 'WORK_EXPERIENCE', 'PROJECT_EXPERIENCE']
 const hasRichContent = computed(() => RICH_CONTENT_MODELS.includes(model.value))
@@ -97,7 +103,7 @@ const GLOBAL_WEIGHT_ITEMS: { key: TGlobalWeightKey, label: string, hint: string 
 
 /** 间距档位：内边距最小值取 0（负 padding 无效），外边距允许负值用来压紧模块 */
 const GLOBAL_SPACING_ITEMS: { key: TGlobalSpacingKey, label: string, hint: string, min: number, max: number }[] = [
-  { key: 'pTop', label: '模块上内边距', hint: '', min: 0, max: 60 },
+  { key: 'pTop', label: '模块上内边距', hint: '小标题条上下留白随之', min: 0, max: 60 },
   { key: 'pBottom', label: '模块下内边距', hint: '', min: 0, max: 60 },
   { key: 'pLeftRight', label: '模块左右内边距', hint: '', min: 0, max: 60 },
   { key: 'modelMarginTop', label: '模块上间距', hint: '', min: -40, max: 80 },
@@ -116,25 +122,25 @@ const MODULE_WEIGHT_ITEMS: { key: TModuleWeightKey, label: string, hint: string 
 ]
 
 const MODULE_SPACING_ITEMS: { key: TModuleSpacingKey, label: string, hint: string, min: number, max: number }[] = [
-  { key: 'pTop', label: '模块上内边距', hint: '', min: 0, max: 60 },
+  { key: 'pTop', label: '模块上内边距', hint: '小标题条上下留白随之', min: 0, max: 60 },
   { key: 'pBottom', label: '模块下内边距', hint: '', min: 0, max: 60 },
   { key: 'pLeftRight', label: '模块左右内边距', hint: '', min: 0, max: 60 },
   { key: 'mTop', label: '模块上间距', hint: '', min: -40, max: 80 },
   { key: 'mBottom', label: '模块下间距', hint: '', min: -40, max: 120 },
 ]
 
-/** 头像尺寸：未设置时滑块从皮肤常见尺寸起步，改动后才写入模块 style */
+/** 头像尺寸：未设置时滑块从皮肤默认尺寸起步（84 x 100），改动后才写入模块 style */
 const AVATAR_ITEMS: { key: TSizeKey, label: string, hint: string, min: number, max: number, fallback: number }[] = [
-  { key: 'avatarWidth', label: '头像宽度', hint: '', min: 40, max: 300, fallback: 115 },
-  { key: 'avatarHeight', label: '头像高度', hint: '', min: 40, max: 400, fallback: 145 },
+  { key: 'avatarWidth', label: '头像宽度', hint: '', min: 40, max: 300, fallback: 84 },
+  { key: 'avatarHeight', label: '头像高度', hint: '', min: 40, max: 400, fallback: 100 },
 ]
 
 const CONTENT_INDENT_ITEM: { key: TSizeKey, label: string, hint: string, min: number, max: number, fallback: number }
   = { key: 'contentPaddingLeft', label: '正文左缩进', hint: '', min: 0, max: 60, fallback: 0 }
 
-/** 列表项间距：未设置时滑块从各皮肤常见值起步，改动后才写入模块 style（各皮肤用 var 兜底） */
+/** 条目间距：未设置时滑块从统一节奏的默认值起步（10px，比模块间距小一档），改动后才写入模块 style */
 const ENTRY_GAP_ITEM: { key: TSizeKey, label: string, hint: string, min: number, max: number, fallback: number }
-  = { key: 'entryMarginBottom', label: '条目间距', hint: '', min: 0, max: 80, fallback: 20 }
+  = { key: 'entryMarginBottom', label: '条目间距', hint: '条目与条目之间，默认 10px', min: 0, max: 80, fallback: 10 }
 
 function pickGlobalTheme(color: string) {
   store.updateGlobalStyle({ themeColor: color })
@@ -222,7 +228,8 @@ function close() {
 </script>
 
 <template>
-  <view v-if="visible" class="mask" @click="close">
+  <view v-if="visible" class="mask">
+    <view class="mask__backdrop" @click="close" />
     <view class="sheet sheet--tall" @click.stop>
       <text class="sheet-title">{{ showModuleTab ? '样式' : '全局样式' }}</text>
 
@@ -458,28 +465,26 @@ function close() {
             />
           </view>
 
-          <template v-if="isListModule">
-            <text class="sheet-label">列表</text>
-            <view class="slider-row">
-              <view class="slider-head">
-                <view class="opt-name">
-                  <text class="opt-label">{{ ENTRY_GAP_ITEM.label }}</text>
-                  <text class="opt-hint">{{ ENTRY_GAP_ITEM.hint }}</text>
-                </view>
-                <text class="slider-value">{{ moduleStyle.entryMarginBottom || '默认' }}</text>
+          <!-- 条目间距与模块间距同属纵向节奏，放同一组：调完模块留白顺手就能改条目疏密 -->
+          <view v-if="isListModule" class="slider-row">
+            <view class="slider-head">
+              <view class="opt-name">
+                <text class="opt-label">{{ ENTRY_GAP_ITEM.label }}</text>
+                <text class="opt-hint">{{ ENTRY_GAP_ITEM.hint }}</text>
               </view>
-              <slider
-                class="slider"
-                :min="ENTRY_GAP_ITEM.min"
-                :max="ENTRY_GAP_ITEM.max"
-                :step="1"
-                :value="sizeSliderValue(ENTRY_GAP_ITEM.key, ENTRY_GAP_ITEM.fallback)"
-                active-color="#2563eb"
-                :block-size="18"
-                @change="onSizeChange(ENTRY_GAP_ITEM.key, $event)"
-              />
+              <text class="slider-value">{{ moduleStyle.entryMarginBottom || `${ENTRY_GAP_ITEM.fallback}px` }}</text>
             </view>
-          </template>
+            <slider
+              class="slider"
+              :min="ENTRY_GAP_ITEM.min"
+              :max="ENTRY_GAP_ITEM.max"
+              :step="1"
+              :value="sizeSliderValue(ENTRY_GAP_ITEM.key, ENTRY_GAP_ITEM.fallback)"
+              active-color="#2563eb"
+              :block-size="18"
+              @change="onSizeChange(ENTRY_GAP_ITEM.key, $event)"
+            />
+          </view>
 
           <template v-if="isBaseInfo">
             <text class="sheet-label">头像尺寸</text>

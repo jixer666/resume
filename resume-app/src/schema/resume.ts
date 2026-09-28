@@ -19,7 +19,7 @@ const RESUME_JSON: IRESUMEJSON = {
     pTopBottom: '0', // 上下内边距
     pLeftRight: '', // 左右内边距
     modelMarginTop: '0px',
-    modelMarginBottom: '45px',
+    modelMarginBottom: '0px',
     leftWidth: '', // 左右布局时左侧宽度
     rightWidth: '', // 左右布局时右侧宽度
     leftThemeColor: '', // 左侧布局时左侧背景色

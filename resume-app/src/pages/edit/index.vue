@@ -549,7 +549,8 @@ function confirmDelete() {
       </view>
     </view>
 
-    <view v-if="showSettingSheet" class="mask" @click="showSettingSheet = false">
+    <view v-if="showSettingSheet" class="mask">
+      <view class="mask__backdrop" @click="showSettingSheet = false" />
       <view class="sheet" @click.stop>
         <text class="sheet-title">{{ resume?.NAME || DEFAULT_RESUME_NAME }}</text>
         <text class="sheet-sub">共 {{ components.length }} 个模块</text>
@@ -567,7 +568,8 @@ function confirmDelete() {
       </view>
     </view>
 
-    <view v-if="showNameSheet" class="mask" @click="showNameSheet = false">
+    <view v-if="showNameSheet" class="mask">
+      <view class="mask__backdrop" @click="showNameSheet = false" />
       <view class="sheet" @click.stop>
         <text class="sheet-title">编辑名称</text>
         <input

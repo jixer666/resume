@@ -43,8 +43,8 @@
             thumbnail = #{thumbnail},
             template_code = #{templateCode},
             update_time = #{updateTime},
-            ver = #{ver}
-        where id = #{id} and uid = #{uid} and is_delete != id
+            ver = ver + 1
+        where id = #{id} and uid = #{uid} and is_delete != id and ver = #{ver}
     </update>
 
     <update id="deleteUserResume">

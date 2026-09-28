@@ -18,19 +18,24 @@ defineProps<{
 </script>
 
 <style lang="scss" scoped>
-  .title {
+  /*
+   * 简历标题条高度：`--rs-doc-title-h` 由 ResumeRender 按「整理成一页」的压缩比例下发
+   * （默认 32px = 字号 13px + 上下各约 10px），条高跟着字号一起收。
+   * 左侧色块与文字行同高，两边必须一起缩，否则色块会把条重新撑到原高。
+   */
+.title {
   width: 100%;
   padding-top: v-bind('modelStyle.pTop');
   padding-bottom: v-bind('modelStyle.pBottom');
   padding-left: v-bind('modelStyle.pLeftRight');
   padding-right: v-bind('modelStyle.pLeftRight');
-  min-height: 32px;
+  min-height: var(--rs-doc-title-h, 32px);
   margin-bottom: v-bind('modelStyle.mBottom');
   margin-top: v-bind('modelStyle.mTop');
   background-color: v-bind('modelStyle.themeColor');
   display: flex;
   .left {
-    min-height: 32px;
+    min-height: var(--rs-doc-title-h, 32px);
     width: 36px;
     background-color: #258bb1;
     margin-right: 18px;

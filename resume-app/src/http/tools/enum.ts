@@ -6,6 +6,7 @@ export enum ResultEnum {
   Success200 = 200, // 成功
   Error = 400, // 错误
   Unauthorized = 401, // 未授权
+  UnauthorizedBackend = 1002, // 后端业务码：身份未授权（ExceptionEnum.UNAUTHORIZED_EXCEPTION），需要重新登录
   Forbidden = 403, // 禁止访问（原为forbidden）
   NotFound = 404, // 未找到（原为notFound）
   MethodNotAllowed = 405, // 方法不允许（原为methodNotAllowed）

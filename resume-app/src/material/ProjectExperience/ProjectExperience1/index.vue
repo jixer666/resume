@@ -1,20 +1,20 @@
-<!-- 项目经验：项目名 / 时间一行，职责一行，正文富文本 -->
+<!-- 项目经验：项目名 / 职责 / 时间同行，正文富文本 -->
 <template>
   <view class="project-experience u-tag-div">
     <model-title :title="modelData.title" :model-style="modelStyle" />
     <view class="project-experience__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="project-experience__item">
         <view class="project-experience__head">
-          <text v-if="modelData.isShow.projectName" class="project-experience__name">
-            {{ item.projectName }}
-          </text>
+          <view class="project-experience__meta">
+            <text v-if="modelData.isShow.projectName" class="project-experience__name">
+              {{ item.projectName }}
+            </text>
+            <text v-if="modelData.isShow.posts && item.posts" class="project-experience__posts">
+              {{ item.posts }}
+            </text>
+          </view>
           <text v-if="modelData.isShow.date" class="project-experience__date">
             {{ formatDate(item.date) }}
-          </text>
-        </view>
-        <view v-if="modelData.isShow.posts" class="project-experience__meta">
-          <text class="project-experience__posts">
-            {{ item.posts }}
           </text>
         </view>
         <view v-if="item.projectContent" class="project-experience__content">
@@ -48,19 +48,28 @@ defineProps<{
   margin-bottom: v-bind('modelStyle.mBottom');
 
   &__list {
-    margin-top: 18px;
+    /* 小标题条 → 首个条目：与模块间距同源，条上下留白一致（见 RenderItem） */
+    margin-top: var(--rs-gap-title, 18px);
   }
 
   &__item {
     &:not(:last-child) {
-      margin-bottom: var(--entry-mb, 24px);
+      margin-bottom: var(--entry-mb, var(--rs-gap-entry));
     }
   }
 
   &__head {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
+  }
+
+  &__meta {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: baseline;
+    min-width: 0;
   }
 
   &__name {
@@ -70,25 +79,23 @@ defineProps<{
   }
 
   &__date {
+    flex: none;
+    margin-left: 12px;
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
     color: v-bind('modelStyle.textColor');
-  }
-
-  &__meta {
-    display: flex;
-    align-items: center;
-    margin-top: 8px;
+    white-space: nowrap;
   }
 
   &__posts {
+    margin-left: 8px;
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
     color: v-bind('modelStyle.textColor');
   }
 
   &__content {
-    margin-top: 10px;
+    margin-top: var(--rs-gap-body, 8px);
   }
 }
 </style>

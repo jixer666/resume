@@ -45,12 +45,13 @@ defineProps<{
   margin-bottom: v-bind('modelStyle.mBottom');
 
   &__list {
-    margin-top: 18px;
+    /* 小标题条 → 首个条目：与模块间距同源，条上下留白一致（见 RenderItem） */
+    margin-top: var(--rs-gap-title, 18px);
   }
 
   &__item {
     &:not(:last-child) {
-      margin-bottom: var(--entry-mb, 14px);
+      margin-bottom: var(--entry-mb, var(--rs-gap-entry));
     }
   }
 
@@ -75,7 +76,7 @@ defineProps<{
   &__meta {
     display: flex;
     align-items: center;
-    margin-top: 6px;
+    margin-top: var(--rs-gap-line, 6px);
   }
 
   &__grade {

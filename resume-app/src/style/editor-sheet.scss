@@ -20,8 +20,24 @@
   background-color: rgb(15 23 42 / 45%);
 }
 
+/*
+  关闭热区单独铺一层、垫在面板下面：只有点到遮罩本身才关弹层。
+
+  不能只靠面板上的 `@click.stop` —— 小程序里 `stopPropagation` 是空实现，
+  事件一旦冒泡到 `.mask` 上（如面板内横向 scroll-view 的胶囊），弹层就会被误关。
+  热区与面板是兄弟节点，面板内的任何点击都冒不到它。
+*/
+.mask__backdrop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
 .sheet {
   position: absolute;
+  z-index: 1;
   right: 0;
   bottom: 0;
   left: 0;

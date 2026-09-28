@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { templateSideColor, templateTheme } from '@/schema/templates'
+import { pxTonumber } from '@/utils/common'
 import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 import { useTokenStore } from '@/store/token'
@@ -32,6 +33,9 @@ const showSkeleton = computed(() => templateStore.detailLoading && !tpl.value)
 const theme = computed(() => (tpl.value ? templateTheme(tpl.value) : '#2563eb'))
 const side = computed(() => (tpl.value ? templateSideColor(tpl.value) : '#eef4ff'))
 
+/** 模块间距 = 模块上内边距 + 模块下间距：两者相加才是模块之间真正的留白 */
+const moduleGap = computed(() => `${(pxTonumber(tpl.value?.style?.pTop) || 0) + (pxTonumber(tpl.value?.style?.modelMarginBottom) || 0)}px`)
+
 /** 参数行：固定四项，窄屏也不会换行错位 */
 const metaList = computed(() => {
   const style = tpl.value?.style || {}
@@ -39,7 +43,7 @@ const metaList = computed(() => {
     { label: '版式', value: tpl.value?.layout === 'leftRight' ? '左右双栏' : '单栏通排' },
     { label: '一级标题', value: style.firstTitleFontSize || '20px' },
     { label: '正文字号', value: style.textFontSize || '14px' },
-    { label: '模块间距', value: style.modelMarginBottom || '40px' },
+    { label: '模块间距', value: moduleGap.value },
   ]
 })
 

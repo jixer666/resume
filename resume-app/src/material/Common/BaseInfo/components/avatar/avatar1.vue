@@ -21,10 +21,10 @@ const props = defineProps<{
 }>()
 const isShow = reactive(props.modelData.isShow)
 
-/** 头像尺寸：默认 100 x 120，可在样式面板里改 avatarWidth / avatarHeight */
+/** 头像尺寸：默认 84 x 100，可在样式面板里改 avatarWidth / avatarHeight */
 const avatarStyle = computed<Record<string, string>>(() => ({
-  width: props.modelStyle?.avatarWidth || '100px',
-  height: props.modelStyle?.avatarHeight || '120px',
+  width: props.modelStyle?.avatarWidth || '84px',
+  height: props.modelStyle?.avatarHeight || '100px',
 }))
 </script>
 

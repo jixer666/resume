@@ -5,6 +5,7 @@ import type IMODELSTYLE from '@/interface/modelStyle'
 import type IRESUMEJSON from '@/interface/resume'
 import type { IResumeTemplate } from '@/schema/templates'
 import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 import { deleteResume, getResumeDetail, getResumeList, saveResume } from '@/api/resume'
 import { MATERIAL_JSON } from '@/schema/materialList'
 import MODEL_DATA_JSON from '@/schema/modelData'
@@ -211,10 +212,35 @@ function applyGlobalStyleToItem(
   })
 }
 
-/** 「一键整理成一页」要压缩的模块样式字段：全是纵向项，直接影响内容高度（左右内边距、配色与高度无关，不参与） */
-const FIT_MODULE_KEYS = ['pTop', 'pBottom', 'mTop', 'mBottom', 'firstTitleFontSize', 'titleFontSize', 'textFontSize'] as const
+/**
+ * 「一键整理成一页」要压缩的模块样式字段：全是纵向项，直接影响内容高度（左右内边距、配色与高度无关，不参与）。
+ *
+ * 条目间距也算一个：它同样是模块内部的纵向节奏，不一起压的话，模块越挤、条目之间反而显得越松。
+ * 用户没单独设过条目间距时，那种情况走整页统一的节奏（见 ResumeRender 的 --rs-gap-entry）。
+ * 头像尺寸同样：皮肤里写死的默认值按 FIT_MODULE_DEFAULTS 兜底压缩，用户设过的值按用户的值压缩。
+ */
+const FIT_MODULE_KEYS = ['pTop', 'pBottom', 'mTop', 'mBottom', 'entryMarginBottom', 'firstTitleFontSize', 'titleFontSize', 'textFontSize', 'avatarWidth', 'avatarHeight'] as const
 /** 同步缩放的全局字号字段：让样式面板显示的值与模块实际渲染对得上 */
 const FIT_GLOBAL_FONT_KEYS = ['firstTitleFontSize', 'secondTitleFontSize', 'textFontSize'] as const
+
+/**
+ * 模块没设过这些字段时的出厂默认值（按模块给）：整理按它压缩、还原时再删掉。
+ *
+ * 头像尺寸在皮肤里是写死的 84 x 100（样式面板可改），JSON 里通常没有这个字段，
+ * 只按 JSON 里已存在的值压缩的话头像永远不动，所以给一份默认值兜底。
+ */
+const FIT_MODULE_DEFAULTS: Record<string, Record<string, string>> = {
+  BASE_INFO: {
+    avatarWidth: '84px',
+    avatarHeight: '100px',
+  },
+}
+
+/** 压缩下限：字号由 FONT_SIZES 兜底（≥ 10px），头像再小就只剩个色块了 */
+const FIT_MODULE_FLOORS: Record<string, number> = {
+  avatarWidth: 56,
+  avatarHeight: 64,
+}
 
 /**
  * 「一键整理成一页」的基准快照：模块 keyId → 该模块**自己**当时的样式原值（字符串，保证能无损还原）。
@@ -228,6 +254,8 @@ export interface IFitBase {
   modules: Record<string, Record<string, string>>
   /** 全局字号的原始值 */
   global: Record<string, string>
+  /** 整理前的整页压缩比例（通常是 undefined，还原时删掉） */
+  fitRatio?: number
 }
 
 /** 字号吸附到样式面板的档位（10px 起、步长 2px、到 60px），避免面板把非档位值显示成「10px」 */
@@ -236,14 +264,21 @@ function snapFontSize(px: number): string {
   return FONT_SIZES.includes(`${stepped}px`) ? `${stepped}px` : FONT_SIZES[0]
 }
 
-/** 压缩单个值：字号吸附档位，间距取整且不为负；`ratio >= 1` 时原样返回，保证能无损还原 */
+/**
+ * 压缩单个值：字号吸附档位，间距取整且不低于下限；`ratio >= 1` 时原样返回，保证能无损还原。
+ *
+ * 负外边距是「往上压」的，线性缩放即可（-10px 的 0.5 是 -5px），不能被下限抬到 0。
+ */
 function scaleFitValue(key: string, raw: string, ratio: number): string {
   const value = pxTonumber(raw)
   if (!value || ratio >= 1)
     return raw
   if (key.endsWith('FontSize'))
     return snapFontSize(value * ratio)
-  return `${Math.max(0, Math.round(value * ratio))}px`
+  const scaled = Math.round(value * ratio)
+  if (scaled < 0)
+    return `${scaled}px`
+  return `${Math.max(FIT_MODULE_FLOORS[key] ?? 0, scaled)}px`
 }
 
 /**
@@ -541,7 +576,7 @@ export const useResumeStore = defineStore(
         const values: Record<string, string> = {}
         FIT_MODULE_KEYS.forEach((key) => {
           const raw = style[key]
-          if (typeof raw === 'string')
+          if (typeof raw === 'string' && raw !== '')
             values[key] = raw
         })
         modules[item.keyId] = values
@@ -550,10 +585,42 @@ export const useResumeStore = defineStore(
       const global: Record<string, string> = {}
       FIT_GLOBAL_FONT_KEYS.forEach((key) => {
         const raw = globalStyle?.[key]
-        if (typeof raw === 'string')
+        if (typeof raw === 'string' && raw !== '')
           global[key] = raw
       })
-      return { modules, global }
+      const fitRatio = Number(globalStyle?.fitRatio)
+      return {
+        modules,
+        global,
+        fitRatio: Number.isFinite(fitRatio) && fitRatio > 0 && fitRatio < 1 ? fitRatio : undefined,
+      }
+    }
+
+    /**
+     * 整理之后用户又调了样式：把基准里被改过的字段换成用户刚设的值。
+     *
+     * 这样「还原样式」还原的是「整理前的外观 + 用户整理后的改动」——
+     * 直接拿旧基准套回去的话，用户在整理之后做的调整会被一起抹掉。
+     */
+    function rebaseFitBase(base: IFitBase): IFitBase {
+      const modules: Record<string, Record<string, string>> = {}
+      Object.entries(base.modules).forEach(([keyId, values]) => {
+        const edited = editedModuleKeys.get(keyId)
+        const style = findModuleByKey(keyId)?.style as unknown as Record<string, unknown> | undefined
+        const next: Record<string, string> = {}
+        Object.entries(values).forEach(([key, raw]) => {
+          const now = style?.[key]
+          next[key] = edited?.has(key) && typeof now === 'string' && now !== '' ? now : raw
+        })
+        modules[keyId] = next
+      })
+      const globalStyle = current.value?.GLOBAL_STYLE as unknown as Record<string, unknown>
+      const global: Record<string, string> = {}
+      Object.entries(base.global).forEach(([key, raw]) => {
+        const now = globalStyle?.[key]
+        global[key] = editedGlobalKeys.has(key) && typeof now === 'string' && now !== '' ? now : raw
+      })
+      return { modules, global, fitRatio: base.fitRatio }
     }
 
     /**
@@ -563,7 +630,10 @@ export const useResumeStore = defineStore(
      * 传 1 即无损还原基准（`scaleFitValue` 在 ratio >= 1 时原样返回）。
      *
      * 刻意不记入「用户改过的字段」：整理是一次性的排版动作，不是样式偏好。
-     * 记进去的话，之后每次换模板都会拿这 7 个字段盖掉新模板的字体与留白，换模板就看不出变化了。
+     * 记进去的话，之后每次换模板都会拿这些字段盖掉新模板的字体与留白，换模板就看不出变化了。
+     *
+     * 条目间距 / 小标题条高度 / 姓名大小这些整页统一的节奏不在模块样式里，
+     * 改为把比例记进 GLOBAL_STYLE.fitRatio（见 ResumeRender），预览与导出的 PDF 才是同一份排版。
      */
     function applyFitScale(base: IFitBase, ratio: number): void {
       const json = current.value
@@ -575,6 +645,16 @@ export const useResumeStore = defineStore(
         if (raw !== undefined)
           globalStyle[key] = scaleFitValue(key, raw, ratio)
       })
+      // 比例 >= 1 即还原：基准里本来没有这个字段（没整理过）就删掉，别在 JSON 里留个 1
+      if (ratio >= 1) {
+        if (base.fitRatio === undefined)
+          delete globalStyle.fitRatio
+        else
+          globalStyle.fitRatio = base.fitRatio
+      }
+      else {
+        globalStyle.fitRatio = ratio
+      }
       json.COMPONENTS.forEach((item: IMATERIALITEM) => {
         const values = base.modules[item.keyId]
         if (!values)
@@ -582,8 +662,18 @@ export const useResumeStore = defineStore(
         const style = item.style as unknown as Record<string, unknown>
         FIT_MODULE_KEYS.forEach((key) => {
           const raw = values[key]
-          if (raw !== undefined)
+          if (raw !== undefined) {
             style[key] = scaleFitValue(key, raw, ratio)
+            return
+          }
+          // 模块没设过这个字段（如头像尺寸）：按出厂默认压缩，还原时删掉、不留痕迹
+          const fallback = FIT_MODULE_DEFAULTS[item.model]?.[key]
+          if (!fallback)
+            return
+          if (ratio >= 1)
+            delete style[key]
+          else
+            style[key] = scaleFitValue(key, fallback, ratio)
         })
       })
     }
@@ -678,6 +768,9 @@ export const useResumeStore = defineStore(
         if (prevGlobal[key] !== undefined)
           nextGlobal[key] = prevGlobal[key]
       })
+      // 换模板等于换一套排版：之前「整理成一页」的压缩比例随之失效，
+      // 留着的话新模板会带着上一套的节奏渲染，模块样式却已经重置，里外不一致
+      delete nextGlobal.fitRatio
       json.GLOBAL_STYLE = nextGlobal as unknown as IGlobalStyle
 
       // 模板字段与用户改过的全局字段都要无条件扇出：模板里「刚好等于出厂默认」的那几项也必须生效，
@@ -732,6 +825,7 @@ export const useResumeStore = defineStore(
       updateGlobalStyle,
       captureFitBase,
       applyFitScale,
+      rebaseFitBase,
       updateModuleTitle,
       resetGlobalStyle,
       resetModuleStyle,

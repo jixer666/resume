@@ -106,7 +106,8 @@ function addModule(model: string) {
 
 <template>
   <view class="module-manager">
-    <view v-if="visible" class="mask" @click="close">
+    <view v-if="visible" class="mask">
+      <view class="mask__backdrop" @click="close" />
       <view class="sheet sheet--tall" @click.stop>
         <text class="sheet-title">模块管理</text>
         <scroll-view scroll-y class="sheet-scroll">

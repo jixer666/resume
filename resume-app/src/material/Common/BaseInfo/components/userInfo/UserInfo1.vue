@@ -49,22 +49,27 @@ const metaText = computed(() => {
   align-items: center;
   width: 100%;
 
-  /* 姓名字号是本套皮肤的固定值（版式图约 26px），不跟随正文 / 小标题档位 */
+  /*
+   * 姓名字号是本套皮肤的固定值（版式图约 26px），不跟随正文 / 小标题档位；
+   * `--rs-name-size` 由 ResumeRender 按「整理成一页」的压缩比例下发（默认 26px），
+   * 整页压紧时姓名跟着收一档，页面上才不会有「大字 + 小字」的割裂感。
+   */
   &__name {
-    font-size: 26px;
+    font-size: var(--rs-name-size, 26px);
     font-weight: 700;
     color: v-bind('modelStyle.titleColor');
   }
 
   &__meta {
-    margin-top: 10px;
+    /* 姓名 → 联系方式 / 联系方式 → 简介：并入模块内统一节奏（见 RenderItem） */
+    margin-top: var(--rs-gap-body, 8px);
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
     color: v-bind('modelStyle.textColor');
   }
 
   &__abstract {
-    margin-top: 6px;
+    margin-top: var(--rs-gap-line, 6px);
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
     color: v-bind('modelStyle.textColor');

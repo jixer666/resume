@@ -657,7 +657,7 @@ const IMPORT_JSON = {
     pTopBottom: '0',
     pLeftRight: '40px',
     modelMarginTop: '0px',
-    modelMarginBottom: '45px',
+    modelMarginBottom: '0px',
     leftWidth: '',
     rightWidth: '',
     leftThemeColor: '',

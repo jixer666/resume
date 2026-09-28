@@ -39,7 +39,7 @@ catch 到的永远是 `HttpError`,`type` 四选一,按需分支:
 
 | type | 触发 | 默认行为 |
 |------|------|---------|
-| `Auth` | HTTP 401 或业务码 401 | 封装内已处理(见下),业务只需 catch |
+| `Auth` | HTTP 401、业务码 401 或后端业务码 1002 | 封装内已处理(见下),业务只需 catch |
 | `Business` | HTTP 2xx 但业务码失败 | 自动 toast 错误消息 |
 | `Http` | 非 2xx 状态码 | 自动 toast |
 | `Network` | 请求 fail | 自动 toast「网络错误」 |
@@ -54,8 +54,10 @@ await httpPost('/log/track', payload, undefined, undefined, { hideErrorToast: tr
 
 由 `http.ts` 统一处理,受 `env/.env` 的 `VITE_AUTH_MODE` 控制:
 
-- `single`:清用户态 → 跳登录页
+- `single`:清本地登录态(token/用户信息)→ 提示后跳登录页
 - `double`:用 refreshToken 无感刷新(并发请求进队列,刷新成功后自动重放;失败才登出)
+
+后端 `1002`(`ExceptionEnum.UNAUTHORIZED_EXCEPTION`,身份未授权)与 401 同路处理:清本地 token 并回到登录页。
 
 **业务代码不要自行处理 401,也不要读 store 手动拼 Authorization。**
 

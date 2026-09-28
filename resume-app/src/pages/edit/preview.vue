@@ -5,6 +5,7 @@ import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templa
 import type { IFitBase } from '@/store/resume'
 import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
+import { findFitRatio, FIT_TOLERANCE } from '@/utils/fit'
 
 /**
  * 简历预览：全屏只读，同一份 JSON + 同一套物料，用 ResumeRender 以 HTML/CSS 渲染 —— 所见即所得，
@@ -69,14 +70,8 @@ const measuring = ref(false)
 /** 传给 ResumeRender 的最小高度：撑满已算出的页数，双列模板第 2 页起左栏底色才不会断 */
 const renderMinHeight = computed(() => (measuring.value ? undefined : pageCount.value * PAPER_HEIGHT))
 
-/**
- * 一键整理的压缩档位：从「几乎不动」逐档收紧，取第一个能装进一页的档位。
- *
- * 每档对基准值乘一次比例（不是叠乘），所以档位之间互不影响、也不会越压越离谱。
- */
-const FIT_RATIOS = [0.94, 0.88, 0.82, 0.76, 0.7, 0.64, 0.58]
-/** 内容恰好等于纸高也算装得下，留 2px 给亚像素误差 */
-const FIT_TOLERANCE = 2
+/** 内容恰好等于纸高也算装得下，留 2px 给亚像素误差（见 utils/fit） */
+const FIT_LIMIT = PAPER_HEIGHT + FIT_TOLERANCE
 
 onShow(() => {
   syncPaperScale()
@@ -132,15 +127,17 @@ async function measurePaper(): Promise<void> {
 }
 
 /**
- * 一键整理成一页 A4：逐档压缩字号与模块纵向间距，直到内容量出来不超过一张 A4。
+ * 一键整理成一页 A4：把字号与纵向留白按比例收紧，直到内容量出来不超过一张 A4。
  *
- * 压缩写的是真实样式数据（模块各自的 pTop / pBottom / mTop / mBottom 与字号，全局字号同步），
- * 所以预览与导出的 PDF 都是一页。每档都在**整理前的基准值**上乘比例（见 store.captureFitBase），
- * 而不是在上一档的结果上继续乘 —— 档位之间互不影响，也不会把皮肤自带的留白抹平。
+ * 收的是整页所有纵向节奏 —— 模块的 pTop / pBottom / mTop / mBottom、条目间距、字号（全局同步），
+ * 以及整页统一的条目间距 / 小标题条高度 / 姓名大小与头像尺寸，所以预览与导出的 PDF 都是一页。
+ * 每档都在**整理前的基准值**上乘比例（见 store.captureFitBase），而不是在上一档的结果上继续乘 ——
+ * 档位之间互不影响，也不会把皮肤自带的留白抹平。
  *
- * 一路压到底还装不下就还原基准：既然挤不进一页，就别把版式改坏。
+ * 压到最低档还装不下就还原基准：既然挤不进一页，就别把版式改坏。
  *
- * 整理成功后按钮变成「还原样式」：把整理前的基准值原样套回（见 restoreFit）。
+ * 整理成功后按钮变成「还原样式」：把整理前的基准值原样套回（见 restoreFit）；
+ * 整理之后用户又调过的样式会先并入基准（见 store.rebaseFitBase），还原时不会被抹掉。
  */
 async function fitToOnePage() {
   if (fitting.value || !resume.value)
@@ -166,25 +163,28 @@ async function fitToOnePage() {
     }
     else {
       const base = store.captureFitBase()
-      let fitted = false
-      for (const ratio of FIT_RATIOS) {
+      // 每档都在**整理前的基准值**上乘比例（不是叠乘），档位之间互不影响；
+      // 测量前先摘掉 min-height（见 measureContentHeight），量到的才是内容真实高度
+      const ratio = await findFitRatio(
+        r => store.applyFitScale(base, r),
+        () => waitRender().then(() => measureHeight()),
+        FIT_LIMIT,
+      )
+      if (ratio !== null) {
+        // 收尾再套一次最终比例：屏幕上留下的样式与记录的比例必须一致
         store.applyFitScale(base, ratio)
         await waitRender()
-        const next = await measureHeight()
-        if (next > 0 && next <= PAPER_HEIGHT + FIT_TOLERANCE) {
-          fitted = true
-          break
-        }
-      }
-      if (fitted)
         fitBase.value = base
-      else
+        message = `已整理成一页 A4（样式收到 ${Math.round(ratio * 100)}%）`
+      }
+      else {
         store.applyFitScale(base, 1)
+        message = '内容较多，压不进一页，样式已还原'
+      }
       await measurePaper()
       store.saveCurrent().catch((error) => {
         console.error('保存简历失败:', error)
       })
-      message = fitted ? '已整理成一页 A4' : '内容较多，压不进一页，样式已还原'
     }
   }
   catch (error) {
@@ -255,9 +255,10 @@ function closeSheet() {
   const styleChanged = showStyleSheet.value
   showModuleSheet.value = false
   showStyleSheet.value = false
-  // 样式面板改过样式后，「整理成一页」的基准值就过期了：留着还原会把用户刚改的样式盖回去
-  if (styleChanged)
-    fitBase.value = null
+  // 样式面板改过样式后，把「整理成一页」的基准里刚被改过的字段换成新值（见 store.rebaseFitBase）：
+  // 「还原样式」还原的是整理前的外观 + 用户整理后的改动，两边都不会被抹掉
+  if (styleChanged && fitBase.value)
+    fitBase.value = store.rebaseFitBase(fitBase.value)
   store.saveCurrent().catch((error) => {
     console.error('保存简历失败:', error)
   })
@@ -412,7 +413,8 @@ async function exportPdf() {
 
     <style-sheet :visible="showStyleSheet" @close="closeSheet" />
 
-    <view v-if="showTemplateSheet" class="mask" @click="showTemplateSheet = false">
+    <view v-if="showTemplateSheet" class="mask">
+      <view class="mask__backdrop" @click="showTemplateSheet = false" />
       <view class="sheet sheet--tall" @click.stop>
         <text class="sheet-title">更换模板</text>
         <text class="sheet-sub">只换版式与样式，已填内容会保留</text>

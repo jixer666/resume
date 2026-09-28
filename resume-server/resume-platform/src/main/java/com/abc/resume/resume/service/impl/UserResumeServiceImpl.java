@@ -147,7 +147,6 @@ public class UserResumeServiceImpl extends BaseService implements UserResumeServ
             resume.setResumeDetail(dto.getResumeDetail());
         }
         resume.setUpdateTime(new Date());
-        resume.setVer(resume.getVer() + 1);
         int row = userResumeMapper.updateUserResume(resume);
         AssertUtils.isTrue(row > 0, ExceptionEnum.BIZ_EXCEPTION);
         return buildUserResumeVO(resume, true);
