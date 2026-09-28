@@ -1,7 +1,7 @@
 <!-- 教育背景：学校 / 时间一行，专业 / 学历一行 -->
 <template>
   <view class="edu-background u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="edu-background__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="edu-background__item">
         <view class="edu-background__head">

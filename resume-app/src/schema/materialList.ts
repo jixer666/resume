@@ -5,7 +5,8 @@ import type { IMSTERIALLISTJSON } from '@/interface/material'
  *
  * 皮肤文件在 src/material/<Model>/<Model><N>/ 下，新增一套皮肤后在这里登记，
  * 再跑 `pnpm gen:material` 生成派发组件 CompatRenderer。
- * 当前只保留经典模板（classic）用到的 `_1` 一套皮肤，其余皮肤按需再补。
+ * 当前登记两套：`_1` 经典模板（classic）用，`_2` 名片模板（card）用
+ * （两套只有基础资料头部不同，正文皮肤共用 `_1`），其余皮肤按需再补。
  *
  * 每组的**第一套**皮肤是该模块的默认皮肤（新建简历 / 模板没指定变体时用它），
  * 所以 `_1` 必须排在各组首位。
@@ -49,6 +50,39 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
       keyId: '', // 组件id
       model: 'BASE_INFO', // 模块
       cptName: 'BASE_INFO_1', // 组件名
+      cptOptionsName: 'BASE_INFO_OPTIONS',
+      cptTitle: '基础资料', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '100px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#2b74ff',
+        firstTitleFontSize: '16px',
+        titleColor: '#121c26',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#4b5563',
+        textFontSize: '13px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '48px',
+        avatarWidth: '84px',
+        avatarHeight: '100px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
+    {
+      keyId: '', // 组件id
+      model: 'BASE_INFO', // 模块
+      cptName: 'BASE_INFO_2', // 组件名
       cptOptionsName: 'BASE_INFO_OPTIONS',
       cptTitle: '基础资料', // 组件名
       cptX: 0, // 组件x坐标

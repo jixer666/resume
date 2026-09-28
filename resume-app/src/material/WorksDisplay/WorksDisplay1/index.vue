@@ -1,7 +1,7 @@
 <!-- 作品展示：作品名 + 链接（小程序没有 a 标签，点击复制） -->
 <template>
   <view class="works-display u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="works-display__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="works-display__item">
         <text class="works-display__name">

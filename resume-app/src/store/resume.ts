@@ -118,6 +118,7 @@ const GLOBAL_STYLE_MAP: [keyof IGlobalStyle, keyof IMODELSTYLE][] = [
   ['pLeftRight', 'pLeftRight'],
   ['modelMarginTop', 'mTop'],
   ['modelMarginBottom', 'mBottom'],
+  ['titleStyle', 'titleStyle'],
 ]
 
 /**
@@ -763,6 +764,10 @@ export const useResumeStore = defineStore(
 
       // 模板预设打底，用户改过的全局字段再盖回原值
       const prevGlobal = { ...(json.GLOBAL_STYLE as unknown as Record<string, unknown>) }
+      // 小标题样式是模板级预设（见 ModelTitle1 的分发）：上一套模板的形态不能跟着简历留下来，
+      // 否则新模板的小标题会被上一套的形态盖掉；用户手动改过的值不受影响
+      if (!editedGlobalKeys.has('titleStyle'))
+        delete prevGlobal.titleStyle
       const nextGlobal: Record<string, unknown> = { ...prevGlobal, ...(template.style as unknown as Record<string, unknown>) }
       editedGlobalKeys.forEach((key) => {
         if (prevGlobal[key] !== undefined)

@@ -1,7 +1,7 @@
 <template>
   <div class="job-intention u-tag-div">
     <!-- 标题 -->
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <slot name="model-title" />
     <!-- 求职意向 -->
     <ul class="u-tag-ul">

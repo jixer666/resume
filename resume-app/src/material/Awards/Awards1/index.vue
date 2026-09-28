@@ -1,7 +1,7 @@
 <!-- 荣誉奖项：奖项名称 / 时间一行，等级一行 -->
 <template>
   <view class="awards u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="awards__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="awards__item">
         <view class="awards__head">

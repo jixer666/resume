@@ -1,7 +1,7 @@
 <!-- 工作经历：公司 / 部门 / 职位 / 时间同行，正文富文本 -->
 <template>
   <view class="work-experience u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="work-experience__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="work-experience__item">
         <view class="work-experience__head">

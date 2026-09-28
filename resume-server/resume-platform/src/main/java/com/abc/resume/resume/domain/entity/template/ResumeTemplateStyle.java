@@ -86,4 +86,8 @@ public class ResumeTemplateStyle {
      * 整页背景预设名：空串纯白，其余由前端按预设渲染
      */
     private String resumeBackgroundCom;
+    /**
+     * 小标题样式预设名：空串为经典标题条，其余由前端按预设渲染
+     */
+    private String titleStyle;
 }

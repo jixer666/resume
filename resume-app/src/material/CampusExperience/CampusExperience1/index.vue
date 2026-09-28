@@ -1,7 +1,7 @@
 <!-- 校园经历：社团名 / 时间一行，职务一行，正文富文本 -->
 <template>
   <view class="campus-experience u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="campus-experience__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="campus-experience__item">
         <view class="campus-experience__head">

@@ -1,7 +1,7 @@
 <!-- 实习经验：公司 / 时间一行，职位 / 部门一行，正文富文本 -->
 <template>
   <view class="internship-experience u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="internship-experience__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="internship-experience__item">
         <view class="internship-experience__head">

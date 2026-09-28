@@ -1,7 +1,7 @@
 <!-- 项目经验：项目名 / 职责 / 时间同行，正文富文本 -->
 <template>
   <view class="project-experience u-tag-div">
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <view class="project-experience__list u-tag-div">
       <view v-for="(item, index) in modelData.LIST" :key="index" class="project-experience__item">
         <view class="project-experience__head">

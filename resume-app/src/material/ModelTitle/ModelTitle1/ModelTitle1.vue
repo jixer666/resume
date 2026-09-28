@@ -1,51 +1,27 @@
-<!-- 模块小标题：浅色标题条 + 左侧主题色竖条（经典模板样式） -->
+<!-- 模块小标题：按模板级样式预设 titleStyle 分发（空串为经典标题条，iconBadge 为圆点图标标题） -->
 <template>
-  <view class="model-title">
-    <view class="model-title__bar" />
-    <text class="model-title__text">
-      {{ title }}
-    </text>
-  </view>
+  <icon-badge-title v-if="isIconBadge" :title="title" :model-style="modelStyle" :icon="icon" />
+  <classic-title v-else :title="title" :model-style="modelStyle" />
 </template>
 
 <script setup lang="ts">
 import type IMODELSTYLE from '@/interface/modelStyle'
-import { lightenColor } from '@/schema/templates'
+import { computed } from 'vue'
+import ClassicTitle from '@/material/Common/ModelTitle/ClassicTitle.vue'
+import IconBadgeTitle from '@/material/Common/ModelTitle/IconBadgeTitle.vue'
 
 const props = defineProps<{
   title: string
   modelStyle: IMODELSTYLE // 模块样式
+  icon?: string // 模块图标（模块数据里的 iconfont 名），圆点标题用
 }>()
 
-/** 标题条底色：主题色兑白，换主题色时整条底色一起跟随 */
-const barBackground = computed(() => lightenColor(String(props.modelStyle?.themeColor || '#2b74ff'), 0.92))
-</script>
-
-<style lang="scss" scoped>
-/*
- * 小标题条高度：`--rs-title-h` 由 ResumeRender 按「整理成一页」的压缩比例下发
- * （默认 30px = 字号 16px + 上下各 15px），条高跟着字号一起收，
- * 否则字号压小了、条还是 30px，标题就显得又空又大。
+/**
+ * 小标题形态由模板级样式预设 titleStyle 决定（与整页背景 resumeBackgroundCom 同一套做法）：
+ * 换模板时小标题跟着模板走，所有模块一起换形态。
+ *
+ * 为什么不给每个模块各出一套标题皮肤：小标题不属于模块变体（variants 里没有 MODEL_TITLE），
+ * 这里分发一次，11 套正文皮肤就不用为「只换标题形态」各复制一份。
  */
-.model-title {
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: var(--rs-title-h, 30px);
-  background-color: v-bind('barBackground');
-
-  &__bar {
-    width: 4px;
-    height: var(--rs-title-h, 30px);
-    background-color: v-bind('modelStyle.themeColor');
-  }
-
-  &__text {
-    padding-left: 16px;
-    font-size: v-bind('modelStyle.firstTitleFontSize');
-    font-weight: 600;
-    color: v-bind('modelStyle.themeColor');
-  }
-}
-</style>
+const isIconBadge = computed(() => props.modelStyle?.titleStyle === 'iconBadge')
+</script>

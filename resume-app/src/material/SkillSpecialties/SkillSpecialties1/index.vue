@@ -2,7 +2,7 @@
 <template>
   <div class="skill-specialties u-tag-div">
     <!-- 标题 -->
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <!-- 技能描述：整段富文本；列表符号由 RichTextView 统一处理，外层不再用 ul/li 包裹 -->
     <view class="skill-content">
       <RichTextView :html="modelData.content" :model-style="modelStyle" extra-style="letter-spacing:2px" />

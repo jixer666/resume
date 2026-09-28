@@ -6,6 +6,7 @@
 import type { IMATERIALITEM } from '@/interface/material'
 import ResumeTitle1 from '@/material/ResumeTitle/ResumeTitle1/index.vue'
 import BaseInfo1 from '@/material/BaseInfo/BaseInfo1/index.vue'
+import BaseInfo2 from '@/material/BaseInfo/BaseInfo2/index.vue'
 import JobIntention1 from '@/material/JobIntention/JobIntention1/index.vue'
 import EduBackground1 from '@/material/EduBackground/EduBackground1/index.vue'
 import SkillSpecialties1 from '@/material/SkillSpecialties/SkillSpecialties1/index.vue'
@@ -28,6 +29,7 @@ defineProps<{
 <template>
   <ResumeTitle1 v-if="item.cptName === 'RESUME_TITLE_1'" :model-data="item.data" :model-style="item.style" />
   <BaseInfo1 v-else-if="item.cptName === 'BASE_INFO_1'" :model-data="item.data" :model-style="item.style" />
+  <BaseInfo2 v-else-if="item.cptName === 'BASE_INFO_2'" :model-data="item.data" :model-style="item.style" />
   <JobIntention1 v-else-if="item.cptName === 'JOB_INTENTION_1'" :model-data="item.data" :model-style="item.style" />
   <EduBackground1 v-else-if="item.cptName === 'EDU_BACKGROUND_1'" :model-data="item.data" :model-style="item.style" />
   <SkillSpecialties1 v-else-if="item.cptName === 'SKILL_SPECIALTIES_1'" :model-data="item.data" :model-style="item.style" />

@@ -188,6 +188,10 @@ public class UserResumeDetail {
         if (StringUtils.isNotBlank(source.getResumeBackgroundCom())) {
             target.setResumeBackgroundCom(source.getResumeBackgroundCom());
         }
+        // 小标题样式是前端预设，后端不解释：GlobalStyle 未声明的字段原样透传
+        if (StringUtils.isNotBlank(source.getTitleStyle())) {
+            target.putExtra("titleStyle", source.getTitleStyle());
+        }
     }
 
     /**

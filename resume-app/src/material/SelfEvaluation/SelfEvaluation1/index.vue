@@ -2,7 +2,7 @@
 <template>
   <div class="self-eavluation u-tag-div">
     <!-- 标题 -->
-    <model-title :title="modelData.title" :model-style="modelStyle" />
+    <model-title :title="modelData.title" :model-style="modelStyle" :icon="modelData.iconfont" />
     <!-- 兴趣爱好 -->
     <div class="self-eavluation-content u-tag-div">
       <view class="u-tag-p">
