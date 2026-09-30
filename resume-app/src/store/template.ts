@@ -1,5 +1,6 @@
 import type { IResumeTemplate } from '@/schema/templates'
 import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 import { getTemplateDetail, getTemplateList } from '@/api/template'
 
 /** 每页条数 */
@@ -32,14 +33,23 @@ export const useTemplateStore = defineStore('template', () => {
   const total = ref(0)
   /** 是否还有下一页 */
   const hasMore = computed(() => list.value.length < total.value)
+  /**
+   * 按编码补拉的模板缓存：不进 list（避免和分页数据打架），也不占用 current（详情页在用）。
+   *
+   * 编辑页从「我的」直接进入时模板列表可能是空的，新增模块要同步取模板配置，
+   * 所以载入简历时用 ensure 把模板拉进这里（见 resume store 的 loadResume / addModule）。
+   */
+  const cache = new Map<string, IResumeTemplate>()
 
   /**
-   * 同步取模板：优先列表，其次详情页已载入的当前模板。
+   * 同步取模板：优先列表，其次按编码补拉的缓存，最后详情页已载入的当前模板。
    *
    * 「使用模板」在 onLoad 里同步套用，不能等接口，所以留这条同步通道。
    */
   function get(code: string): IResumeTemplate | undefined {
-    return list.value.find(item => item.code === code) || (current.value?.code === code ? current.value : undefined)
+    return list.value.find(item => item.code === code)
+      || cache.get(code)
+      || (current.value?.code === code ? current.value : undefined)
   }
 
   /** 请求某一页；append 为 true 时追加到列表尾部 */
@@ -109,6 +119,29 @@ export const useTemplateStore = defineStore('template', () => {
     return current.value
   }
 
+  /**
+   * 确保某份模板已载入：命中缓存直接返回，否则按编码拉一次详情。
+   *
+   * 编辑期间「新增模块」要同步按模板取皮肤，这里提前把模板补进缓存；
+   * 拉取失败不抛，返回 undefined，调用方按「模板配置暂不可用」回退首套皮肤。
+   */
+  async function ensure(code: string): Promise<IResumeTemplate | undefined> {
+    const cached = get(code)
+    if (cached)
+      return cached
+    try {
+      const res = await getTemplateDetail(code)
+      if (!res)
+        return undefined
+      cache.set(res.code, res)
+      return res
+    }
+    catch (err) {
+      console.error('载入模板配置失败:', err)
+      return undefined
+    }
+  }
+
   return {
     list,
     current,
@@ -121,6 +154,7 @@ export const useTemplateStore = defineStore('template', () => {
     total,
     hasMore,
     get,
+    ensure,
     fetchList,
     fetchMore,
     fetchDetail,

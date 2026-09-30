@@ -13,6 +13,7 @@ import {
 } from '@/api/login'
 import { isDoubleTokenRes, isSingleTokenRes } from '@/api/types/login'
 import { isDoubleTokenMode } from '@/utils'
+import { showToast } from '@/utils/toast'
 import { useUserStore } from './user'
 
 // 初始化状态
@@ -121,7 +122,7 @@ export const useTokenStore = defineStore(
         const res = await _login(loginForm)
         console.log('普通登录-res: ', res)
         await _postLogin(res)
-        uni.showToast({
+        showToast({
           title: '登录成功',
           icon: 'success',
         })
@@ -129,7 +130,7 @@ export const useTokenStore = defineStore(
       }
       catch (error) {
         console.error('登录失败:', error)
-        uni.showToast({
+        showToast({
           title: '登录失败，请重试',
           icon: 'error',
         })
@@ -154,7 +155,7 @@ export const useTokenStore = defineStore(
         const res = await _wxLogin(code)
         console.log('微信登录-res: ', res)
         await _postLogin(res)
-        uni.showToast({
+        showToast({
           title: '登录成功',
           icon: 'success',
         })
@@ -162,7 +163,7 @@ export const useTokenStore = defineStore(
       }
       catch (error) {
         console.error('微信登录失败:', error)
-        uni.showToast({
+        showToast({
           title: error.message,
           icon: 'error',
         })

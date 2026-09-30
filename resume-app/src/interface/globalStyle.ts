@@ -18,7 +18,7 @@ interface IGlobalStyle {
   rightThemeColor: string // 右侧布局时右侧背景色
   fontFamily: string // 字体
   resumeBackgroundCom: string // 整页背景预设名（空串为纯白）
-  titleStyle?: string // 小标题样式预设名（空串为经典标题条，iconBadge 为圆点图标标题）
+  titleStyle?: string // 小标题样式预设名（空串为经典标题条，iconBadge 为圆点图标标题，underlineTitle 为下划线标题）
   fitRatio?: number // 「整理成一页」的整页压缩比例（1 = 未压缩；条目间距 / 标题条高度 / 姓名大小按它算）
 }
 export default IGlobalStyle

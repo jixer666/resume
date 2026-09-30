@@ -6,6 +6,8 @@ import type { IFitBase } from '@/store/resume'
 import { useResumeStore } from '@/store/resume'
 import { useTemplateStore } from '@/store/template'
 import { findFitRatio, FIT_TOLERANCE } from '@/utils/fit'
+import { countPages } from '@/utils/pagination'
+import { hideLoading, showLoading, showToast } from '@/utils/toast'
 
 /**
  * 简历预览：全屏只读，同一份 JSON + 同一套物料，用 ResumeRender 以 HTML/CSS 渲染 —— 所见即所得，
@@ -16,6 +18,9 @@ import { findFitRatio, FIT_TOLERANCE } from '@/utils/fit'
  * 分页：先量出未缩放的内容总高，按 A4 高（1123px）算出页数；
  * 每页渲染一份 ResumeRender 并用 `margin-top: -(页序 * 1123)` 上移，外层 `overflow: hidden`
  * 裁掉多余部分 —— 即「真实分页」，内容跨页续接、不丢数据（允许切断半行文字）。
+ *
+ * 量高要等重渲染落地（见 measureSettledHeight）、取整要扣亚像素容差（见 utils/pagination），
+ * 否则真机上量到的是上一轮的 min-height，空白页会一页页往上叠。
  */
 defineOptions({ name: 'ResumeEditPreview' })
 definePage({
@@ -39,8 +44,13 @@ const templates = computed(() => templateStore.list)
 const paperScale = ref(1)
 /** 未缩放的内容总高，用来算页数 */
 const contentHeight = ref(PAPER_HEIGHT)
-/** 页数：至少 1 页，超出按 A4 高向上取整 */
-const pageCount = computed(() => Math.max(1, Math.ceil(contentHeight.value / PAPER_HEIGHT)))
+/**
+ * 页数：至少 1 页，超出按 A4 高向上取整。
+ *
+ * 取整交给 countPages：它会先扣掉亚像素容差（量到的高度是缩放后除回来的，误差 1px 上下），
+ * 内容刚好一张纸时不会再被顶成两页。
+ */
+const pageCount = computed(() => countPages(contentHeight.value, PAPER_HEIGHT))
 
 /** 每页在页面上的占位尺寸（缩放后） */
 const slotStyle = computed(() => ({
@@ -72,6 +82,9 @@ const renderMinHeight = computed(() => (measuring.value ? undefined : pageCount.
 
 /** 内容恰好等于纸高也算装得下，留 2px 给亚像素误差（见 utils/fit） */
 const FIT_LIMIT = PAPER_HEIGHT + FIT_TOLERANCE
+
+/** 量高的最大尝试次数：真机上重渲染落到视图层不止一帧，量不稳就再等一帧重来 */
+const MEASURE_ATTEMPTS = 4
 
 onShow(() => {
   syncPaperScale()
@@ -110,12 +123,36 @@ function measureHeight(): Promise<number> {
  *
  * 不摘的话量到的是 min-height（页数 × A4 高），页数越多量出来越高 ——
  * 「整理成一页」会永远判定为装不下，整理也就永远完不成。
+ *
+ * 摘掉 min-height 要等一次重渲染，真机上 setData 落到视图层往往不止一帧：
+ * 量早了量到的还是上一轮的 min-height，页数就会一页页往上叠（换一次模板多一张空白纸）。
+ * 所以这里量「稳定高度」—— 连续两次量到同一个值才算数。
  */
 async function measureContentHeight(): Promise<number> {
   measuring.value = true
   await waitRender(60)
-  const height = await measureHeight()
+  const height = await measureSettledHeight()
   measuring.value = false
+  return height
+}
+
+/**
+ * 量稳定下来的高度（未缩放，px）：连续两次量到同一个高度（±2px）才认为渲染已经落地。
+ *
+ * 单次测量拿到的是「视图层此刻的高度」，刚改过样式 / 刚摘掉 min-height 时可能还是旧值；
+ * 同一个布局连着量两次结果必然一致，不一致说明上一帧的改动还没落地，再等一帧重来。
+ */
+async function measureSettledHeight(): Promise<number> {
+  let height = 0
+  for (let attempt = 0; attempt < MEASURE_ATTEMPTS; attempt++) {
+    const next = await measureHeight()
+    if (height && next && Math.abs(next - height) <= FIT_TOLERANCE) {
+      height = next
+      break
+    }
+    height = next
+    await waitRender(60)
+  }
   return height
 }
 
@@ -148,13 +185,13 @@ async function fitToOnePage() {
     return
   }
   fitting.value = true
-  uni.showLoading({ title: '正在整理', mask: true })
+  showLoading({ title: '正在整理', mask: true })
   let message = ''
   try {
     // 整个测量过程都摘掉 min-height（见 measureContentHeight），量到的才是内容真实高度
     measuring.value = true
     await waitRender(60)
-    const height = await measureHeight()
+    const height = await measureSettledHeight()
     if (!height) {
       message = '暂时量不到简历高度，请稍后重试'
     }
@@ -167,7 +204,7 @@ async function fitToOnePage() {
       // 测量前先摘掉 min-height（见 measureContentHeight），量到的才是内容真实高度
       const ratio = await findFitRatio(
         r => store.applyFitScale(base, r),
-        () => waitRender().then(() => measureHeight()),
+        () => waitRender().then(() => measureSettledHeight()),
         FIT_LIMIT,
       )
       if (ratio !== null) {
@@ -195,9 +232,9 @@ async function fitToOnePage() {
     measuring.value = false
     fitting.value = false
   }
-  uni.hideLoading()
+  hideLoading()
   if (message)
-    uni.showToast({ title: message, icon: 'none' })
+    showToast({ title: message })
 }
 
 /** 还原「整理成一页」：基准值乘 1 即无损还原（见 store.applyFitScale），再重新分页并落库 */
@@ -206,7 +243,7 @@ async function restoreFit() {
   if (!base)
     return
   fitting.value = true
-  uni.showLoading({ title: '正在还原', mask: true })
+  showLoading({ title: '正在还原', mask: true })
   try {
     store.applyFitScale(base, 1)
     fitBase.value = null
@@ -214,13 +251,13 @@ async function restoreFit() {
     store.saveCurrent().catch((error) => {
       console.error('保存简历失败:', error)
     })
-    uni.hideLoading()
-    uni.showToast({ title: '已还原整理前的样式', icon: 'none' })
+    hideLoading()
+    showToast({ title: '已还原整理前的样式' })
   }
   catch (error) {
     console.error('还原整理样式失败:', error)
-    uni.hideLoading()
-    uni.showToast({ title: '还原失败，请重试', icon: 'none' })
+    hideLoading()
+    showToast({ title: '还原失败，请重试' })
   }
   finally {
     measuring.value = false
@@ -282,7 +319,7 @@ function chooseTemplate(code: string) {
   if (code === activeTemplateCode.value)
     return
   if (!store.applyTemplate(code)) {
-    uni.showToast({ title: '该模板暂不可用', icon: 'none' })
+    showToast({ title: '该模板暂不可用' })
     return
   }
   // 换模板后模块样式整体重来，整理前的基准值失效
@@ -303,7 +340,7 @@ async function exportPdf() {
   if (exporting.value)
     return
   exporting.value = true
-  uni.showLoading({ title: '正在生成 PDF', mask: true })
+  showLoading({ title: '正在生成 PDF', mask: true })
   try {
     await store.saveCurrent()
     const id = Number(store.current?.ID)
@@ -315,19 +352,19 @@ async function exportPdf() {
       if (percent <= 0 || percent === lastPercent)
         return
       lastPercent = percent
-      uni.showLoading({ title: `正在下载 ${percent}%`, mask: true })
+      showLoading({ title: `正在下载 ${percent}%`, mask: true })
     })
-    uni.hideLoading()
+    hideLoading()
     uni.openDocument({
       filePath,
       fileType: 'pdf',
       showMenu: true,
-      fail: () => uni.showToast({ title: '打开 PDF 失败', icon: 'none' }),
+      fail: () => showToast({ title: '打开 PDF 失败' }),
     })
   }
   catch (error) {
-    uni.hideLoading()
-    uni.showToast({ title: (error as Error).message || '导出失败', icon: 'none' })
+    hideLoading()
+    showToast({ title: (error as Error).message || '导出失败' })
   }
   finally {
     exporting.value = false

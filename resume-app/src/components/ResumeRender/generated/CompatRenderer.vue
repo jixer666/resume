@@ -7,13 +7,18 @@ import type { IMATERIALITEM } from '@/interface/material'
 import ResumeTitle1 from '@/material/ResumeTitle/ResumeTitle1/index.vue'
 import BaseInfo1 from '@/material/BaseInfo/BaseInfo1/index.vue'
 import BaseInfo2 from '@/material/BaseInfo/BaseInfo2/index.vue'
+import BaseInfo3 from '@/material/BaseInfo/BaseInfo3/index.vue'
 import JobIntention1 from '@/material/JobIntention/JobIntention1/index.vue'
+import JobIntention2 from '@/material/JobIntention/JobIntention2/index.vue'
 import EduBackground1 from '@/material/EduBackground/EduBackground1/index.vue'
 import SkillSpecialties1 from '@/material/SkillSpecialties/SkillSpecialties1/index.vue'
 import CampusExperience1 from '@/material/CampusExperience/CampusExperience1/index.vue'
+import CampusExperience2 from '@/material/CampusExperience/CampusExperience2/index.vue'
 import InternshipExperience1 from '@/material/InternshipExperience/InternshipExperience1/index.vue'
 import WorkExperience1 from '@/material/WorkExperience/WorkExperience1/index.vue'
+import WorkExperience2 from '@/material/WorkExperience/WorkExperience2/index.vue'
 import ProjectExperience1 from '@/material/ProjectExperience/ProjectExperience1/index.vue'
+import ProjectExperience2 from '@/material/ProjectExperience/ProjectExperience2/index.vue'
 import Awards1 from '@/material/Awards/Awards1/index.vue'
 import Hobbies1 from '@/material/Hobbies/Hobbies1/index.vue'
 import SelfEvaluation1 from '@/material/SelfEvaluation/SelfEvaluation1/index.vue'
@@ -30,13 +35,18 @@ defineProps<{
   <ResumeTitle1 v-if="item.cptName === 'RESUME_TITLE_1'" :model-data="item.data" :model-style="item.style" />
   <BaseInfo1 v-else-if="item.cptName === 'BASE_INFO_1'" :model-data="item.data" :model-style="item.style" />
   <BaseInfo2 v-else-if="item.cptName === 'BASE_INFO_2'" :model-data="item.data" :model-style="item.style" />
+  <BaseInfo3 v-else-if="item.cptName === 'BASE_INFO_3'" :model-data="item.data" :model-style="item.style" />
   <JobIntention1 v-else-if="item.cptName === 'JOB_INTENTION_1'" :model-data="item.data" :model-style="item.style" />
+  <JobIntention2 v-else-if="item.cptName === 'JOB_INTENTION_2'" :model-data="item.data" :model-style="item.style" />
   <EduBackground1 v-else-if="item.cptName === 'EDU_BACKGROUND_1'" :model-data="item.data" :model-style="item.style" />
   <SkillSpecialties1 v-else-if="item.cptName === 'SKILL_SPECIALTIES_1'" :model-data="item.data" :model-style="item.style" />
   <CampusExperience1 v-else-if="item.cptName === 'CAMPUS_EXPERIENCE_1'" :model-data="item.data" :model-style="item.style" />
+  <CampusExperience2 v-else-if="item.cptName === 'CAMPUS_EXPERIENCE_2'" :model-data="item.data" :model-style="item.style" />
   <InternshipExperience1 v-else-if="item.cptName === 'INTERNSHIP_EXPERIENCE_1'" :model-data="item.data" :model-style="item.style" />
   <WorkExperience1 v-else-if="item.cptName === 'WORK_EXPERIENCE_1'" :model-data="item.data" :model-style="item.style" />
+  <WorkExperience2 v-else-if="item.cptName === 'WORK_EXPERIENCE_2'" :model-data="item.data" :model-style="item.style" />
   <ProjectExperience1 v-else-if="item.cptName === 'PROJECT_EXPERIENCE_1'" :model-data="item.data" :model-style="item.style" />
+  <ProjectExperience2 v-else-if="item.cptName === 'PROJECT_EXPERIENCE_2'" :model-data="item.data" :model-style="item.style" />
   <Awards1 v-else-if="item.cptName === 'AWARDS_1'" :model-data="item.data" :model-style="item.style" />
   <Hobbies1 v-else-if="item.cptName === 'HOBBIES_1'" :model-data="item.data" :model-style="item.style" />
   <SelfEvaluation1 v-else-if="item.cptName === 'SELF_EVALUATION_1'" :model-data="item.data" :model-style="item.style" />

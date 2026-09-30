@@ -47,6 +47,9 @@ const UI_ICONS: Record<string, IMpIconSymbol> = {
   // 上下两条横线夹一个双向箭头：表达「把内容纵向压进一页」
   'ui-compress': { v: '0 0 32 32', b: '<path d="M6 5h20v3H6z"/><path d="M6 25h20v3H6z"/><path d="M14.5 12h3v8h-3z"/><path d="M16 8l4 5H12z"/><path d="M16 24l-4-5h8z"/>' },
   'ui-renew': { v: '0 0 32 32', b: '<path d="M12 10H6.78A11 11 0 0 1 27 16h2A13 13 0 0 0 6 7.68V4H4v8h8zm8 12h5.22A11 11 0 0 1 5 16H3a13 13 0 0 0 23 8.32V28h2v-8h-8z"/>' },
+  // 以下两个取自 weui（微信原生 toast 图标）：success 是对勾、error 是实心圆挖出感叹号
+  'ui-toast-success': { v: '0 0 24 24', b: '<path d="M8.657 18.435 3 12.778l1.414-1.414 4.95 4.95L20.678 5l1.414 1.414-12.02 12.021a1 1 0 0 1-1.415 0z" fill-rule="evenodd"/>' },
+  'ui-toast-error': { v: '0 0 24 24', b: '<path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-.763-15.864.11 7.596h1.305l.11-7.596h-1.525zm.759 10.967c.512 0 .902-.383.902-.882 0-.5-.39-.882-.902-.882-.512 0-.902.383-.902.882 0 .5.39.882.902.882z" fill-rule="evenodd"/>' },
 }
 
 const B64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'

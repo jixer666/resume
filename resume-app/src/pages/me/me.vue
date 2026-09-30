@@ -8,8 +8,9 @@ import { toLoginPage } from '@/utils/toLoginPage'
 /**
  * 「我的」页 ≡ 我的简历列表。
  *
- * 排版走极简：白底标题栏（份数 + 新建入口）+ 白底列表行（缩略图 + 名称 + 更新时间 + 箭头），
- * 去掉渐变头部与卡片底部的操作按钮 —— 整行可点即进编辑。
+ * 排版走极简：白底概览栏（份数 + 新建按钮，吸顶常驻）+ 白底列表行
+ * （名称 + 版式标签 + 更新时间 + 箭头），不再画缩略图 —— 列表只回答「有哪些简历」，
+ * 封面交给模板库与详情页；整行可点即进编辑。
  *
  * 首页是模板库，这里只留「已经存在的简历」；新建走首页挑模板那条路。
  * 列表来自后端 `/resume/page`：首次加载铺骨架屏，下拉可刷新。
@@ -31,7 +32,6 @@ const loading = ref(false)
 const loaded = ref(false)
 /** 登录态是「一次拉取」的快照，放在 onShow 里刷新，避免在 computed 里写 store */
 const loggedIn = ref(false)
-
 const list = computed(() => resumeStore.list)
 /** 骨架屏 = 已登录、正在加载、且还没有任何数据 */
 const showSkeleton = computed(() => loggedIn.value && loading.value && !list.value.length)
@@ -95,6 +95,11 @@ function displayTime(text: string): string {
   return time.format('YYYY-MM-DD')
 }
 
+/** 版式文案：双列简历存的是 leftRight，其余都是单栏 */
+function layoutText(layout: string): string {
+  return layout === 'leftRight' ? '双栏' : '单栏'
+}
+
 /** 打开一份已保存的简历继续编辑 */
 function openResume(item: IResumeBrief) {
   uni.navigateTo({ url: `/pages/edit/index?id=${item.id}` })
@@ -112,13 +117,18 @@ function goLogin() {
 
 <template>
   <view class="page">
-    <!-- 标题栏：左侧份数，右侧新建入口 -->
-    <view class="bar">
-      <text class="bar-count">
-        {{ loggedIn ? `共 ${list.length} 份` : '登录后同步简历' }}
-      </text>
-      <view v-if="loggedIn" class="bar-new" hover-class="bar-new-press" @click="goTemplates">
-        ＋ 新建简历
+    <!-- 概览栏：左侧份数，右侧新建按钮；吸顶常驻，滚到哪都能直接新建 -->
+    <view class="header">
+      <view class="header-count">
+        <template v-if="loggedIn">
+          <text class="count-num">{{ list.length }}</text>
+          <text class="count-unit">份简历</text>
+        </template>
+        <text v-else class="count-unit">登录后同步简历</text>
+      </view>
+      <view v-if="loggedIn" class="new-btn" hover-class="new-btn-press" @click="goTemplates">
+        <text class="new-btn-plus">＋</text>
+        <text>新建简历</text>
       </view>
       <!-- 重新拉取（已有数据）时，用一条细进度条提示还在请求 -->
       <view v-if="loading && list.length" class="refresh-track">
@@ -137,9 +147,8 @@ function goLogin() {
 
     <!-- 首次加载：骨架屏 -->
     <view v-else-if="showSkeleton" class="list">
-      <view v-for="n in 3" :key="n" class="row">
-        <view class="skeleton skeleton--thumb" />
-        <view class="skeleton-info">
+      <view v-for="n in 4" :key="n" class="row">
+        <view class="row-body">
           <view class="skeleton skeleton--name" />
           <view class="skeleton skeleton--time" />
         </view>
@@ -163,18 +172,18 @@ function goLogin() {
         hover-class="row-press"
         @click="openResume(item)"
       >
-        <view class="thumb">
-          <view class="thumb-img">
-            <resume-cover :layout="item.layout" size="xs" />
+        <view class="row-body">
+          <view class="row-head">
+            <text class="name">{{ item.name || '未命名简历' }}</text>
           </view>
-        </view>
-        <view class="info">
-          <text class="name">{{ item.name || '未命名简历' }}</text>
           <text class="time">更新于 {{ displayTime(item.updateTime) }}</text>
         </view>
         <text class="arrow">›</text>
       </view>
     </view>
+
+    <!-- 问题反馈：右边缘竖排标签 + QQ群号弹层（组件见 src/components/fg-feedback），任何登录态下都能用 -->
+    <fg-feedback />
   </view>
 </template>
 
@@ -188,16 +197,37 @@ function goLogin() {
   background-color: #f5f6f8;
 }
 
-/* -------- 标题栏 -------- */
-.bar {
-  position: relative;
+/* -------- 概览栏 -------- */
+.header {
+  position: sticky;
+  z-index: 10;
+  top: 0;
   display: flex;
   align-items: center;
-  height: 48px;
+  height: 52px;
   justify-content: space-between;
   padding: 0 16px;
   border-bottom: 1px solid #eef0f3;
   background-color: #fff;
+}
+
+/* 份数：数字放大当视觉落点，单位退成小字 */
+.header-count {
+  display: flex;
+  align-items: baseline;
+}
+
+.count-num {
+  color: #1f2329;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.count-unit {
+  margin-left: 4px;
+  color: #8f959e;
+  font-size: 13px;
 }
 
 /* 顶部不定长进度条 */
@@ -228,18 +258,27 @@ function goLogin() {
   }
 }
 
-.bar-count {
-  color: #646a73;
+/* 实心胶囊按钮：比文字链更明确，吸顶时一直挂在右上角 */
+.new-btn {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 15px;
+  background-color: #2563eb;
+  color: #fff;
   font-size: 13px;
+  font-weight: 500;
 }
 
-.bar-new {
-  color: #2563eb;
-  font-size: 13px;
+.new-btn-plus {
+  margin-right: 2px;
+  font-size: 14px;
+  line-height: 1;
 }
 
-.bar-new-press {
-  opacity: 0.6;
+.new-btn-press {
+  opacity: 0.85;
 }
 
 /* -------- 简历列表 -------- */
@@ -250,9 +289,9 @@ function goLogin() {
 .row {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 12px 14px;
-  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
   background-color: #fff;
 }
 
@@ -260,51 +299,54 @@ function goLogin() {
   background-color: #f2f3f5;
 }
 
-.thumb {
-  display: flex;
-  width: 46px;
-  height: 60px;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 6px;
-  background-color: #f7f8fa;
-}
-
-/* ResumeCover 按 A4 比例自撑高度，38px 宽 ≈ 54px 高，正好填满衬底内容区 */
-.thumb-img {
-  width: 38px;
-}
-
-.info {
+/* 没有缩略图后，名称与时间就是整行唯一的信息列 */
+.row-body {
   min-width: 0;
   flex: 1;
-  margin-left: 12px;
+}
+
+.row-head {
+  display: flex;
+  align-items: center;
 }
 
 .name {
-  display: block;
+  min-width: 0;
+  flex: 1;
   overflow: hidden;
   color: #1f2329;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 21px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* 版式标签：补回缩略图原本承担的「单栏 / 双栏」信息 */
+.badge {
+  flex: none;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #f2f3f5;
+  color: #646a73;
+  font-size: 11px;
+  line-height: 14px;
+}
+
 .time {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: #8f959e;
   font-size: 12px;
+  line-height: 17px;
 }
 
 .arrow {
   flex: none;
-  margin-left: 8px;
+  margin-left: 10px;
   color: #c9ced6;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -314,27 +356,14 @@ function goLogin() {
   animation: skeleton-pulse 1.2s ease-in-out infinite;
 }
 
-.skeleton--thumb {
-  width: 46px;
-  height: 60px;
-  flex: none;
-  border-radius: 6px;
-}
-
-.skeleton-info {
-  min-width: 0;
-  flex: 1;
-  margin-left: 12px;
-}
-
 .skeleton--name {
-  width: 55%;
-  height: 14px;
+  width: 46%;
+  height: 15px;
   border-radius: 4px;
 }
 
 .skeleton--time {
-  width: 35%;
+  width: 30%;
   height: 11px;
   margin-top: 9px;
   border-radius: 4px;

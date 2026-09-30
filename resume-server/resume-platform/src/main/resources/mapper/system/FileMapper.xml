@@ -21,7 +21,7 @@
     </resultMap>
 
     <sql id="selectFileVo">
-        select id, filename, total_size, file_type, file_md5, oss_type, file_path, user_id, create_time, update_time, status, ver, is_delete from tb_file
+        select id, filename, total_size, file_type, file_md5, oss_type, file_path, user_id, create_time, update_time, status, ver, is_delete from file
     </sql>
 
     <select id="selectFileList" resultMap="FileResult">

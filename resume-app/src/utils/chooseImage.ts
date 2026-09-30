@@ -1,117 +1,121 @@
 /**
- * 头像 / 图片选择的公共实现（基本信息、自定义模块的头像字段共用）。
+ * 头像 / 图片选择与上传的公共实现（基本信息页的头像字段用）。
  *
- * 两端都要把选中的图片转成 base64 再回填，原因是同一个：临时地址都活不过一次重启。
- * H5 的 `blob:` 刷新即失效；小程序的 `tempFilePath` 只在本次会话有效，
- * 而且导出 PDF 时后端浏览器读不到 `wxfile://`，PDF 里就会缺头像。
+ * 上传接口（`/system/oss/upload`）要求 fileMd5 与 fileType 都必填，文件名还决定
+ * 后端拼 OSS 对象名时用的扩展名，所以这里把三样都准备齐：
+ * - 文件名：H5 取选择器给的原始文件名，小程序 / App 取临时路径最后一段（都带扩展名）；
+ * - MD5：把文件读成字节后统一用 `md5` 算（各端结果一致，见 utils/file.ts）；
+ * - 类型：按扩展名给图片 MIME。
  *
- * base64 会跟着简历 JSON 一起落库，所以这里同时兜住体积：先压缩，再限制 base64 长度。
+ * 图片先压缩再上传：头像在 A4 上最大约 200px，压缩到 480px 足够 2 倍屏清晰，
+ * 也避免把几 MB 的原图传给后端；压缩失败（如非 JPG）退回原图，不拦路。
  */
 
-/** 图片 base64 上限（字符数，约合 1.2MB 原文）：后端没有上传接口，图片只能随 JSON 落库，太大既拖慢保存也顶不住本地存储 */
-const IMAGE_MAX_BASE64_LENGTH = 1.2 * 1024 * 1024
+import { uploadFile } from '@/api/file'
+import { getFileName, getImageMimeType, readFileAsArrayBuffer } from '@/utils/file'
+import { md5 } from '@/utils/md5'
+import { hideLoading, showLoading, showToast } from '@/utils/toast'
+
 /** 小程序端压缩目标宽度：头像在 A4 上最大约 200px，480px 足够 2 倍屏清晰 */
 const IMAGE_TARGET_WIDTH = 480
 
-export function chooseLocalImage(apply: (value: string) => void): void {
-  uni.chooseImage({
-    count: 1,
-    sizeType: ['compressed'],
-    sourceType: ['album', 'camera'],
-    success: ({ tempFilePaths }) => {
-      const path = tempFilePaths[0] || ''
-      if (!path)
-        return
-      // #ifdef H5
-      readAsDataUrl(path, apply)
-      // #endif
-      // #ifdef MP-WEIXIN
-      readAsBase64(path, apply)
-      // #endif
-      // #ifndef H5 || MP-WEIXIN
-      apply(path)
-      // #endif
-    },
-  })
+/** 选中的图片：path 用于读取与上传，name / type 交给上传接口 */
+interface IChosenImage {
+  path: string
+  name: string
+  type: string
 }
 
-// #ifdef H5
-/** H5 端把本地图片读成 base64，读取失败时退回原始地址 */
-function readAsDataUrl(url: string, apply: (value: string) => void) {
-  const xhr = new XMLHttpRequest()
-  xhr.onload = () => {
-    const reader = new FileReader()
-    reader.onload = () => applyChecked(String(reader.result), apply)
-    reader.onerror = () => apply(url)
-    reader.readAsDataURL(xhr.response)
+/**
+ * 选一张本地图片并上传到后端 OSS，返回可直接存进简历 JSON 的下载地址。
+ * 用户取消选择时返回空串（不提示），上传失败时提示并返回空串。
+ */
+export async function chooseAndUploadAvatar(): Promise<string> {
+  const file = await chooseImageFile()
+  if (!file)
+    return ''
+  showLoading({ title: '头像上传中', mask: true })
+  try {
+    const fileMd5 = md5(await readFileAsArrayBuffer(file.path))
+    const { downloadUrl } = await uploadFile({
+      filePath: file.path,
+      fileName: file.name,
+      fileMd5,
+      fileType: file.type,
+    })
+    hideLoading()
+    return downloadUrl
   }
-  xhr.onerror = () => apply(url)
-  xhr.open('GET', url)
-  xhr.responseType = 'blob'
-  xhr.send()
+  catch (error) {
+    hideLoading()
+    showToast({ title: (error as Error).message || '头像上传失败' })
+    return ''
+  }
 }
-// #endif
+
+/** 选一张本地图片；用户取消选择时返回 null */
+function chooseImageFile(): Promise<IChosenImage | null> {
+  return new Promise((resolve) => {
+    uni.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        // #ifdef H5
+        const h5File = res.tempFiles[0] as unknown as { name?: string, type?: string } | undefined
+        const h5Path = res.tempFilePaths[0] || ''
+        if (!h5Path) {
+          resolve(null)
+          return
+        }
+        resolve({ path: h5Path, name: h5File?.name || 'avatar.jpg', type: h5File?.type || 'image/jpeg' })
+        // #endif
+        // #ifdef MP-WEIXIN
+        const mpPath = res.tempFilePaths[0] || ''
+        if (!mpPath) {
+          resolve(null)
+          return
+        }
+        compressImage(mpPath).then((compressedPath) => {
+          resolve({ path: compressedPath, name: getFileName(compressedPath), type: getImageMimeType(compressedPath) })
+        })
+        // #endif
+        // #ifndef H5 || MP-WEIXIN
+        const appPath = res.tempFilePaths[0] || ''
+        if (!appPath) {
+          resolve(null)
+          return
+        }
+        resolve({ path: appPath, name: getFileName(appPath), type: getImageMimeType(appPath) })
+        // #endif
+      },
+      // 用户取消选择也走 fail，这里静默返回，由调用方按空值处理
+      fail: () => resolve(null),
+    })
+  })
+}
 
 // #ifdef MP-WEIXIN
 /**
- * 小程序端：先压缩再读成 base64。
- *
- * `compressImage` 在小图上也按 `compressedWidth` 缩放（放大反而更占体积），
- * 所以先用 `getImageInfo` 拿原图宽度，只有确实更宽时才指定目标宽度。
+ * 小程序端压缩图片：`compressImage` 在小图上也按 `compressedWidth` 缩放（放大反而更占体积），
+ * 所以先用 `getImageInfo` 拿原图宽度，只有确实更宽时才指定目标宽度；
+ * 压缩失败退回原图，体积交给上传接口。
  */
-function readAsBase64(path: string, apply: (value: string) => void) {
-  uni.getImageInfo({
-    src: path,
-    success: ({ width }) => compressThenRead(path, width, apply),
-    fail: () => compressThenRead(path, 0, apply),
+function compressImage(filePath: string): Promise<string> {
+  return new Promise((resolve) => {
+    uni.getImageInfo({
+      src: filePath,
+      success: ({ width }) => {
+        uni.compressImage({
+          src: filePath,
+          quality: 80,
+          ...(width > IMAGE_TARGET_WIDTH ? { compressedWidth: IMAGE_TARGET_WIDTH } : {}),
+          success: ({ tempFilePath }) => resolve(tempFilePath || filePath),
+          fail: () => resolve(filePath),
+        })
+      },
+      fail: () => resolve(filePath),
+    })
   })
-}
-
-function compressThenRead(path: string, width: number, apply: (value: string) => void) {
-  uni.compressImage({
-    src: path,
-    quality: 80,
-    ...(width > IMAGE_TARGET_WIDTH ? { compressedWidth: IMAGE_TARGET_WIDTH } : {}),
-    success: ({ tempFilePath }) => readFileBase64(tempFilePath || path, apply),
-    // 压缩失败不拦路：退回原图读 base64，体积交给下面的统一兜底
-    fail: () => readFileBase64(path, apply),
-  })
-}
-
-function readFileBase64(filePath: string, apply: (value: string) => void) {
-  uni.getFileSystemManager().readFile({
-    filePath,
-    encoding: 'base64',
-    success: ({ data }) => {
-      const base64 = typeof data === 'string' ? data : ''
-      if (!base64) {
-        uni.showToast({ title: '图片读取失败，请重试', icon: 'none' })
-        return
-      }
-      applyChecked(`data:${mimeOf(filePath)};base64,${base64}`, apply)
-    },
-    fail: () => uni.showToast({ title: '图片读取失败，请重试', icon: 'none' }),
-  })
-}
-
-/** readFile 只给纯 base64，data url 的 mime 前缀只能自己按后缀补 */
-function mimeOf(path: string): string {
-  const lower = path.toLowerCase()
-  if (lower.endsWith('.png'))
-    return 'image/png'
-  if (lower.endsWith('.webp'))
-    return 'image/webp'
-  if (lower.endsWith('.gif'))
-    return 'image/gif'
-  return 'image/jpeg'
 }
 // #endif
-
-/** 体积兜底：超限就提示换图，不把超大的 base64 塞进简历 JSON */
-function applyChecked(dataUrl: string, apply: (value: string) => void) {
-  if (dataUrl.length > IMAGE_MAX_BASE64_LENGTH) {
-    uni.showToast({ title: '图片过大，请换一张', icon: 'none' })
-    return
-  }
-  apply(dataUrl)
-}

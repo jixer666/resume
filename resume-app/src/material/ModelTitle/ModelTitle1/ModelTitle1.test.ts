@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ModelTitle1 from './ModelTitle1.vue'
 
 /**
- * 小标题分发：形态由模板级样式预设 titleStyle 决定（空串为经典标题条，iconBadge 为圆点图标标题）。
+ * 小标题分发：形态由模板级样式预设 titleStyle 决定
+ * （空串为经典标题条，iconBadge 为圆点图标标题，underlineTitle 为下划线标题）。
  * 正文皮肤只引这一处分发，换标题形态不该让每套皮肤各复制一份。
  */
 
@@ -89,6 +90,17 @@ describe('modelTitle1', () => {
     })
     expect(wrapper.find('.mp-icon-stub').attributes('data-name')).toBe('icon-gongzuojingyan')
     expect(wrapper.find('.model-title__line').exists()).toBe(true)
+  })
+
+  it('titleStyle = underlineTitle 时渲染下划线标题', () => {
+    wrapper = mount(ModelTitle1, {
+      props: { title: '教育背景', modelStyle: { ...modelStyle, titleStyle: 'underlineTitle' } },
+      ...mountOptions,
+    })
+    expect(wrapper.find('.model-title__line').exists()).toBe(true)
+    expect(wrapper.find('.model-title__text').text()).toBe('教育背景')
+    expect(wrapper.find('.model-title__badge').exists()).toBe(false)
+    expect(wrapper.find('.model-title__bar').exists()).toBe(false)
   })
 
   it('没有图标名时不渲染空图标节点', () => {

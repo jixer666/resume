@@ -44,6 +44,8 @@ catch 到的永远是 `HttpError`,`type` 四选一,按需分支:
 | `Http` | 非 2xx 状态码 | 自动 toast |
 | `Network` | 请求 fail | 自动 toast「网络错误」 |
 
+自动 toast 走 `src/utils/toast.ts` 的自绘提示(不用 `uni.showToast`:微信原生 toast 带 icon 时最多 7 个汉字,长文案会被截断),业务里自己提示也用它,见 conventions.md 第 5 节。
+
 静默场景(自己处理提示)传 `hideErrorToast`:
 
 ```ts

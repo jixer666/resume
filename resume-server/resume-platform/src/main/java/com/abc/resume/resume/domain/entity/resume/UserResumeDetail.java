@@ -22,14 +22,6 @@ import java.util.stream.Collectors;
 public class UserResumeDetail {
 
     /**
-     * 默认铺的模块，顺序即渲染顺序（CUSTOM_* 属可选模块，不进默认组合）
-     */
-    private static final List<String> DEFAULT_MODELS = Arrays.asList(
-            "RESUME_TITLE", "BASE_INFO", "JOB_INTENTION", "EDU_BACKGROUND",
-            "SKILL_SPECIALTIES", "CAMPUS_EXPERIENCE", "INTERNSHIP_EXPERIENCE",
-            "WORK_EXPERIENCE", "PROJECT_EXPERIENCE", "AWARDS", "HOBBIES",
-            "SELF_EVALUATION", "WORKS_DISPLAY");
-    /**
      * 双列布局标识
      */
     private static final String LAYOUT_LEFT_RIGHT = "leftRight";
@@ -69,7 +61,7 @@ public class UserResumeDetail {
     private GlobalStyle globalStyle;
 
     /**
-     * 按模板构造一份简历骨架，模块 data 的默认值取自配置中心的模块默认数据
+     * 按模板构造一份简历骨架
      */
     public static UserResumeDetail fromTemplate(ResumeTemplate template, ResumeTemplateConfig templateConfig) {
         UserResumeDetail detail = new UserResumeDetail();
@@ -79,20 +71,24 @@ public class UserResumeDetail {
             return detail;
         }
         ResumeTemplateDetail templateDetail = template.getTemplateDetail();
+        if (Objects.isNull(templateDetail)) {
+            return detail;
+        }
         detail.setLayout(templateDetail.getLayout());
         applyStyle(detail.getGlobalStyle(), templateDetail.getStyle());
-        ResumeTemplateVariant variants = template.getTemplateDetail().getVariants();
-        if (Objects.nonNull(variants)) {
-            List<ResumeComponent> components = variants.getValidFieldList().stream()
-                    .map(item -> buildResumeComponent(item, templateDetail, templateConfig)).collect(Collectors.toList());
-            detail.setComponents(components);
-        }
+        ResumeTemplateVariant variants = templateDetail.getVariants();
+        List<ResumeComponent> components = Objects.isNull(variants) ? Collections.emptyList()
+                : variants.getValidFieldList().stream()
+                .filter(model -> !isHidden(templateDetail, model))
+                .map(model -> buildResumeComponent(model, templateDetail, templateConfig))
+                .collect(Collectors.toList());
+        detail.setComponents(components);
 
         return detail;
     }
 
     /**
-     * 出厂默认全局样式：优先取配置中心下发的 globalStyle，未配置时回退到内置默认值
+     * 默认全局样式
      */
     private static GlobalStyle buildDefaultGlobalStyle(ResumeTemplateConfig modelDataConfig) {
         if (Objects.isNull(modelDataConfig) || Objects.isNull(modelDataConfig.getGlobalStyle()) || modelDataConfig.getGlobalStyle().isEmpty()) {
@@ -195,8 +191,7 @@ public class UserResumeDetail {
     }
 
     /**
-     * 构造单个模块描述：栏位与显隐取自模板，皮肤取模板指定值（未指定交由前端取首套），
-     * 业务数据取配置中心的模块默认值，样式取模板预设、未声明时回退配置中心的模块默认样式
+     * 构造单个模块简历模块实例
      */
     private static ResumeComponent buildResumeComponent(String model, ResumeTemplateDetail templateDetail, ResumeTemplateConfig modelDataConfig) {
         ResumeComponent component = new ResumeComponent();
@@ -204,12 +199,11 @@ public class UserResumeDetail {
         component.setModel(model);
         component.setShow(true);
         component.setData(copyConfigModelData(modelDataConfig, model));
-        component.setStyle(copyConfigModelStyle(modelDataConfig, model));
+        component.setStyle(buildModelStyle(modelDataConfig, templateDetail, model));
         if (templateDetail == null) {
             return component;
         }
         component.setLayout(LAYOUT_LEFT_RIGHT.equals(templateDetail.getLayout()) ? leftRightLayoutOf(templateDetail, model) : StringUtils.EMPTY);
-        component.setShow(!isHidden(templateDetail, model));
         component.setCptName(cptNameOf(templateDetail, model));
         return component;
     }
@@ -240,6 +234,50 @@ public class UserResumeDetail {
             return null;
         }
         return JsonUtils.parseObj(style);
+    }
+
+    private static Map<String, Object> buildModelStyle(ResumeTemplateConfig modelDataConfig, ResumeTemplateDetail templateDetail, String model) {
+        Map<String, Object> style = copyConfigModelStyle(modelDataConfig, model);
+        if (Objects.isNull(style)) {
+            style = new LinkedHashMap<>();
+        }
+        if (Objects.nonNull(templateDetail)) {
+            applyTemplateStyle(style, templateDetail.getStyle());
+        }
+        return style.isEmpty() ? null : style;
+    }
+
+    /**
+     * 把模板的配置的全局样式设置到模块样式上
+     */
+    private static void applyTemplateStyle(Map<String, Object> style, ResumeTemplateStyle templateStyle) {
+        if (Objects.isNull(templateStyle)) {
+            return;
+        }
+        putStyleIfPresent(style, "themeColor", templateStyle.getThemeColor());
+        putStyleIfPresent(style, "firstTitleFontSize", templateStyle.getFirstTitleFontSize());
+        putStyleIfPresent(style, "titleFontSize", templateStyle.getSecondTitleFontSize());
+        putStyleIfPresent(style, "titleColor", templateStyle.getSecondTitleColor());
+        putStyleIfPresent(style, "titleFontWeight", templateStyle.getSecondTitleWeight());
+        putStyleIfPresent(style, "textFontSize", templateStyle.getTextFontSize());
+        putStyleIfPresent(style, "textColor", templateStyle.getTextFontColor());
+        putStyleIfPresent(style, "textFontWeight", templateStyle.getTextFontWeight());
+        putStyleIfPresent(style, "pTop", templateStyle.getPTop());
+        putStyleIfPresent(style, "pBottom", templateStyle.getPBottom());
+        putStyleIfPresent(style, "pLeftRight", templateStyle.getPLeftRight());
+        putStyleIfPresent(style, "mTop", templateStyle.getModelMarginTop());
+        putStyleIfPresent(style, "mBottom", templateStyle.getModelMarginBottom());
+        putStyleIfPresent(style, "titleStyle", templateStyle.getTitleStyle());
+    }
+
+    private static void putStyleIfPresent(Map<String, Object> style, String key, Object value) {
+        if (Objects.isNull(value)) {
+            return;
+        }
+        if (value instanceof CharSequence && StringUtils.isBlank((CharSequence) value)) {
+            return;
+        }
+        style.put(key, value);
     }
 
     /**

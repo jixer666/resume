@@ -5,7 +5,7 @@ system:
     - /system/logout
     - /system/oss/download/**
     - /resume/template/**
-    - /resume/config
+    - /config/resume
 
   export:
     preview-url: ${resume.system.export.preview-url}

@@ -3,6 +3,7 @@ import type { IMATERIALITEM } from '@/interface/material'
 import MODEL_DATA_JSON from '@/schema/modelData'
 import { DEFAULT_RESUME_NAME, useResumeStore } from '@/store/resume'
 import { formatDate } from '@/utils/common'
+import { showToast } from '@/utils/toast'
 
 /**
  * 简历编辑入口：顶部简历名 + 保存态、一张滚动的模块清单、底部常驻三入口 + 三个底部弹层。
@@ -219,7 +220,7 @@ function summaryOf(item: IMATERIALITEM): { primary: string, secondary: string } 
     case 'BASE_INFO':
       return {
         primary: String(data.name || '点击填写个人信息'),
-        secondary: joined('phoneNumber', 'email', 'abstract') || '姓名、电话、邮箱等',
+        secondary: joined('phoneNumber', 'email') || '姓名、电话、邮箱等',
       }
     case 'RESUME_TITLE':
       return {
@@ -234,7 +235,7 @@ function summaryOf(item: IMATERIALITEM): { primary: string, secondary: string } 
     default:
       return {
         primary: String(data.name || data.title || '点击填写'),
-        secondary: String(data.abstract || ''),
+        secondary: '',
       }
   }
 }
@@ -408,7 +409,7 @@ function confirmDelete() {
         return
       store.removeResume(id)
         .then(() => {
-          uni.showToast({ title: '已删除', icon: 'none' })
+          showToast({ title: '已删除' })
           setTimeout(() => uni.navigateBack(), 300)
         })
         .catch((error) => {
@@ -855,6 +856,7 @@ function confirmDelete() {
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   background-color: #fff;
   box-shadow: 0 -6px 18px rgb(23 43 77 / 8%);
+  z-index: 1000;
 }
 
 .tab {

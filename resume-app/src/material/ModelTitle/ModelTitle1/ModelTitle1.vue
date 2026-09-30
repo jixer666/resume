@@ -1,6 +1,7 @@
-<!-- 模块小标题：按模板级样式预设 titleStyle 分发（空串为经典标题条，iconBadge 为圆点图标标题） -->
+<!-- 模块小标题：按模板级样式预设 titleStyle 分发（空串为经典标题条，iconBadge 为圆点图标标题，underlineTitle 为下划线标题） -->
 <template>
   <icon-badge-title v-if="isIconBadge" :title="title" :model-style="modelStyle" :icon="icon" />
+  <underline-title v-else-if="isUnderline" :title="title" :model-style="modelStyle" />
   <classic-title v-else :title="title" :model-style="modelStyle" />
 </template>
 
@@ -9,6 +10,7 @@ import type IMODELSTYLE from '@/interface/modelStyle'
 import { computed } from 'vue'
 import ClassicTitle from '@/material/Common/ModelTitle/ClassicTitle.vue'
 import IconBadgeTitle from '@/material/Common/ModelTitle/IconBadgeTitle.vue'
+import UnderlineTitle from '@/material/Common/ModelTitle/UnderlineTitle.vue'
 
 const props = defineProps<{
   title: string
@@ -24,4 +26,6 @@ const props = defineProps<{
  * 这里分发一次，11 套正文皮肤就不用为「只换标题形态」各复制一份。
  */
 const isIconBadge = computed(() => props.modelStyle?.titleStyle === 'iconBadge')
+/** 下划线标题：标题与整宽下划线同色（主题色），双栏模板用 */
+const isUnderline = computed(() => props.modelStyle?.titleStyle === 'underlineTitle')
 </script>

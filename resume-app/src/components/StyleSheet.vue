@@ -129,7 +129,7 @@ const MODULE_SPACING_ITEMS: { key: TModuleSpacingKey, label: string, hint: strin
   { key: 'mBottom', label: '模块下间距', hint: '', min: -40, max: 120 },
 ]
 
-/** 头像尺寸：未设置时滑块从皮肤默认尺寸起步（84 x 100），改动后才写入模块 style */
+/** 头像尺寸：未设置时滑块从皮肤默认尺寸起步（单栏 84 x 100、双栏侧栏 100 x 120），改动后才写入模块 style */
 const AVATAR_ITEMS: { key: TSizeKey, label: string, hint: string, min: number, max: number, fallback: number }[] = [
   { key: 'avatarWidth', label: '头像宽度', hint: '', min: 40, max: 300, fallback: 84 },
   { key: 'avatarHeight', label: '头像高度', hint: '', min: 40, max: 400, fallback: 100 },

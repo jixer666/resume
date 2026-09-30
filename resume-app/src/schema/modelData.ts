@@ -20,7 +20,6 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
     workService: 3, // 工作年限
     phoneNumber: '028-1234321', // 联系电话
     email: '12322233@qq.com', // 邮箱
-    abstract: '', // 简介
     degree: '本科',
     isShow: {
       age: true,
@@ -29,7 +28,6 @@ const MODEL_DATA_JSON: IMODELDATAJSON = {
       workService: true, // 工作年限
       phoneNumber: true, // 联系电话
       email: true, // 邮箱
-      abstract: true, // 简介
       degree: true,
     },
   },

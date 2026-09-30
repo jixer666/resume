@@ -30,13 +30,19 @@
 - 需要持久化的状态配置 `pinia-plugin-persistedstate`,不手写 uni.setStorage 同步业务状态
 - uni.getStorageSync 读出的数据是真边界数据,使用前校验(见 architecture.md 第 3 节)
 
-## 5. Git 提交
+## 5. 全局提示(toast / loading)
+
+- 提示统一用 `src/utils/toast.ts` 的 `showToast` / `showLoading` / `hideToast`(**禁止** `uni.showToast` / `uni.showLoading`)
+- 原因:微信原生 toast 带 icon 时标题最多 14 个半角字符(即 7 个汉字),多出来的直接丢掉——后端错误文案「人气太火爆了,请稍后再试」只会显示「人气太火爆了,」;不带 icon 时也最多两行,三端样式还互不一致
+- 实现:`fg-toast` 全局组件(挂在 `App.ku.vue` 根节点,所有页面共用),文案按宽度自动换行、完整展示;`icon` 支持 `none / success / error / loading`,loading 不自动关闭,需 `hideToast()` 收尾
+
+## 6. Git 提交
 
 - commitlint 强制 conventional commits:`feat: / fix: / docs: / style: / refactor: / perf: / test: / chore:`
 - 版本发布走 changesets:`pnpm upload:changeset`
 - husky 钩子已启用,lint-staged 会拦截不合规提交
 
-## 6. 合入前验证(三条命令)
+## 7. 合入前验证(三条命令)
 
 ```bash
 pnpm type-check   # vue-tsc --noEmit,类型零错误

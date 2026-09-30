@@ -1,6 +1,5 @@
 package com.abc.resume.system.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.abc.resume.core.base.BaseService;
 import com.abc.resume.core.exception.GlobalException;
 import com.abc.resume.core.strategy.ServiceProvider;
@@ -61,14 +60,12 @@ public class OssServiceImpl extends BaseService implements OssService {
         return buildFileVO(saveFile, downloadUrl);
     }
 
-
     @Override
     public ResponseEntity<byte[]> downloadOss(Long fileId) {
         File fileEntity = fileService.vaildAndGet(fileId);
         byte[] fileData = downloadByOss(fileEntity);
         return download(fileData, fileEntity.getFilename(), MediaType.APPLICATION_OCTET_STREAM);
     }
-
 
     private void saveToOss(OssFileDTO ossFile) {
         IOssStrategy ossStrategy = getOssStrategy();
@@ -88,7 +85,7 @@ public class OssServiceImpl extends BaseService implements OssService {
     }
 
     private File buildNewFileByReq(OssFileUploadDTO req, Integer ossType) {
-        File fileEntity = BeanUtil.copyProperties(req, File.class);
+        File fileEntity = BeanUtils.copyProperties(req, File.class);
         fileEntity.setOssType(ossType);
         fileEntity.setTotalSize(req.getFile().getSize());
         fileEntity.setUserId(SecurityUtils.getUserId());
@@ -98,7 +95,7 @@ public class OssServiceImpl extends BaseService implements OssService {
     }
 
 
-    private static OssFileDTO buildOssFileDTO(File fileEntity, MultipartFile file) {
+    private OssFileDTO buildOssFileDTO(File fileEntity, MultipartFile file) {
         OssFileDTO ossFileDto = BeanUtils.copyProperties(fileEntity, OssFileDTO.class);
         try {
             ossFileDto.setFileData(file.getBytes());
@@ -111,7 +108,7 @@ public class OssServiceImpl extends BaseService implements OssService {
     }
 
     private FileVO buildFileVO(File saveFile, String downloadUrl) {
-        FileVO fileVo = BeanUtil.copyProperties(saveFile, FileVO.class);
+        FileVO fileVo = BeanUtils.copyProperties(saveFile, FileVO.class);
         fileVo.setDownloadUrl(downloadUrl);
         return fileVo;
     }

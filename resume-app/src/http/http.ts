@@ -3,6 +3,7 @@ import type { CustomRequestOptions, HttpError, IResponse } from '@/http/types'
 import { nextTick } from 'vue'
 import { useTokenStore } from '@/store/token'
 import { isDoubleTokenMode } from '@/utils'
+import { hideToast, showToast } from '@/utils/toast'
 import { toLoginPage } from '@/utils/toLoginPage'
 import { createHttpError, getResponseMessage, HttpErrorType, isSuccessResultCode, ResultEnum, ShowMessage } from './tools/enum'
 
@@ -37,8 +38,8 @@ export function http<T>(options: CustomRequestOptions) {
             tokenStore.clearLocalToken()
             nextTick(() => {
               // 关闭其他弹窗
-              uni.hideToast()
-              uni.showToast({
+              hideToast()
+              showToast({
                 title: '登录已过期，请重新登录',
                 icon: 'none',
               })
@@ -62,8 +63,8 @@ export function http<T>(options: CustomRequestOptions) {
             tokenStore.clearLocalToken()
             nextTick(() => {
               // 关闭其他弹窗
-              uni.hideToast()
-              uni.showToast({
+              hideToast()
+              showToast({
                 title: '登录已过期，请重新登录',
                 icon: 'none',
               })
@@ -86,8 +87,8 @@ export function http<T>(options: CustomRequestOptions) {
                 refreshing = false
                 nextTick(() => {
                   // 关闭其他弹窗
-                  uni.hideToast()
-                  uni.showToast({
+                  hideToast()
+                  showToast({
                     title: 'token 刷新成功',
                     icon: 'none',
                   })
@@ -101,8 +102,8 @@ export function http<T>(options: CustomRequestOptions) {
                 // 刷新 token 失败，清本地登录态并回到登录页
                 nextTick(() => {
                   // 关闭其他弹窗
-                  uni.hideToast()
-                  uni.showToast({
+                  hideToast()
+                  showToast({
                     title: '登录已过期，请重新登录',
                     icon: 'none',
                   })
@@ -144,7 +145,7 @@ export function http<T>(options: CustomRequestOptions) {
             })
 
             if (!options.hideErrorToast) {
-              uni.showToast({
+              showToast({
                 icon: 'none',
                 title: httpError.message,
               })
@@ -165,7 +166,7 @@ export function http<T>(options: CustomRequestOptions) {
         })
 
         if (!options.hideErrorToast) {
-          uni.showToast({
+          showToast({
             icon: 'none',
             title: httpError.message,
           })
@@ -181,7 +182,7 @@ export function http<T>(options: CustomRequestOptions) {
         } satisfies HttpError)
 
         if (!options.hideErrorToast) {
-          uni.showToast({
+          showToast({
             icon: 'none',
             title: httpError.message,
           })

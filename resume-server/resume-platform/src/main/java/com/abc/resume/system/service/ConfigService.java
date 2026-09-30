@@ -2,6 +2,7 @@ package com.abc.resume.system.service;
 
 import com.abc.resume.core.config.model.Config;
 import com.abc.resume.system.domain.context.ConfigQueryContext;
+import com.abc.resume.system.domain.vo.ResumeConfigVO;
 
 import java.util.List;
 
@@ -11,4 +12,6 @@ import java.util.List;
 public interface ConfigService {
 
     List<Config> getConfigList(ConfigQueryContext context);
+
+    ResumeConfigVO getResumeConfig();
 }

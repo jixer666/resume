@@ -2,6 +2,7 @@
 import type { IMATERIALITEM } from '@/interface/material'
 import { useResumeStore } from '@/store/resume'
 import { cleanHtml, plainToHtml } from '@/utils/richText'
+import { showToast } from '@/utils/toast'
 
 /**
  * 列表类模块的单条编辑：教育 / 工作 / 项目 / 实习 / 校园 / 荣誉 / 作品。
@@ -195,11 +196,11 @@ function save() {
   // 「至今」没选开始时间会写出 `['至今']` 这种残缺区间；两端都填了则要求顺序正确
   if (hasDateRange.value) {
     if (form.toNow && !form.dateStart) {
-      uni.showToast({ title: '请先选择开始时间', icon: 'none' })
+      showToast({ title: '请先选择开始时间' })
       return
     }
     if (form.dateStart && form.dateEnd && form.dateEnd < form.dateStart) {
-      uni.showToast({ title: '结束时间不能早于开始时间', icon: 'none' })
+      showToast({ title: '结束时间不能早于开始时间' })
       return
     }
   }

@@ -36,5 +36,8 @@ defineExpose({
     <KuRootView />
 
     <FgTabbar v-if="isCurrentPageTabbar" />
+
+    <!-- 全局提示：替代原生 uni.showToast（微信原生 toast 会截断长文案），见 utils/toast.ts -->
+    <FgToast />
   </view>
 </template>

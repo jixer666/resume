@@ -214,6 +214,65 @@ function applyGlobalStyleToItem(
 }
 
 /**
+ * 两份模块样式是否逐字段一致。
+ *
+ * 用来判断模块样式还是不是后端铺的配置中心默认值（见 UserResumeDetail.buildModelStyle）：
+ * 整份一致才认为用户没动过这个模块的样式，可以安全地补上模板预设。
+ */
+function isSameModelStyle(style: unknown, defaults: Partial<IMODELSTYLE> | undefined): boolean {
+  if (!defaults || !Object.keys(defaults).length)
+    return false
+  const source = (style || {}) as Record<string, unknown>
+  const keys = Object.keys(source)
+  if (keys.length !== Object.keys(defaults).length)
+    return false
+  return keys.every(key => source[key] === (defaults as Record<string, unknown>)[key])
+}
+
+/**
+ * 模块样式扇出要用的全局字段：模板声明过的字段 + 当前值已不同于出厂默认的字段。
+ *
+ * 模板声明过的字段无条件扇出（值恰好等于出厂默认时也要落到模块上，与新建简历一致）；
+ * 「不同于出厂默认」兜住两类情况：用户改过的值，以及载入的简历上模板预设的值
+ * （后端建骨架时只把模板样式落在 GLOBAL_STYLE 上，见 healTemplateStyles）。
+ */
+function fanoutKeysOf(json: IRESUMEJSON, template?: IResumeTemplate): (keyof IGlobalStyle)[] {
+  const globalStyle = (json.GLOBAL_STYLE || {}) as unknown as Record<string, unknown>
+  const defaults = globalStyleDefaults()
+  const keys = new Set<string>(Object.keys(template?.style || {}))
+  GLOBAL_STYLE_MAP.forEach(([key]) => {
+    if (globalStyle[key] !== undefined && globalStyle[key] !== defaults[key])
+      keys.add(key)
+  })
+  return Array.from(keys) as (keyof IGlobalStyle)[]
+}
+
+/**
+ * 补齐后端建骨架时没扇出的模板样式（兼容历史数据）。
+ *
+ * 简历的 GLOBAL_STYLE = 出厂全局默认 + 模板预设（见 applyStyle），所以「与出厂默认值不同」
+ * 的那几个字段就是这套模板声明过的样式。后端按模板新建简历时，模块样式只铺了配置中心的通用
+ * 默认值，模板声明的字段没跟着扇出，首次打开就不像这套模板（双栏的窄边距、下划线小标题全都不在），
+ * 手动换一次模板才会补上（见 applyTemplate）。这里在载入时补一次：只有模块样式整份还是配置中心
+ * 默认值（说明用户没动过）时才套用，用户改过的样式原样保留。
+ */
+function healTemplateStyles(json: IRESUMEJSON): void {
+  const list = json.COMPONENTS
+  if (!Array.isArray(list) || !list.length)
+    return
+  const globalStyle = (json.GLOBAL_STYLE || {}) as unknown as Record<string, unknown>
+  const keys = fanoutKeysOf(json)
+  if (!keys.length)
+    return
+  const modelStyle = useConfigStore().modelStyle
+  list.forEach((item: IMATERIALITEM) => {
+    if (!isSameModelStyle(item.style, modelStyle[item.model]))
+      return
+    applyGlobalStyleToItem(item, globalStyle, keys)
+  })
+}
+
+/**
  * 「一键整理成一页」要压缩的模块样式字段：全是纵向项，直接影响内容高度（左右内边距、配色与高度无关，不参与）。
  *
  * 条目间距也算一个：它同样是模块内部的纵向节奏，不一起压的话，模块越挤、条目之间反而显得越松。
@@ -227,8 +286,8 @@ const FIT_GLOBAL_FONT_KEYS = ['firstTitleFontSize', 'secondTitleFontSize', 'text
 /**
  * 模块没设过这些字段时的出厂默认值（按模块给）：整理按它压缩、还原时再删掉。
  *
- * 头像尺寸在皮肤里是写死的 84 x 100（样式面板可改），JSON 里通常没有这个字段，
- * 只按 JSON 里已存在的值压缩的话头像永远不动，所以给一份默认值兜底。
+ * 头像尺寸在各皮肤里是写死的默认值（单栏 84 x 100、双栏侧栏 100 x 120，样式面板可改），
+ * JSON 里通常没有这个字段，只按 JSON 里已存在的值压缩的话头像永远不动，所以给一份默认值兜底。
  */
 const FIT_MODULE_DEFAULTS: Record<string, Record<string, string>> = {
   BASE_INFO: {
@@ -359,7 +418,10 @@ export const useResumeStore = defineStore(
         json.LAYOUT = template.layout
         json.GLOBAL_STYLE = { ...json.GLOBAL_STYLE, ...template.style }
       }
+      // 模块清单走全量默认顺序：模板只为部分模块指定皮肤（其余回退首套皮肤），
+      // hidden 表示这套模板不需要的模块，直接不铺 —— 否则会留下“看不见却占高度”的空模块
       json.COMPONENTS = DEFAULT_MODELS
+        .filter(model => !template?.hidden?.includes(model))
         .map(model => createMaterialItem(model, layoutOf(model, template), template?.variants?.[model]))
         .filter((item): item is IMATERIALITEM => !!item)
 
@@ -369,9 +431,6 @@ export const useResumeStore = defineStore(
         const globalStyle = json.GLOBAL_STYLE as unknown as Record<string, unknown>
         json.COMPONENTS.forEach((item: IMATERIALITEM) => {
           applyGlobalStyleToItem(item, globalStyle, keys)
-          // 模板声明隐藏的模块初始不渲染（编辑页仍可手动打开）
-          if (template.hidden?.includes(item.model))
-            item.show = false
         })
       }
       current.value = json
@@ -403,10 +462,17 @@ export const useResumeStore = defineStore(
       }
       // 主键以后端为准，避免本地 ID 和后端对不上
       json.ID = String(detail.id)
+      // 后端建骨架时没扇出的模板样式在这里补上：要赶在 hydrateComponents 之前，
+      // 此时模块样式还是后端落库的原样，才分得清「没动过」和「用户改过」
+      healTemplateStyles(json)
       // 后端新建时只落骨架，缺的 style / data 由本地物料表补齐
       hydrateComponents(json)
       // 后端表里存着这份简历用的是哪个模板：预览页的「更换模板」据此高亮当前项
       currentTemplateCode.value = String(detail.templateCode || '')
+      // 编辑期间「新增模块」要按模板配置取皮肤，这里顺手把模板补进模板 store；
+      // 不 await：拉取失败不影响简历载入，新增模块会回退首套皮肤（见 ensure 的兜底）
+      if (currentTemplateCode.value)
+        useTemplateStore().ensure(currentTemplateCode.value)
       current.value = json
       savedSnapshot.value = snapshotOf(json)
       saveState.value = 'idle'
@@ -493,14 +559,27 @@ export const useResumeStore = defineStore(
       }
     }
 
-    /** 新增模块：追加到末尾，双列布局默认进左栏，单列布局一律通栏 */
+    /**
+     * 新增模块：追加到末尾，皮肤与栏位都按当前模板的配置来。
+     *
+     * 模板为这个模块配置了皮肤就取那套（见 IResumeTemplate.variants），没配置才回退首套；
+     * 栏位同理走模板的左右栏配置（未列出的模块通栏）；模板还没载入时沿用旧行为，
+     * 双列进左栏、单列通栏。模板样式与用户改过的全局样式也要扇出，新模块才和其余模块一个样。
+     */
     function addModule(model: string): IMATERIALITEM | null {
       const json = current.value
       if (!json)
         return null
-      const item = createMaterialItem(model, isTwoColumn.value ? 'left' : '')
+      const template = currentTemplateCode.value ? useTemplateStore().get(currentTemplateCode.value) : undefined
+      const layout = template ? layoutOf(model, template) : (isTwoColumn.value ? 'left' : '')
+      const item = createMaterialItem(model, layout, template?.variants?.[model])
       if (!item)
         return null
+      applyGlobalStyleToItem(
+        item,
+        json.GLOBAL_STYLE as unknown as Record<string, unknown>,
+        fanoutKeysOf(json, template),
+      )
       json.COMPONENTS.push(item)
       return item
     }

@@ -3,7 +3,6 @@ package com.abc.resume.resume.service;
 import com.abc.resume.core.page.PageResult;
 import com.abc.resume.resume.domain.dto.UserResumePageDTO;
 import com.abc.resume.resume.domain.dto.UserResumeSubmitDTO;
-import com.abc.resume.resume.domain.vo.ResumeConfigVO;
 import com.abc.resume.resume.domain.vo.UserResumeVO;
 import org.springframework.http.ResponseEntity;
 
@@ -16,11 +15,6 @@ public interface UserResumeService {
      * 查询用户简历分页
      */
     PageResult getUserResumePage(UserResumePageDTO dto);
-
-    /**
-     * 简历前端配置（出厂默认全局样式 + 各模块默认样式）
-     */
-    ResumeConfigVO getResumeConfig();
 
     /**
      * 简历详情

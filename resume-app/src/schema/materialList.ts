@@ -5,8 +5,11 @@ import type { IMSTERIALLISTJSON } from '@/interface/material'
  *
  * 皮肤文件在 src/material/<Model>/<Model><N>/ 下，新增一套皮肤后在这里登记，
  * 再跑 `pnpm gen:material` 生成派发组件 CompatRenderer。
- * 当前登记两套：`_1` 经典模板（classic）用，`_2` 名片模板（card）用
- * （两套只有基础资料头部不同，正文皮肤共用 `_1`），其余皮肤按需再补。
+ * 当前登记四套模板的皮肤：
+ * - 基础资料：`_1` 经典（姓名居中 + 头像靠右）、`_2` 名片式头部、`_3` 蓝色侧栏头部；
+ * - 求职意向：`_1` 经典（图标 + 一行）、`_2` 侧栏版（「标签： 值」逐行）；
+ * - 工作 / 项目 / 校园经历：`_1` 条目头一行、`_2` 公司（项目 / 社团）名独占一行；
+ * - 其余模块各一套，四套模板共用。
  *
  * 每组的**第一套**皮肤是该模块的默认皮肤（新建简历 / 模板没指定变体时用它），
  * 所以 `_1` 必须排在各组首位。
@@ -112,6 +115,39 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
       }, // 组件样式
       data: {}, // 组件数据
     },
+    {
+      keyId: '', // 组件id
+      model: 'BASE_INFO', // 模块
+      cptName: 'BASE_INFO_3', // 组件名
+      cptOptionsName: 'BASE_INFO_OPTIONS',
+      cptTitle: '基础资料', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '100px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#4184ff',
+        firstTitleFontSize: '15px',
+        titleColor: '#ffffff',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#ffffff',
+        textFontSize: '12px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '26px',
+        avatarWidth: '100px',
+        avatarHeight: '120px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
   ],
   JOB_INTENTION: [
     {
@@ -142,6 +178,37 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
         pTop: '12px',
         pBottom: '0px',
         pLeftRight: '48px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
+    {
+      keyId: '', // 组件id
+      model: 'JOB_INTENTION', // 模块
+      cptName: 'JOB_INTENTION_2', // 组件名
+      cptOptionsName: 'JOB_INTENTION_OPTIONS',
+      cptTitle: '求职意向', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '100px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#4184ff',
+        firstTitleFontSize: '15px',
+        titleColor: '#ffffff',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#ffffff',
+        textFontSize: '12px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '26px',
       }, // 组件样式
       data: {}, // 组件数据
     },
@@ -244,6 +311,37 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
       }, // 组件样式
       data: {}, // 组件数据
     },
+    {
+      keyId: '', // 组件id
+      model: 'CAMPUS_EXPERIENCE', // 模块
+      cptName: 'CAMPUS_EXPERIENCE_2', // 组件名
+      cptOptionsName: 'CAMPUS_EXPERIENCE_OPTIONS',
+      cptTitle: '校园经历', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '50px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#2b74ff',
+        firstTitleFontSize: '16px',
+        titleColor: '#121c26',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#4b5563',
+        textFontSize: '13px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '48px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
   ],
   INTERNSHIP_EXPERIENCE: [
     {
@@ -310,6 +408,37 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
       }, // 组件样式
       data: {}, // 组件数据
     },
+    {
+      keyId: '', // 组件id
+      model: 'WORK_EXPERIENCE', // 模块
+      cptName: 'WORK_EXPERIENCE_2', // 组件名
+      cptOptionsName: 'WORK_EXPERIENCE_OPTIONS',
+      cptTitle: '工作经历', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '50px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#2b74ff',
+        firstTitleFontSize: '16px',
+        titleColor: '#121c26',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#4b5563',
+        textFontSize: '13px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '48px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
   ],
   PROJECT_EXPERIENCE: [
     {
@@ -318,6 +447,37 @@ export const MATERIAL_JSON: IMSTERIALLISTJSON = {
       cptName: 'PROJECT_EXPERIENCE_1', // 组件名
       cptOptionsName: 'PROJECT_EXPERIENCE_OPTIONS',
       cptTitle: '项目经验', // 组件名
+      cptX: 0, // 组件x坐标
+      cptY: 0, // 组件y坐标
+      cptZ: 0, // 组件z坐标
+      cptHeight: '50px', // 组件高度
+      cptWidth: '100%', // 组件宽度
+      layout: 'center', // 布局在左侧还是右侧
+      show: true, // 组件是否显示
+      style: {
+        themeColor: '#2b74ff',
+        firstTitleFontSize: '16px',
+        titleColor: '#121c26',
+        titleFontSize: '13px',
+        titleFontWeight: 600,
+        textColor: '#4b5563',
+        textFontSize: '13px',
+        textFontWeight: 400,
+        backgroundColor: '',
+        mBottom: '0px',
+        mTop: '0px',
+        pTop: '12px',
+        pBottom: '0px',
+        pLeftRight: '48px',
+      }, // 组件样式
+      data: {}, // 组件数据
+    },
+    {
+      keyId: '', // 组件id
+      model: 'PROJECT_EXPERIENCE', // 模块
+      cptName: 'PROJECT_EXPERIENCE_2', // 组件名
+      cptOptionsName: 'PROJECT_EXPERIENCE_OPTIONS',
+      cptTitle: '项目经历', // 组件名
       cptX: 0, // 组件x坐标
       cptY: 0, // 组件y坐标
       cptZ: 0, // 组件z坐标

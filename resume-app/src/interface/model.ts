@@ -40,7 +40,6 @@ interface IBASEINFO {
   workService: number // 工作年限
   phoneNumber: string // 联系电话
   email: string // 邮箱
-  abstract: string // 简介
   degree: string
   isShow: {
     age: boolean
@@ -49,7 +48,6 @@ interface IBASEINFO {
     workService: boolean // 工作年限
     phoneNumber: boolean // 联系电话
     email: boolean // 邮箱
-    abstract: boolean // 简介
     degree: boolean
   }
   [propNams: string]: any

@@ -1,4 +1,4 @@
-<!-- 基础资料文字块：姓名 / 联系方式 / 简介整块居中（经典模板样式） -->
+<!-- 基础资料文字块：姓名 / 联系方式整块居中（经典模板样式） -->
 <template>
   <view class="user-info-1-box">
     <text class="user-info-1-box__name">
@@ -6,9 +6,6 @@
     </text>
     <text v-if="metaText" class="user-info-1-box__meta">
       {{ metaText }}
-    </text>
-    <text v-if="isShow.abstract" class="user-info-1-box__abstract">
-      {{ modelData.abstract }}
     </text>
   </view>
 </template>
@@ -21,7 +18,6 @@ const props = defineProps<{
   modelData: IBASEINFO // 模块数据
   modelStyle: IMODELSTYLE // 模块样式
 }>()
-const isShow = reactive(props.modelData.isShow)
 
 /** 联系方式行：只拼接打开的项，用竖线分隔（与版式图一致：电话 | 邮箱） */
 const metaText = computed(() => {
@@ -61,15 +57,8 @@ const metaText = computed(() => {
   }
 
   &__meta {
-    /* 姓名 → 联系方式 / 联系方式 → 简介：并入模块内统一节奏（见 RenderItem） */
+    /* 姓名 → 联系方式：并入模块内统一节奏（见 RenderItem） */
     margin-top: var(--rs-gap-body, 8px);
-    font-size: v-bind('modelStyle.textFontSize');
-    font-weight: v-bind('modelStyle.textFontWeight');
-    color: v-bind('modelStyle.textColor');
-  }
-
-  &__abstract {
-    margin-top: var(--rs-gap-line, 6px);
     font-size: v-bind('modelStyle.textFontSize');
     font-weight: v-bind('modelStyle.textFontWeight');
     color: v-bind('modelStyle.textColor');

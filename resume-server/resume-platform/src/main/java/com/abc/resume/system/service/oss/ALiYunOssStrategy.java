@@ -7,13 +7,16 @@ import com.abc.resume.system.domain.entity.File;
 import com.abc.resume.system.utils.OssFileUtil;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * @Author: LiJunXi
@@ -58,7 +61,18 @@ public class ALiYunOssStrategy implements IOssStrategy {
 
     @Override
     public byte[] getFile(File fileEntity) {
-        return new byte[0];
+        OSSClient ossClient = (OSSClient) new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+        try {
+            OSSObject ossObject = ossClient.getObject(bucketName, fileEntity.getFilePath());
+            try (InputStream inputStream = ossObject.getObjectContent()) {
+                return StreamUtils.copyToByteArray(inputStream);
+            }
+        } catch (Exception e) {
+            log.error("下载阿里云OSS文件出错，原因：{}", e.getMessage(), e);
+            throw new GlobalException(ExceptionEnum.BIZ_EXCEPTION.getCode(), "下载文件出错");
+        } finally {
+            ossClient.shutdown();
+        }
     }
 
     @Override

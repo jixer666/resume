@@ -9,6 +9,11 @@
  * 两条小程序端的坑（写在这，避免后续误改）：
  * 1. `<editor>` 是原生组件，层级永远最高 —— 盖在它上面的浮层必须用 `cover-view`；
  * 2. `setHtml` 只有小程序端有，H5 端只有 `setContents`，回填 HTML 必须分开调。
+ *
+ * 还有一条更隐蔽的坑（踩过一次，别再改回去）：
+ * editor 的 context 必须用 `shallowRef` 存。`ref` 会把它包成响应式 Proxy，
+ * 之后 `setContents` 的消息在发往视图层前序列化 Proxy 会失败（devtools 报
+ * `An object could not be cloned`），表现为保存后重进页面编辑器不回显内容。
  */
 defineOptions({ name: 'RichTextEditor' })
 
@@ -37,7 +42,8 @@ interface IEditorContext {
 /** 同一页面可能同时挂多个编辑器，id 加随机后缀保证选择器唯一 */
 const uid = `rich-text-editor-${Math.random().toString(36).slice(2, 8)}`
 const instance = getCurrentInstance()
-const ctx = ref<IEditorContext | null>(null)
+/** 必须 shallowRef，理由见文件头注释第 3 条 */
+const ctx = shallowRef<IEditorContext | null>(null)
 /** 最近一次由本组件发出的值：外部回传同值时不再重设 HTML，否则编辑时光标会跳 */
 let lastValue = props.modelValue
 

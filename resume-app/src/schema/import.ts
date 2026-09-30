@@ -79,7 +79,6 @@ const IMPORT_JSON = {
         workService: 3,
         phoneNumber: '028-1234321',
         email: '12322233@qq.com',
-        abstract: '我是一个没有感情的工作机器',
         degree: '本科',
         isShow: {
           age: true,
@@ -88,7 +87,6 @@ const IMPORT_JSON = {
           workService: true,
           phoneNumber: true,
           email: true,
-          abstract: true,
           degree: true,
         },
       },

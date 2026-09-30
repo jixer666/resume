@@ -19,6 +19,7 @@
 import useGetLineLeft from '@/hooks/material/useTemplate3LeftLine'
 import type { IWORKSDISPLAY } from '@/interface/model'
 import type IMODELSTYLE from '@/interface/modelStyle'
+import { showToast } from '@/utils/toast'
 
 const props = defineProps<{
   modelData: IWORKSDISPLAY
@@ -31,7 +32,7 @@ function copyWorksLink(link?: string) {
     return
   uni.setClipboardData({
     data: link,
-    success: () => uni.showToast({ title: '链接已复制', icon: 'none' }),
+    success: () => showToast({ title: '链接已复制' }),
   })
 }
 // 模板3左侧竖线

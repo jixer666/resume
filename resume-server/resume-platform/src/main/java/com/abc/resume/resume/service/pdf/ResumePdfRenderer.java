@@ -1,5 +1,6 @@
 package com.abc.resume.resume.service.pdf;
 
+import com.abc.resume.core.async.AsyncManager;
 import com.abc.resume.core.exception.GlobalException;
 import com.abc.resume.enums.ExceptionEnum;
 import com.microsoft.playwright.Browser;
@@ -10,23 +11,18 @@ import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.Margin;
 import com.microsoft.playwright.options.WaitUntilState;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.TimerTask;
 
 /**
- * 简历 PDF 渲染器：无头浏览器打开 H5 导出预览页，再按 A4 打印成 PDF。
- * <p>
- * 不在 Java 侧重写渲染逻辑 —— 简历物料有近两百套皮肤（Vue SFC + scoped SCSS），
- * 后端无法复用；所以让浏览器去跑前端已有的预览页，所见即所得。
+ * 简历 PDF 渲染器
  */
 @Slf4j
 @Component
@@ -37,10 +33,6 @@ public class ResumePdfRenderer {
 
     @Value("${resume.system.export.timeout}")
     private double timeout;
-
-    @Autowired
-    @Qualifier("commonTaskExecutor")
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     /**
      * A4 纸宽（px）
@@ -57,13 +49,15 @@ public class ResumePdfRenderer {
     private Playwright playwright;
     private Browser browser;
 
-
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        threadPoolTaskExecutor.execute(() -> {
-            playwright = Playwright.create();
-            browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-            log.info("简历导出浏览器初始化完成");
+        AsyncManager.me().execute(new TimerTask() {
+            @Override
+            public void run() {
+                playwright = Playwright.create();
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+                log.info("简历导出浏览器初始化完成");
+            }
         });
     }
 

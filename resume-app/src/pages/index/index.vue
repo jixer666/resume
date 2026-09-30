@@ -175,7 +175,6 @@ function reload() {
           </view>
           <view class="card-body">
             <text class="name">{{ item.name }}</text>
-            <text class="badge">{{ layoutText(item.layout) }}</text>
           </view>
         </view>
       </view>
@@ -195,6 +194,9 @@ function reload() {
         <text v-else-if="!hasMore" class="footer-text">没有更多了</text>
       </view>
     </template>
+
+    <!-- 问题反馈：右边缘竖排标签 + QQ群号弹层（组件见 src/components/fg-feedback） -->
+    <fg-feedback />
   </view>
 </template>
 

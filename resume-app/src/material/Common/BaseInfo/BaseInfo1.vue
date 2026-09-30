@@ -1,4 +1,4 @@
-<!-- 基础资料：姓名 / 联系方式 / 简介居中，头像靠右（经典模板样式） -->
+<!-- 基础资料：姓名 / 联系方式居中，头像靠右（经典模板样式） -->
 <template>
   <view class="base-info-common-1-box u-tag-div">
     <view class="user-info u-tag-div">

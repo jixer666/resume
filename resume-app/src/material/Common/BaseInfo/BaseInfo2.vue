@@ -1,4 +1,4 @@
-<!-- 基础资料：姓名 / 联系方式 / 简介靠左，头像靠右（名片式头部） -->
+<!-- 基础资料：姓名 / 联系方式靠左，头像靠右（名片式头部） -->
 <template>
   <view class="base-info-common-2-box u-tag-div">
     <view class="user-info u-tag-div">

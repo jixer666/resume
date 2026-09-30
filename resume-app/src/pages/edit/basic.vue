@@ -2,7 +2,7 @@
 import type { IBASEINFO } from '@/interface/model'
 import type { IMATERIALITEM } from '@/interface/material'
 import { useResumeStore } from '@/store/resume'
-import { chooseLocalImage } from '@/utils/chooseImage'
+import { chooseAndUploadAvatar } from '@/utils/chooseImage'
 
 /**
  * 基本信息表单：按 keyId 定位 store 里的 BASE_INFO 模块，直接改它的业务数据。
@@ -39,7 +39,6 @@ function createForm(): IBASEINFO {
     workService: 0,
     phoneNumber: '',
     email: '',
-    abstract: '',
     degree: '',
     isShow: {
       age: true,
@@ -48,7 +47,6 @@ function createForm(): IBASEINFO {
       workService: true,
       phoneNumber: true,
       email: true,
-      abstract: true,
       degree: true,
     },
   }
@@ -65,10 +63,11 @@ onLoad((query) => {
     Object.assign(form, data)
 })
 
-function chooseAvatar() {
-  chooseLocalImage((value) => {
-    form.avatar = value
-  })
+/** 选图后直接上传到后端 OSS，落库的是下载地址；取消选择或上传失败时不动原头像 */
+async function chooseAvatar() {
+  const url = await chooseAndUploadAvatar()
+  if (url)
+    form.avatar = url
 }
 
 function removeAvatar() {
@@ -144,8 +143,6 @@ function clear() {
       <input v-model="form.phoneNumber" class="input" type="number" placeholder="请输入联系电话">
       <text class="label">邮箱</text>
       <input v-model="form.email" class="input" placeholder="请输入邮箱">
-      <text class="label">一句话简介</text>
-      <textarea v-model="form.abstract" class="textarea" placeholder="一句话介绍自己，尽量不要太长" :maxlength="60" />
     </view>
 
     <view class="footer">

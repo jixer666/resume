@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import type { IWORKSDISPLAY } from '@/interface/model'
 import type IMODELSTYLE from '@/interface/modelStyle'
+import { showToast } from '@/utils/toast'
 import ModelTitle from '../../ModelTitle/ModelTitle1/ModelTitle1.vue'
 
 defineProps<{
@@ -31,7 +32,7 @@ function copyWorksLink(link?: string) {
     return
   uni.setClipboardData({
     data: link,
-    success: () => uni.showToast({ title: '链接已复制', icon: 'none' }),
+    success: () => showToast({ title: '链接已复制' }),
   })
 }
 </script>

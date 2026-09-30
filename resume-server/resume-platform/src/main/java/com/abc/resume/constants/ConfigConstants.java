@@ -10,4 +10,6 @@ public class ConfigConstants {
 
     public static final String USER_RESUME_CONFIG = "userResumeConfig";
 
+    public static final String GLOBAL_CONFIG = "globalConfig";
+
 }

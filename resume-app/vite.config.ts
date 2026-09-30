@@ -158,6 +158,8 @@ export default defineConfig(({ command, mode }) => {
       syncManifestPlugin(),
       vitePluginEruda({
         open: UNI_PLATFORM === 'h5' && mode === 'development',
+        // 导出预览页是后端无头浏览器印 PDF 用的，调试面板的悬浮按钮会被一起印进 PDF
+        skipPaths: ['/pages/export/index'],
       }),
       // 自动打开开发者工具插件 (必须修改 .env 文件中的 VITE_WX_APPID)
       // 上传时通过 SKIP_OPEN_DEVTOOLS=true 跳过

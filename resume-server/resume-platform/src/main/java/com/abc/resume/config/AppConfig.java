@@ -3,6 +3,7 @@ package com.abc.resume.config;
 import com.abc.resume.constants.ConfigConstants;
 import com.abc.resume.core.config.annoation.ConfigAttribute;
 import com.abc.resume.core.config.annoation.ConfigComponent;
+import com.abc.resume.system.domain.entity.config.GlobalConfig;
 import com.abc.resume.system.domain.entity.config.ResumeTemplateConfig;
 import com.abc.resume.system.domain.entity.config.UserResumeConfig;
 import lombok.Getter;
@@ -23,5 +24,8 @@ public class AppConfig {
 
     @ConfigAttribute(ConfigConstants.USER_RESUME_CONFIG)
     private UserResumeConfig userResumeConfig;
+
+    @ConfigAttribute(ConfigConstants.GLOBAL_CONFIG)
+    private GlobalConfig globalConfig;
 
 }

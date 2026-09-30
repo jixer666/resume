@@ -163,6 +163,9 @@ function backToLibrary() {
         {{ creating ? '正在创建…' : '使用模板' }}
       </button>
     </view>
+
+    <!-- 问题反馈：右边缘竖排标签 + QQ群号弹层（组件见 src/components/fg-feedback） -->
+    <fg-feedback />
   </view>
 </template>
 

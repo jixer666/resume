@@ -5,6 +5,7 @@ import { createAlova } from 'alova'
 import { createServerTokenAuthentication } from 'alova/client'
 import VueHook from 'alova/vue'
 import { toLoginPage } from '@/utils/toLoginPage'
+import { showToast } from '@/utils/toast'
 import { ContentTypeEnum, ResultEnum, ShowMessage } from './tools/enum'
 
 // 配置动态Tag
@@ -92,7 +93,7 @@ const alovaInstance = createAlova({
     if (statusCode !== 200) {
       const errorMessage = ShowMessage(statusCode) || `HTTP请求错误[${statusCode}]`
       console.error('errorMessage===>', errorMessage)
-      uni.showToast({
+      showToast({
         title: errorMessage,
         icon: 'error',
       })
@@ -104,7 +105,7 @@ const alovaInstance = createAlova({
     // 0和200当做成功都很普遍，这里直接兼容两者，见 ResultEnum
     if (code !== ResultEnum.Success0 && code !== ResultEnum.Success200) {
       if (config.meta?.toast !== false) {
-        uni.showToast({
+        showToast({
           title: message,
           icon: 'none',
         })
