@@ -35,7 +35,7 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        insert into tb_file (filename, total_size, file_type, file_md5, oss_type, file_path, user_id, create_time, update_time, status, ver, is_delete)
+        insert into file (filename, total_size, file_type, file_md5, oss_type, file_path, user_id, create_time, update_time, status, ver, is_delete)
         values (#{filename}, #{totalSize}, #{fileType}, #{fileMd5}, #{ossType}, #{filePath}, #{userId}, #{createTime}, #{updateTime}, #{status}, #{ver}, #{isDelete})
     </insert>
 

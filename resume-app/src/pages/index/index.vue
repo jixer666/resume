@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { IResumeTemplate } from '@/schema/templates'
 import { templateSideColor, templateTheme } from '@/schema/templates'
 import { useTemplateStore } from '@/store/template'
 
@@ -40,6 +41,8 @@ const loadingMore = computed(() => templateStore.loadingMore)
 const hasMore = computed(() => templateStore.hasMore)
 const error = computed(() => templateStore.error)
 const filter = ref<LayoutFilter>('all')
+/** 封面图加载失败的模板 code：回退到 CSS 缩略图，避免卡片上留一块破图 */
+const brokenCovers = reactive<Record<string, boolean>>({})
 /**
  * 骨架屏 =「正在加载 且 还没有数据」。
  *
@@ -96,6 +99,15 @@ function layoutText(layout: string): string {
 
 function openTemplate(code: string) {
   uni.navigateTo({ url: `/pages/template-detail/index?id=${code}` })
+}
+
+function markCoverBroken(code: string) {
+  brokenCovers[code] = true
+}
+
+/** 该模板是否有可用的后端封面图（有图且没加载失败） */
+function hasCover(item: IResumeTemplate): boolean {
+  return !!item.cover && !brokenCovers[item.code]
 }
 
 function reload() {
@@ -165,7 +177,16 @@ function reload() {
           @click="openTemplate(item.code)"
         >
           <view class="cover-wrap">
-            <view class="cover-box">
+            <!-- 封面图铺满整块封面区；没生成或加载失败时用 CSS 缩略图居中兜底 -->
+            <image
+              v-if="hasCover(item)"
+              class="cover-img"
+              :src="item.cover"
+              mode="aspectFill"
+              :lazy-load="true"
+              @error="markCoverBroken(item.code)"
+            />
+            <view v-else class="cover-box">
               <resume-cover
                 :layout="item.layout"
                 :theme-color="templateTheme(item)"
@@ -304,19 +325,33 @@ function reload() {
   background-color: #f2f3f5;
 }
 
-/* 封面衬底：中性浅灰，把白纸封面托出来 */
+/* 封面区：按 A4 纸比例（1 : 1.414）随卡片宽度撑高，封面图才能整块铺满 */
 .cover-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 176px;
-  padding: 12px 0;
+  position: relative;
+  overflow: hidden;
+  padding-top: 141.4%;
   background-color: #f7f8fa;
 }
 
-/* ResumeCover 按 A4 比例自撑高度，给定宽度即锁定 150px 高的内容区 */
+/* 没有封面图（或加载失败）时：CSS 缩略图在封面区居中兜底 */
 .cover-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 106px;
+  transform: translate(-50%, -50%);
+}
+
+/* 封面图：铺满整块封面区；图本身就是 A4 版式截图，按比例缩放后不裁不拉 */
+.cover-img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .card-body {
@@ -351,9 +386,11 @@ function reload() {
 }
 
 .skeleton--cover {
-  width: 106px;
-  height: 150px;
-  border-radius: 6px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .skeleton--name {

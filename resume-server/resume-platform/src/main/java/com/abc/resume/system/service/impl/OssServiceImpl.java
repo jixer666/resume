@@ -54,8 +54,8 @@ public class OssServiceImpl extends BaseService implements OssService {
         // 保存到数据库
         saveFile.setFilePath(ossFile.getFilePath());
         log.info("开始文件保存数据库，文件: {}", saveFile);
-        fileService.saveFile(BeanUtils.copyProperties(saveFile, FileDTO.class));
-        String downloadUrl = OssFileUtil.getFileDownloadUrl(saveFile.getId());
+        File file = fileService.saveFile(BeanUtils.copyProperties(saveFile, FileDTO.class));
+        String downloadUrl = OssFileUtil.getFileDownloadUrl(file.getId());
         log.info("文件上传成功，文件下载链接: {}", downloadUrl);
         return buildFileVO(saveFile, downloadUrl);
     }

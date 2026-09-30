@@ -10,7 +10,7 @@ public interface FileService {
 
     void updateFile(FileDTO fileDTO);
 
-    void saveFile(FileDTO fileDTO);
+    File saveFile(FileDTO fileDTO);
 
     void deleteFile(FileDTO fileDTO);
 

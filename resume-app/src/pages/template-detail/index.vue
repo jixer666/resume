@@ -32,6 +32,22 @@ const creating = ref(false)
 const showSkeleton = computed(() => templateStore.detailLoading && !tpl.value)
 const theme = computed(() => (tpl.value ? templateTheme(tpl.value) : '#2563eb'))
 const side = computed(() => (tpl.value ? templateSideColor(tpl.value) : '#eef4ff'))
+/** 封面图加载失败：回退到 CSS 缩略图，避免顶部留一块破图 */
+const coverBroken = ref(false)
+/** 先用列表里的封面渲染、详情接口回来换成新图时，重置失败标记再试一次 */
+watch(() => tpl.value?.cover, () => {
+  coverBroken.value = false
+})
+/** 可放大的封面图：有后端图且没加载失败（CSS 缩略图没有原图可放大） */
+const hasCover = computed(() => !!tpl.value?.cover && !coverBroken.value)
+
+/** 点封面看大图：交给原生图片预览，小程序 / App 里可双指缩放与保存 */
+function previewCover() {
+  const cover = tpl.value?.cover
+  if (!hasCover.value || !cover)
+    return
+  uni.previewImage({ urls: [cover], current: cover })
+}
 
 /** 模块间距 = 模块上内边距 + 模块下间距：两者相加才是模块之间真正的留白 */
 const moduleGap = computed(() => `${(pxTonumber(tpl.value?.style?.pTop) || 0) + (pxTonumber(tpl.value?.style?.modelMarginBottom) || 0)}px`)
@@ -115,11 +131,24 @@ function backToLibrary() {
       </template>
 
       <template v-else-if="tpl">
-        <!-- A4 预览：浅灰底衬白纸 -->
+        <!-- A4 预览：浅灰底衬白纸；有后端封面图就直接用图，没有则用 CSS 缩略图 -->
         <view class="preview-area">
-          <view class="preview-frame">
+          <view
+            class="preview-frame"
+            :class="{ 'preview-frame--zoom': hasCover }"
+            :hover-class="hasCover ? 'preview-frame--press' : 'none'"
+            @click="previewCover"
+          >
             <view class="preview">
+              <image
+                v-if="hasCover"
+                class="preview-img"
+                :src="tpl.cover"
+                mode="widthFix"
+                @error="coverBroken = true"
+              />
               <resume-cover
+                v-else
                 :layout="tpl.layout"
                 :theme-color="theme"
                 :side-color="side"
@@ -127,6 +156,9 @@ function backToLibrary() {
               />
             </view>
           </view>
+          <text v-if="hasCover" class="preview-hint">
+            点击封面可放大查看
+          </text>
         </view>
 
         <view class="info-card">
@@ -207,7 +239,8 @@ function backToLibrary() {
 /* -------- A4 预览 -------- */
 .preview-area {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 20px 0 24px;
 }
 
@@ -219,10 +252,32 @@ function backToLibrary() {
   box-shadow: 0 4px 16px rgb(31 35 41 / 8%);
 }
 
+/* 可放大的封面：H5 上给手型光标，按住时给一点反馈 */
+.preview-frame--zoom {
+  cursor: zoom-in;
+}
+
+.preview-frame--press {
+  opacity: 0.9;
+}
+
+/* 「点击封面可放大查看」提示：只跟有封面图的模板走 */
+.preview-hint {
+  margin-top: 10px;
+  color: #8f959e;
+  font-size: 12px;
+}
+
 .preview {
   overflow: hidden;
   width: 100%;
   border-radius: 3px;
+}
+
+/* 后端封面图：按宽度铺满预览框（图本身就是 A4 版式截图，不裁不拉） */
+.preview-img {
+  display: block;
+  width: 100%;
 }
 
 /* -------- 信息与参数 -------- */
@@ -282,7 +337,7 @@ function backToLibrary() {
 
 .skeleton--preview {
   width: 196px;
-  height: 277px;
+  height: 248px;
   border-radius: 6px;
 }
 

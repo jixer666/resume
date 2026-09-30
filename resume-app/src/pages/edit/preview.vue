@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { exportResumePdf } from '@/api/resume'
 import ResumeRender from '@/components/ResumeRender/ResumeRender.vue'
+import type { IResumeTemplate } from '@/schema/templates'
 import { coverBackdrop, templateSideColor, templateTheme } from '@/schema/templates'
 import type { IFitBase } from '@/store/resume'
 import { useResumeStore } from '@/store/resume'
@@ -40,6 +41,8 @@ const store = useResumeStore()
 const templateStore = useTemplateStore()
 const resume = computed(() => store.current)
 const templates = computed(() => templateStore.list)
+/** 封面图加载失败的模板 code：回退到 CSS 缩略图，避免卡片上留一块破图 */
+const brokenCovers = reactive<Record<string, boolean>>({})
 
 const paperScale = ref(1)
 /** 未缩放的内容总高，用来算页数 */
@@ -309,6 +312,15 @@ function openTemplateSheet() {
     templateStore.fetchList()
 }
 
+/** 该模板是否有可用的后端封面图（有图且没加载失败） */
+function hasCover(item: IResumeTemplate): boolean {
+  return !!item.cover && !brokenCovers[item.code]
+}
+
+function markCoverBroken(code: string) {
+  brokenCovers[code] = true
+}
+
 /**
  * 换模板：只换版式与样式，已填内容与模块顺序保留。
  *
@@ -472,7 +484,16 @@ async function exportPdf() {
               @click="chooseTemplate(item.code)"
             >
               <view class="tpl-cover" :style="{ background: coverBackdrop(templateTheme(item)) }">
-                <view class="tpl-cover-box">
+                <!-- 封面图铺满整块封面区；没生成或加载失败时用 CSS 缩略图居中兜底 -->
+                <image
+                  v-if="hasCover(item)"
+                  class="tpl-cover-img"
+                  :src="item.cover"
+                  mode="aspectFill"
+                  :lazy-load="true"
+                  @error="markCoverBroken(item.code)"
+                />
+                <view v-else class="tpl-cover-box">
                   <resume-cover
                     :layout="item.layout"
                     :theme-color="templateTheme(item)"
@@ -600,7 +621,7 @@ async function exportPdf() {
   font-size: 12px;
 }
 
-/* 换模板卡片：三列铺开，封面复用首页的 ResumeCover 缩略图 */
+/* 换模板卡片：三列铺开，封面优先用后端封面图，没有时回退到首页同款 ResumeCover 缩略图 */
 .tpl-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -624,15 +645,30 @@ async function exportPdf() {
 }
 
 .tpl-cover {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 118px;
-  padding: 8px;
+  position: relative;
+  overflow: hidden;
+  padding-top: 141.4%;
 }
 
+/* 后端封面图：铺满整块封面区；图本身就是 A4 版式截图，按比例缩放后不裁不拉 */
+.tpl-cover-img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 没有封面图（或加载失败）时：CSS 缩略图在封面区居中兜底 */
 .tpl-cover-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 74px;
+  transform: translate(-50%, -50%);
 }
 
 .tpl-name {

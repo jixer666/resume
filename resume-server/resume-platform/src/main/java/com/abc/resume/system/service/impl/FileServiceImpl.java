@@ -51,11 +51,12 @@ public class FileServiceImpl extends BaseService implements FileService {
     }
 
     @Override
-    public void saveFile(FileDTO fileDTO) {
+    public File saveFile(FileDTO fileDTO) {
         AssertUtils.isNotEmpty(fileDTO, ExceptionEnum.PARAM_EXCEPTION);
         File file = buildDefaultFileByFileDTO(fileDTO);
         int row = fileMapper.insert(file);
         AssertUtils.isTrue(row > 0, ExceptionEnum.BIZ_EXCEPTION);
+        return file;
     }
 
     @Override
