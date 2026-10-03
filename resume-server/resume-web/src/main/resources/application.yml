@@ -10,6 +10,7 @@ system:
   export:
     preview-url: ${resume.system.export.preview-url}
     timeout: ${resume.system.export.timeout}
+    playwright-server: ${resume.system.export.playwright-server}
 
 server:
   port: ${server.port}
@@ -61,7 +62,7 @@ spring:
     port: ${resume.redis.port}
     database: ${resume.redis.index}
     timeout: 1800000
-#    password: ${resume.redis.password}
+    password: ${resume.redis.password}
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER

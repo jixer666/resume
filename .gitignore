@@ -1,3 +1,8 @@
 /logs/
 /.idea/
 /.pnpm-store/
+
+# Docker 部署：产物和本地配置不进版本库（deploy/README.md 里有说明）
+/deploy/.env
+/deploy/data/
+/deploy/server/resume-web.jar

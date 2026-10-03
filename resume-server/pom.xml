@@ -55,6 +55,7 @@
         <fastjson2.version>2.0.43</fastjson2.version>
         <milvus.version>2.6.11</milvus.version>
         <protobuf.version>3.25.5</protobuf.version>
+        <playwright.version>1.40.0</playwright.version>
 
     </properties>
 
@@ -241,6 +242,11 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.playwright</groupId>
+                <artifactId>playwright</artifactId>
+                <version>${playwright.version}</version>
             </dependency>
 
             <!--自定义模块-->

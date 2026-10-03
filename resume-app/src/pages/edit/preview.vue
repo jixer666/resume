@@ -460,7 +460,7 @@ async function exportPdf() {
 
     <module-manager-sheet :visible="showModuleSheet" @close="closeSheet" @change="closeSheet" />
 
-    <style-sheet :visible="showStyleSheet" @close="closeSheet" />
+    <editor-style-sheet :visible="showStyleSheet" @close="closeSheet" />
 
     <view v-if="showTemplateSheet" class="mask">
       <view class="mask__backdrop" @click="showTemplateSheet = false" />

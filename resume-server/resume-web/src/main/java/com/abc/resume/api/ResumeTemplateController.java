@@ -31,9 +31,9 @@ public class ResumeTemplateController {
     }
 
     @ApiOperation("查询简历模板详情")
-    @GetMapping("/detail/{id}")
-    public ApiResult<ResumeTemplateVO> getTemplateDetail(@PathVariable("id") String id) {
-        ResumeTemplateVO template = resumeTemplateService.getTemplateDetail(id);
+    @GetMapping("/detail/{code}")
+    public ApiResult<ResumeTemplateVO> getTemplateDetail(@PathVariable("code") String code) {
+        ResumeTemplateVO template = resumeTemplateService.getTemplateDetailByCode(code);
         return ApiResult.success(template);
     }
 

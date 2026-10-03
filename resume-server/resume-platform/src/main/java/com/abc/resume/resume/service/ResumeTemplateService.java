@@ -17,5 +17,5 @@ public interface ResumeTemplateService {
     /**
      * 查询简历模板详情
      */
-    ResumeTemplateVO getTemplateDetail(String code);
+    ResumeTemplateVO getTemplateDetailByCode(String code);
 }

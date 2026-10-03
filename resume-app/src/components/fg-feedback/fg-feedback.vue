@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useConfigStore } from '@/store/config'
-import { showToast } from '@/utils/toast'
+import { copyText } from '@/utils/clipboard'
 
 /**
  * 问题反馈入口：贴在页面右边缘的竖排标签 + QQ 群号弹层，页面里写一个 `<fg-feedback />` 即可。
@@ -39,10 +39,7 @@ onMounted(() => {
 
 /** 复制群号：拿到群号后打开 QQ 搜索加入（小程序里没法直接唤起 QQ 加群） */
 function copyQqGroupNumber() {
-  uni.setClipboardData({
-    data: qqGroupNumber.value,
-    success: () => showToast({ title: '群号已复制' }),
-  })
+  copyText(qqGroupNumber.value, '群号已复制')
 }
 </script>
 

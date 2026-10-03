@@ -1,0 +1,6 @@
+# 本地依赖和产物不进构建上下文，避免把 Windows 的 node_modules 拷进 Linux 镜像
+node_modules
+dist
+unpackage
+.pnpm-store
+.git

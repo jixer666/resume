@@ -4,7 +4,6 @@ import com.abc.resume.core.async.AsyncManager;
 import com.abc.resume.core.exception.GlobalException;
 import com.abc.resume.enums.ExceptionEnum;
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.LoadState;
@@ -34,6 +33,9 @@ public class ResumePdfRenderer {
     @Value("${resume.system.export.timeout}")
     private double timeout;
 
+    @Value("${resume.system.export.playwright-server}")
+    private String playwrightServer;
+
     /**
      * A4 纸宽（px）
      */
@@ -46,6 +48,7 @@ public class ResumePdfRenderer {
      * 简历渲染完成的标志：ResumeRender 的根节点，数据没到位时不会出现
      */
     private static final String RESUME_SELECTOR = ".rs-page";
+
     private Playwright playwright;
     private Browser browser;
 
@@ -55,8 +58,9 @@ public class ResumePdfRenderer {
             @Override
             public void run() {
                 playwright = Playwright.create();
-                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-                log.info("简历导出浏览器初始化完成");
+                // 连接远程 Playwright Server，不再本地启动浏览器
+                browser = playwright.chromium().connect(playwrightServer);
+                log.info("简历导出浏览器初始化完成, server={}", playwrightServer);
             }
         });
     }

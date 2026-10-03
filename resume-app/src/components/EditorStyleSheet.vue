@@ -8,7 +8,7 @@ import { pxTonumber } from '@/utils/common'
 import { FONT_SIZES, FONT_WEIGHTS, fontSizeIndex, TEXT_COLORS, THEME_COLORS, WEIGHT_RANGE, weightIndex } from '@/utils/styleOptions'
 
 /**
- * 样式面板：一个弹层里分两栏 —— 「全局样式」与「组件样式」。
+ * 样式面板（EditorStyleSheet）：一个弹层里分两栏 —— 「全局样式」与「组件样式」。
  *
  * - 全局样式：改动经 store.updateGlobalStyle 无条件扇出到所有模块（原 GlobalStyleSheet）；
  * - 组件样式：先选模块，改动只经 store.updateModuleStyle 落到该模块的 style（原 ModuleStyleSheet），
@@ -17,7 +17,7 @@ import { FONT_SIZES, FONT_WEIGHTS, fontSizeIndex, TEXT_COLORS, THEME_COLORS, WEI
  * `showModuleTab=false` 时只有全局样式一栏（编辑页的「全局样式」入口用它）。
  * 两栏共用同一套控件外观，样式在 style/editor-sheet.scss 里。
  */
-defineOptions({ name: 'StyleSheet' })
+defineOptions({ name: 'EditorStyleSheet' })
 
 const props = withDefaults(defineProps<{
   /** 是否展示 */

@@ -598,7 +598,7 @@ function confirmDelete() {
       @close="closeModuleManager"
       @change="autoSave"
     />
-    <style-sheet :visible="showGlobalStyle" :show-module-tab="false" @close="closeGlobalStyle" />
+    <editor-style-sheet :visible="showGlobalStyle" :show-module-tab="false" @close="closeGlobalStyle" />
   </view>
 </template>
 

@@ -184,7 +184,7 @@
 }
 
 /*
-  样式面板（StyleSheet）的分栏与控件：全局样式 / 组件样式两栏共用同一套控件外观。
+  样式面板（EditorStyleSheet）的分栏与控件：全局样式 / 组件样式两栏共用同一套控件外观。
   色板、下拉行、滑块行原先各自写在 GlobalStyleSheet / ModuleStyleSheet 里，合并后统一放这里。
 */
 .sheet-tabs {

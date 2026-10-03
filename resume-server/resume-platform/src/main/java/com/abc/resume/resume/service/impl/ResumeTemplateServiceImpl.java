@@ -33,7 +33,7 @@ public class ResumeTemplateServiceImpl extends BaseService implements ResumeTemp
     }
 
     @Override
-    public ResumeTemplateVO getTemplateDetail(String code) {
+    public ResumeTemplateVO getTemplateDetailByCode(String code) {
         AssertUtils.isNotEmpty(code, ExceptionEnum.PARAM_EXCEPTION);
         ResumeTemplate template = resumeTemplateMapper.selectResumeTemplateByCode(code);
         AssertUtils.isNotEmpty(template, ExceptionEnum.BIZ_EXCEPTION.getCode(), "模板不存在");

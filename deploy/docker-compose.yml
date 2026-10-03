@@ -1,0 +1,127 @@
+# 简历项目 Docker 编排：mysql + redis + playwright + h5 + 后端
+#
+# 使用前先看 deploy/README.md。
+# 需要 Docker Compose v2（命令是 docker compose，不是老的 docker-compose）。
+#
+# 目录约定（和根目录 .gitignore 对应）：
+#   deploy/server/resume-web.jar  后端 jar，由 deploy/build.ps1 复制过来，不进 git
+#   deploy/data/                 mysql / redis / 日志，不进 git
+#   deploy/.env                  本机密码等配置，不进 git
+name: resume
+
+networks:
+  resume-net:
+    # 固定网络名，方案 A 手工建的也是这个名字，验证命令通用
+    name: resume-net
+    driver: bridge
+
+services:
+  # ---------------- MySQL ----------------
+  mysql:
+    image: mysql:8.0.29
+    container_name: resume-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-jixer666mysql}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-resume}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      # 只在 data/mysql 为空（第一次启动）时自动执行，用来建库建表
+      - ../resume-server/sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      resume-net:
+        aliases:
+          - mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  # ---------------- Redis ----------------
+  redis:
+    image: redis:7-alpine
+    container_name: resume-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-jixer666redis}"]
+    volumes:
+      - ./data/redis:/data
+    networks:
+      resume-net:
+        aliases:
+          - redis
+
+  # ---------------- Playwright Server（导出 PDF 的无头浏览器）----------------
+  # 版本必须和 resume-server/pom.xml 里 playwright.version（1.40.0）完全一致
+  # 国内服务器 mcr.microsoft.com 拉不动的话，换成 mcr.azure.cn/playwright:v1.40.0-jammy
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.40.0-jammy
+    container_name: resume-playwright
+    restart: unless-stopped
+    command: ["/bin/sh", "-c", "npx -y playwright@1.40.0 run-server --port 3000 --host 0.0.0.0"]
+    # Chromium 官方建议，/dev/shm 太小容易崩
+    shm_size: "1gb"
+    networks:
+      resume-net:
+        aliases:
+          - playwright
+
+  # ---------------- H5 前端（导出预览页，Playwright 容器要能打开它）----------------
+  h5:
+    build:
+      context: ../resume-app
+    image: resume-h5:latest
+    container_name: resume-h5
+    restart: unless-stopped
+    ports:
+      # 宿主机端口 -> 容器 8080，给自己浏览器访问；容器内部固定 8080
+      - "${H5_PORT:-9001}:8080"
+    networks:
+      resume-net:
+        aliases:
+          - h5
+
+  # ---------------- Spring Boot 后端 ----------------
+  app:
+    build:
+      context: ./server
+    image: resume-app:latest
+    container_name: resume-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      # 已连远程 Playwright Server，本地不用再下几百 MB 浏览器
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    # 命令行参数优先级最高，覆盖 jar 内 application-prod.properties 里的 127.0.0.1
+    # prod 环境已写在镜像 ENTRYPOINT 里，这里不重复传，避免同名参数出现两次
+    command:
+      - --server.port=11000
+      - --resume.mysql.ip=mysql
+      - --resume.mysql.port=3306
+      - --resume.mysql.db=${MYSQL_DATABASE:-resume}
+      - --resume.mysql.username=root
+      - --resume.mysql.password=${MYSQL_ROOT_PASSWORD:-jixer666mysql}
+      - --resume.redis.host=redis
+      - --resume.redis.port=6379
+      - --resume.redis.index=${REDIS_DB:-3}
+      - --resume.redis.password=${REDIS_PASSWORD:-jixer666redis}
+      - --resume.system.export.playwright-server=ws://playwright:3000
+      - --resume.system.export.preview-url=http://h5:8080/#/pages/export/index
+    ports:
+      - "${APP_PORT:-11000}:11000"
+    volumes:
+      # 日志落到宿主机，方便排查
+      - ./data/app-logs:/app/logs
+    networks:
+      resume-net:
+        aliases:
+          - app
